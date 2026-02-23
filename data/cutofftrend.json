@@ -1,0 +1,27 @@
+{
+  "_meta": {
+    "source": "UPSC official cutoff notices — verified 10 exams 2020-2024",
+    "note": "All values in marks out of respective totals"
+  },
+  "exams": [
+    { "exam": "NDA 1 2020", "year": 2020, "written_cutoff": 355, "final_cutoff": 723, "recommended": 519 },
+    { "exam": "NDA 2 2020", "year": 2020, "written_cutoff": 355, "final_cutoff": 719, "recommended": 519 },
+    { "exam": "NDA 1 2021", "year": 2021, "written_cutoff": 343, "final_cutoff": 709, "recommended": 519 },
+    { "exam": "NDA 2 2021", "year": 2021, "written_cutoff": 355, "final_cutoff": 726, "recommended": 519 },
+    { "exam": "NDA 1 2022", "year": 2022, "written_cutoff": 360, "final_cutoff": 720, "recommended": 519 },
+    { "exam": "NDA 2 2022", "year": 2022, "written_cutoff": 316, "final_cutoff": 678, "recommended": 519 },
+    { "exam": "NDA 1 2023", "year": 2023, "written_cutoff": 301, "final_cutoff": 664, "recommended": 520 },
+    { "exam": "NDA 2 2023", "year": 2023, "written_cutoff": 292, "final_cutoff": 656, "recommended": 519 },
+    { "exam": "NDA 1 2024", "year": 2024, "written_cutoff": 291, "final_cutoff": 654, "recommended": 641 },
+    { "exam": "NDA 2 2024", "year": 2024, "written_cutoff": 305, "final_cutoff": 673, "recommended": 792 }
+  ],
+  "summary": {
+    "written": { "min": 291, "max": 360, "avg": 317, "safe_target": 360 },
+    "final":   { "min": 654, "max": 726, "avg": 692, "safe_target": 700 },
+    "trend_written": "Dropped sharply from 360 (2022) to 291 (2024 NDA1). 2024-25 likely 300-360 range.",
+    "trend_final":   "Final cutoff relatively stable 654-726. 700+ is a safe target.",
+    "topper_2024": { "name": "Armaanpreet Singh", "written": 554, "ssb": 444, "total": 998 },
+    "highest_written_2024": { "name": "Om Sengar", "written": 595, "ssb": 382, "total": 977 },
+    "highest_ssb_2024": { "name": "Hardik Garg", "written": 469, "ssb": 524, "total": 993 }
+  }
+}

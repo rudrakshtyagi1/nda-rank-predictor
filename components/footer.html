@@ -1,0 +1,45 @@
+<!-- components/footer.html -->
+
+<footer style="position:relative; z-index:10; border-top:1px solid rgba(255,255,255,0.05); padding:28px 20px; margin-top:32px;">
+
+  <div style="max-width:500px; margin:0 auto; text-align:center;">
+
+    <!-- Logo row -->
+    <div style="display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:14px;">
+      <div style="width:22px; height:22px; border:1px solid rgba(200,181,96,0.4); display:flex; align-items:center; justify-content:center;">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#c8b560" stroke-width="2.5">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+        </svg>
+      </div>
+      <span style="font-family:'Bebas Neue',cursive; font-size:15px; letter-spacing:0.08em; color:#e8e4d0;">NDA RANK PREDICTOR</span>
+    </div>
+
+    <!-- Links -->
+    <div style="display:flex; justify-content:center; gap:20px; margin-bottom:14px; flex-wrap:wrap;">
+      <a href="index.html"  style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#7a7a65; text-decoration:none; letter-spacing:0.08em; transition:color 0.2s;" onmouseover="this.style.color='#f0c040'" onmouseout="this.style.color='#7a7a65'">PREDICTOR</a>
+      <a href="result.html" style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#7a7a65; text-decoration:none; letter-spacing:0.08em;" onmouseover="this.style.color='#f0c040'" onmouseout="this.style.color='#7a7a65'">RESULT</a>
+      <a href="https://upsc.gov.in" target="_blank" style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#7a7a65; text-decoration:none; letter-spacing:0.08em;" onmouseover="this.style.color='#f0c040'" onmouseout="this.style.color='#7a7a65'">UPSC OFFICIAL ↗</a>
+    </div>
+
+    <!-- Divider -->
+    <div style="height:1px; background:rgba(200,181,96,0.1); margin-bottom:14px;"></div>
+
+    <!-- Disclaimer -->
+    <p style="font-family:'JetBrains Mono',monospace; font-size:10px; color:#7a7a65; line-height:1.7; letter-spacing:0.03em;">
+      ⚠ This tool provides <strong style="color:#c8b560;">estimated predictions only</strong> based on historical UPSC NDA data (2021–2025).<br/>
+      It is <strong>NOT an official UPSC tool</strong>. Actual ranks depend on exam difficulty, vacancies &amp; competition.<br/>
+      Data source: UPSC Official Merit Lists
+    </p>
+
+    <!-- Copyright -->
+    <p style="font-family:'JetBrains Mono',monospace; font-size:10px; color:#7a7a65; margin-top:12px; opacity:0.5; letter-spacing:0.05em;">
+      © <span id="footer-year"></span> NDA Rank Predictor · Built for aspirants with ❤
+    </p>
+
+  </div>
+
+</footer>
+
+<script>
+  document.getElementById('footer-year').textContent = new Date().getFullYear();
+</script>

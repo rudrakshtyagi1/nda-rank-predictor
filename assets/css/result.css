@@ -1,0 +1,411 @@
+/* ============================================================
+   result.css — Result Page Animations & Components
+   NDA Rank Predictor — Used in result.html
+   ============================================================ */
+
+/* ── AIR Hero Card ── */
+.air-card {
+  background: var(--surface);
+  border-radius: 6px;
+  position: relative;
+  overflow: hidden;
+  padding: 36px 24px;
+  text-align: center;
+  transition: border-color 0.4s ease;
+}
+
+.air-card-glow {
+  position: absolute;
+  width: 320px; height: 320px;
+  border-radius: 50%;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  filter: blur(70px);
+  opacity: 0.2;
+  transition: background 0.5s ease;
+  animation: glow-breathe 4s ease-in-out infinite;
+}
+
+@keyframes glow-breathe {
+  0%, 100% { opacity: 0.18; transform: translate(-50%, -50%) scale(1);    }
+  50%       { opacity: 0.28; transform: translate(-50%, -50%) scale(1.15); }
+}
+
+/* ── AIR Number ── */
+.air-number {
+  font-family: 'Bebas Neue', cursive;
+  font-size: 88px;
+  line-height: 1;
+  letter-spacing: 0.03em;
+  position: relative;
+  z-index: 1;
+  animation: air-pop 0.8s cubic-bezier(0.34,1.56,0.64,1) forwards;
+  opacity: 0;
+}
+
+@keyframes air-pop {
+  0%   { opacity: 0; transform: scale(0.6) translateY(20px); }
+  70%  { opacity: 1; transform: scale(1.05); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* ── Tag Line ── */
+.air-tag {
+  font-family: 'Bebas Neue', cursive;
+  font-size: 26px;
+  letter-spacing: 0.08em;
+  position: relative;
+  z-index: 1;
+  animation: fade-up 0.6s ease 0.4s forwards;
+  opacity: 0;
+}
+
+/* ── Probability Meter ── */
+.prob-section { }
+
+.prob-bar-wrap {
+  background: var(--surface2);
+  border-radius: 99px;
+  height: 10px;
+  overflow: hidden;
+  position: relative;
+}
+
+.prob-bar-fill {
+  height: 100%;
+  border-radius: 99px;
+  width: 0%;
+  transition: width 1.4s cubic-bezier(0.34,1.1,0.64,1);
+  position: relative;
+}
+
+/* Shimmer on probability bar */
+.prob-bar-fill::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%; right: 0; bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  animation: shimmer 2s ease-in-out infinite 1.5s;
+}
+
+@keyframes shimmer {
+  0%   { left: -100%; }
+  100% { left: 200%; }
+}
+
+/* ── Score Breakdown ── */
+.score-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.score-box {
+  background: var(--surface2);
+  border: 1px solid rgba(200,181,96,0.1);
+  border-radius: 3px;
+  padding: 14px;
+  text-align: center;
+  transition: border-color 0.2s, transform 0.2s;
+  animation: fade-up 0.5s ease forwards;
+  opacity: 0;
+}
+
+.score-box:hover {
+  border-color: rgba(200,181,96,0.25);
+  transform: translateY(-2px);
+}
+
+.score-box-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 28px;
+  color: var(--gold);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.score-box-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-top: 4px;
+}
+
+.score-box-status {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  margin-top: 6px;
+}
+
+.score-total-box {
+  background: rgba(240,192,64,0.06);
+  border: 1px solid rgba(240,192,64,0.2);
+  border-radius: 3px;
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  animation: fade-up 0.5s ease 0.3s forwards;
+  opacity: 0;
+}
+
+/* ── Sectional Analysis ── */
+.sectional-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 13px 0;
+  border-bottom: 1px solid rgba(200,181,96,0.08);
+  animation: fade-up 0.4s ease forwards;
+  opacity: 0;
+}
+
+.sectional-row:last-child { border-bottom: none; }
+
+.badge-pass {
+  background: rgba(82,183,136,0.15);
+  color: var(--safe);
+  border: 1px solid rgba(82,183,136,0.3);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  padding: 4px 12px;
+  border-radius: 99px;
+  white-space: nowrap;
+  animation: badge-pop 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards;
+}
+
+.badge-fail {
+  background: rgba(230,57,70,0.15);
+  color: var(--danger);
+  border: 1px solid rgba(230,57,70,0.3);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  padding: 4px 12px;
+  border-radius: 99px;
+  white-space: nowrap;
+  animation: badge-pop 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards;
+}
+
+@keyframes badge-pop {
+  from { opacity: 0; transform: scale(0.7); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* ── Progress Bars (Cutoff Comparison) ── */
+.progress-wrap {
+  background: var(--surface2);
+  border-radius: 99px;
+  height: 8px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 99px;
+  width: 0%;
+  transition: width 1.2s cubic-bezier(0.34,1.1,0.64,1);
+}
+
+/* ── Next Steps ── */
+.step-card {
+  background: var(--surface2);
+  border: 1px solid rgba(200,181,96,0.1);
+  border-radius: 3px;
+  padding: 14px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  transition: border-color 0.2s, transform 0.2s;
+  animation: fade-up 0.5s ease forwards;
+  opacity: 0;
+}
+
+.step-card:hover {
+  border-color: rgba(200,181,96,0.25);
+  transform: translateX(4px);
+}
+
+.step-number {
+  font-family: 'Bebas Neue', cursive;
+  font-size: 30px;
+  color: var(--gold);
+  opacity: 0.35;
+  line-height: 1;
+  min-width: 28px;
+  flex-shrink: 0;
+}
+
+/* ── Disqualified Banner ── */
+.dq-banner {
+  background: rgba(230,57,70,0.08);
+  border: 1px solid rgba(230,57,70,0.35);
+  border-radius: 4px;
+  padding: 24px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  animation: dq-pulse 2s ease-in-out infinite;
+}
+
+@keyframes dq-pulse {
+  0%, 100% { border-color: rgba(230,57,70,0.35); }
+  50%       { border-color: rgba(230,57,70,0.65); }
+}
+
+.dq-banner::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--danger), transparent);
+}
+
+.dq-title {
+  font-family: 'Bebas Neue', cursive;
+  font-size: 52px;
+  color: var(--danger);
+  line-height: 1;
+  animation: air-pop 0.7s cubic-bezier(0.34,1.56,0.64,1) forwards;
+}
+
+/* ── Share Button ── */
+.btn-share {
+  width: 100%;
+  background: transparent;
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  font-family: 'Bebas Neue', cursive;
+  font-size: 20px;
+  letter-spacing: 0.1em;
+  padding: 16px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-share::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(240,192,64,0.1) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.btn-share:hover {
+  background: rgba(240,192,64,0.08);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(240,192,64,0.2);
+}
+
+.btn-share:hover::before { opacity: 1; }
+
+/* ── Retry Button ── */
+.btn-retry {
+  width: 100%;
+  background: var(--gold);
+  color: var(--army);
+  font-family: 'Bebas Neue', cursive;
+  font-size: 20px;
+  letter-spacing: 0.1em;
+  padding: 16px;
+  border-radius: 3px;
+  cursor: pointer;
+  border: none;
+  transition: transform 0.15s, box-shadow 0.15s;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-retry::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 60%);
+}
+
+.btn-retry:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(240,192,64,0.35);
+}
+
+/* ── Recalculate Nav Link ── */
+.nav-back {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  padding: 8px 14px;
+  border-radius: 2px;
+  color: var(--muted);
+  border: 1px solid rgba(200,181,96,0.15);
+  text-decoration: none;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.nav-back:hover {
+  color: var(--gold);
+  border-color: rgba(240,192,64,0.3);
+}
+
+/* ── Confetti (for high prob results) ── */
+.confetti-wrap {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 999;
+  overflow: hidden;
+}
+
+.confetti-piece {
+  position: absolute;
+  top: -10px;
+  width: 8px; height: 8px;
+  border-radius: 2px;
+  animation: confetti-fall linear forwards;
+}
+
+@keyframes confetti-fall {
+  0%   { transform: translateY(0) rotate(0deg);   opacity: 1; }
+  100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+}
+
+/* ── Score Pill ── */
+.score-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface2);
+  border: 1px solid rgba(200,181,96,0.15);
+  border-radius: 99px;
+  padding: 6px 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+/* ── Disclaimer ── */
+.disclaimer {
+  text-align: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  opacity: 0.6;
+  line-height: 1.6;
+  padding: 0 8px;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+@media (max-width: 480px) {
+  .air-number   { font-size: 72px !important; }
+  .dq-title     { font-size: 40px; }
+  .score-grid   { grid-template-columns: 1fr; }
+  .btn-share,
+  .btn-retry    { font-size: 17px; padding: 14px; }
+}

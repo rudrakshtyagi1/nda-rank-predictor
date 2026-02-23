@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NDA Predictor — Analytics</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+
+  <style>
+    :root {
+      --olive:   #4a5240;
+      --army:    #2d3a1e;
+      --khaki:   #c8b560;
+      --gold:    #f0c040;
+      --danger:  #e63946;
+      --safe:    #52b788;
+      --bg:      #0d0f0a;
+      --surface: #161a10;
+      --surface2:#1e2416;
+      --text:    #e8e4d0;
+      --muted:   #7a7a65;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Rajdhani', sans-serif;
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(192,178,96,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(192,178,96,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none; z-index: 0;
+    }
+
+    .font-display { font-family: 'Bebas Neue', cursive; letter-spacing: 0.05em; }
+    .font-mono    { font-family: 'JetBrains Mono', monospace; }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      position: fixed; top: 0; left: 0;
+      width: 220px; height: 100vh;
+      background: var(--surface);
+      border-right: 1px solid rgba(200,181,96,0.1);
+      z-index: 50;
+      display: flex; flex-direction: column;
+    }
+
+    .sidebar-logo { padding: 20px 18px; border-bottom: 1px solid rgba(200,181,96,0.1); }
+
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 11px 18px;
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 600; font-size: 13px;
+      letter-spacing: 0.06em; color: var(--muted);
+      cursor: pointer; text-decoration: none;
+      border-left: 2px solid transparent;
+      transition: all 0.2s; text-transform: uppercase;
+    }
+
+    .nav-item:hover { color: var(--text); background: rgba(200,181,96,0.05); }
+    .nav-item.active { color: var(--gold); border-left-color: var(--gold); background: rgba(240,192,64,0.06); }
+
+    /* ── Main ── */
+    .main { margin-left: 220px; padding: 28px; position: relative; z-index: 1; }
+
+    /* ── Section Card ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid rgba(200,181,96,0.12);
+      border-radius: 4px;
+      position: relative; overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--khaki), transparent);
+      opacity: 0.35;
+    }
+
+    .section-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px; letter-spacing: 0.2em;
+      color: var(--khaki); text-transform: uppercase; opacity: 0.7;
+    }
+
+    /* ── KPI Cards ── */
+    .kpi-card {
+      background: var(--surface);
+      border: 1px solid rgba(200,181,96,0.12);
+      border-radius: 4px; padding: 20px;
+      position: relative; overflow: hidden;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+
+    .kpi-card:hover {
+      border-color: rgba(200,181,96,0.25);
+      transform: translateY(-2px);
+    }
+
+    .kpi-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--khaki), transparent);
+      opacity: 0.35;
+    }
+
+    .kpi-value {
+      font-family: 'Bebas Neue', cursive;
+      font-size: 48px; line-height: 1; color: var(--gold);
+    }
+
+    .kpi-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px; letter-spacing: 0.15em;
+      color: var(--muted); text-transform: uppercase; margin-top: 4px;
+    }
+
+    .kpi-trend {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px; margin-top: 10px;
+      display: flex; align-items: center; gap: 4px;
+    }
+
+    .kpi-icon {
+      position: absolute; right: 16px; top: 16px;
+      font-size: 28px; opacity: 0.12;
+    }
+
+    /* ── Chart Containers ── */
+    .chart-wrap { position: relative; }
+    .chart-wrap-sm { height: 200px; }
+    .chart-wrap-md { height: 260px; }
+    .chart-wrap-lg { height: 320px; }
+
+    /* ── Funnel Bar ── */
+    .funnel-row {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .funnel-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px; color: var(--muted);
+      width: 130px; flex-shrink: 0;
+      letter-spacing: 0.05em;
+    }
+
+    .funnel-bar-bg {
+      flex: 1; background: var(--surface2);
+      border-radius: 99px; height: 10px; overflow: hidden;
+    }
+
+    .funnel-bar-fill {
+      height: 100%; border-radius: 99px;
+      transition: width 1.2s cubic-bezier(0.34,1.1,0.64,1);
+    }
+
+    .funnel-count {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px; color: var(--text);
+      font-weight: 700; min-width: 32px; text-align: right;
+    }
+
+    /* ── Leaderboard Table ── */
+    .lb-row {
+      display: grid;
+      grid-template-columns: 36px 1fr 80px 80px 80px;
+      gap: 8px; align-items: center;
+      padding: 10px 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      transition: background 0.15s;
+    }
+
+    .lb-row:hover { background: rgba(200,181,96,0.04); }
+    .lb-row:last-child { border-bottom: none; }
+
+    .lb-rank {
+      font-family: 'Bebas Neue', cursive;
+      font-size: 22px; color: var(--muted); text-align: center;
+    }
+
+    .lb-rank.top { color: var(--gold); }
+
+    /* ── Badges ── */
+    .badge {
+      display: inline-block;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px; padding: 3px 8px; border-radius: 99px;
+    }
+    .badge-green  { background: rgba(82,183,136,0.15); color: var(--safe); border: 1px solid rgba(82,183,136,0.3); }
+    .badge-gold   { background: rgba(240,192,64,0.15); color: var(--gold); border: 1px solid rgba(240,192,64,0.3); }
+    .badge-red    { background: rgba(230,57,70,0.15); color: var(--danger); border: 1px solid rgba(230,57,70,0.3); }
+    .badge-orange { background: rgba(255,152,0,0.15); color: #FF9800; border: 1px solid rgba(255,152,0,0.3); }
+
+    /* ── Date Range Selector ── */
+    .range-btn {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px; letter-spacing: 0.08em;
+      padding: 6px 12px; border-radius: 2px;
+      background: transparent;
+      border: 1px solid rgba(200,181,96,0.2);
+      color: var(--muted); cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .range-btn:hover, .range-btn.active {
+      background: rgba(240,192,64,0.1);
+      border-color: var(--gold);
+      color: var(--gold);
+    }
+
+    /* ── Animations ── */
+    @keyframes fade-up {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .fade-up { animation: fade-up 0.5s ease forwards; opacity: 0; }
+    .d1 { animation-delay: 0.05s; } .d2 { animation-delay: 0.12s; }
+    .d3 { animation-delay: 0.2s;  } .d4 { animation-delay: 0.28s; }
+    .d5 { animation-delay: 0.36s; } .d6 { animation-delay: 0.44s; }
+
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--olive); border-radius: 2px; }
+
+    @media (max-width: 768px) {
+      .sidebar { width: 100%; height: auto; position: relative; }
+      .main { margin-left: 0; padding: 16px; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ═══════════════ SIDEBAR ═══════════════ -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="flex items-center gap-2">
+        <div style="width:24px;height:24px;border:1px solid var(--khaki);display:flex;align-items:center;justify-content:center;opacity:0.8">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color:var(--khaki)">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+          </svg>
+        </div>
+        <span class="font-display text-base" style="color:var(--text);letter-spacing:0.08em">NDA ADMIN</span>
+      </div>
+      <div class="font-mono text-xs mt-1" style="color:var(--muted)">Analytics Dashboard</div>
+    </div>
+
+    <nav style="padding:12px 0; flex:1">
+      <a class="nav-item" href="dashboard.html"><span>📊</span> Overview</a>
+      <a class="nav-item" href="dashboard.html"><span>👥</span> All Leads</a>
+      <a class="nav-item active" href="analytics.html"><span>📈</span> Analytics</a>
+      <a class="nav-item" href="dashboard.html"><span>🎯</span> Score Analysis</a>
+    </nav>
+
+    <div style="padding:16px 18px; border-top:1px solid rgba(200,181,96,0.1)">
+      <div class="font-mono text-xs" style="color:var(--muted)" id="live-time">--:--:--</div>
+      <button onclick="logout()" class="font-mono text-xs mt-2 cursor-pointer" style="color:var(--danger);background:none;border:none">
+        → Logout
+      </button>
+    </div>
+  </aside>
+
+  <!-- ═══════════════ MAIN ═══════════════ -->
+  <main class="main">
+
+    <!-- Header -->
+    <div class="flex items-start justify-between mb-6 fade-up d1">
+      <div>
+        <p class="section-label">Insights & Trends</p>
+        <h1 class="font-display text-5xl" style="color:var(--text)">ANALYTICS</h1>
+      </div>
+      <!-- Date Range -->
+      <div class="flex gap-2 flex-wrap">
+        <button class="range-btn active" onclick="setRange(7,  this)">7D</button>
+        <button class="range-btn"        onclick="setRange(14, this)">14D</button>
+        <button class="range-btn"        onclick="setRange(30, this)">30D</button>
+        <button class="range-btn"        onclick="setRange(0,  this)">ALL</button>
+      </div>
+    </div>
+
+    <!-- ── KPI Row ── -->
+    <div class="grid grid-cols-2 gap-4 mb-6 fade-up d2" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr))">
+
+      <div class="kpi-card">
+        <div class="kpi-icon">👥</div>
+        <div class="kpi-value" id="kpi-total">0</div>
+        <div class="kpi-label">Total Leads</div>
+        <div class="kpi-trend" style="color:var(--safe)">
+          <span>↑</span><span id="kpi-today">0 today</span>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-icon">✅</div>
+        <div class="kpi-value" id="kpi-qualified">0</div>
+        <div class="kpi-label">Written Qualified</div>
+        <div class="kpi-trend" style="color:var(--muted)">
+          <span id="kpi-qual-pct">0%</span>&nbsp;pass rate
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-icon">🎯</div>
+        <div class="kpi-value" id="kpi-avg">—</div>
+        <div class="kpi-label">Avg Written Score</div>
+        <div class="kpi-trend" style="color:var(--muted)">
+          Out of 900
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-icon">🔥</div>
+        <div class="kpi-value" id="kpi-hot">0</div>
+        <div class="kpi-label">Hot Leads (80%+)</div>
+        <div class="kpi-trend" style="color:var(--gold)">
+          High selection probability
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── Row 1: Daily Signups + Probability Donut ── -->
+    <div class="grid gap-4 mb-4 fade-up d3" style="grid-template-columns:2fr 1fr">
+
+      <div class="card p-5">
+        <p class="section-label mb-1">Growth</p>
+        <h3 class="font-display text-2xl mb-4" style="color:var(--text)">DAILY SIGNUPS</h3>
+        <div class="chart-wrap chart-wrap-md">
+          <canvas id="daily-chart"></canvas>
+        </div>
+      </div>
+
+      <div class="card p-5">
+        <p class="section-label mb-1">Selection Chances</p>
+        <h3 class="font-display text-2xl mb-4" style="color:var(--text)">PROBABILITY SPLIT</h3>
+        <div class="chart-wrap chart-wrap-md">
+          <canvas id="prob-donut"></canvas>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── Row 2: Written Score Bar + Conversion Funnel ── -->
+    <div class="grid gap-4 mb-4 fade-up d4" style="grid-template-columns:1fr 1fr">
+
+      <div class="card p-5">
+        <p class="section-label mb-1">Score Distribution</p>
+        <h3 class="font-display text-2xl mb-4" style="color:var(--text)">WRITTEN MARKS SPREAD</h3>
+        <div class="chart-wrap chart-wrap-md">
+          <canvas id="score-bar"></canvas>
+        </div>
+      </div>
+
+      <div class="card p-5">
+        <p class="section-label mb-1">User Journey</p>
+        <h3 class="font-display text-2xl mb-4" style="color:var(--text)">CONVERSION FUNNEL</h3>
+        <div id="funnel-bars" style="margin-top:12px"></div>
+        <div class="font-mono text-xs mt-4" style="color:var(--muted)">
+          Lead conversion: <span id="conversion-rate" style="color:var(--gold)">—</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── Row 3: AIR Distribution + Top Scores ── -->
+    <div class="grid gap-4 mb-4 fade-up d5" style="grid-template-columns:1fr 1fr">
+
+      <div class="card p-5">
+        <p class="section-label mb-1">Rank Distribution</p>
+        <h3 class="font-display text-2xl mb-4" style="color:var(--text)">AIR BAND SPLIT</h3>
+        <div class="chart-wrap chart-wrap-md">
+          <canvas id="air-chart"></canvas>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="flex items-center justify-between p-5 border-b" style="border-color:rgba(200,181,96,0.08)">
+          <div>
+            <p class="section-label">Top Performers</p>
+            <h3 class="font-display text-2xl" style="color:var(--text)">LEADERBOARD</h3>
+          </div>
+        </div>
+        <!-- Header Row -->
+        <div class="lb-row" style="border-bottom:1px solid rgba(200,181,96,0.1)">
+          <div class="font-mono text-xs" style="color:var(--muted);text-align:center">#</div>
+          <div class="font-mono text-xs" style="color:var(--muted)">NAME</div>
+          <div class="font-mono text-xs" style="color:var(--muted);text-align:right">WRITTEN</div>
+          <div class="font-mono text-xs" style="color:var(--muted);text-align:right">TOTAL</div>
+          <div class="font-mono text-xs" style="color:var(--muted);text-align:right">PROB</div>
+        </div>
+        <div id="leaderboard-body"></div>
+      </div>
+
+    </div>
+
+    <!-- ── Row 4: Math vs GAT Scatter + Hourly Heatmap ── -->
+    <div class="grid gap-4 mb-4 fade-up d6" style="grid-template-columns:1fr 1fr">
+
+      <div class="card p-5">
+        <p class="section-label mb-1">Subject Performance</p>
+        <h3 class="font-display text-2xl mb-4" style="color:var(--text)">MATH vs GAT</h3>
+        <div class="chart-wrap chart-wrap-md">
+          <canvas id="scatter-chart"></canvas>
+        </div>
+      </div>
+
+      <div class="card p-5">
+        <p class="section-label mb-1">Sectional Analysis</p>
+        <h3 class="font-display text-2xl mb-4" style="color:var(--text)">PASS / FAIL BREAKDOWN</h3>
+        <div class="chart-wrap chart-wrap-md">
+          <canvas id="sectional-chart"></canvas>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <script>
+  // ═══════════════════════════════════════
+  //  AUTH CHECK
+  // ═══════════════════════════════════════
+  if (sessionStorage.getItem('nda_admin') !== '1') {
+    window.location.href = 'login.html';
+  }
+
+  function logout() {
+    sessionStorage.removeItem('nda_admin');
+    window.location.href = 'login.html';
+  }
+
+  // ═══════════════════════════════════════
+  //  LIVE CLOCK
+  // ═══════════════════════════════════════
+  setInterval(() => {
+    document.getElementById('live-time').textContent =
+      new Date().toLocaleTimeString('en-IN', { hour12: false });
+  }, 1000);
+
+  // ═══════════════════════════════════════
+  //  DATA
+  // ═══════════════════════════════════════
+  function getLeads(days = 0) {
+    let leads = JSON.parse(localStorage.getItem('nda_leads') || '[]');
+    if (days > 0) {
+      const cutoff = Date.now() - days * 86400000;
+      leads = leads.filter(l => new Date(l.timestamp).getTime() >= cutoff);
+    }
+    return leads;
+  }
+
+  let currentRange = 7;
+  let charts = {};
+
+  // ═══════════════════════════════════════
+  //  DATE RANGE
+  // ═══════════════════════════════════════
+  function setRange(days, btn) {
+    currentRange = days;
+    document.querySelectorAll('.range-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    destroyCharts();
+    initDashboard();
+  }
+
+  function destroyCharts() {
+    Object.values(charts).forEach(c => { try { c.destroy(); } catch(e) {} });
+    charts = {};
+  }
+
+  // ═══════════════════════════════════════
+  //  CHART DEFAULTS
+  // ═══════════════════════════════════════
+  Chart.defaults.color         = '#7a7a65';
+  Chart.defaults.font.family   = 'JetBrains Mono, monospace';
+  Chart.defaults.font.size     = 11;
+  Chart.defaults.borderColor   = 'rgba(200,181,96,0.08)';
+
+  const GOLD   = '#f0c040';
+  const SAFE   = '#52b788';
+  const DANGER = '#e63946';
+  const MUTED  = '#7a7a65';
+
+  const GRID_COLOR = 'rgba(200,181,96,0.06)';
+
+  function gridOpts() {
+    return {
+      x: { grid: { color: GRID_COLOR }, ticks: { color: MUTED } },
+      y: { grid: { color: GRID_COLOR }, ticks: { color: MUTED } },
+    };
+  }
+
+  // ═══════════════════════════════════════
+  //  INIT DASHBOARD
+  // ═══════════════════════════════════════
+  function initDashboard() {
+    const leads  = getLeads(currentRange);
+    const allL   = getLeads(0);
+    const today  = new Date().toDateString();
+
+    // ── KPIs ──
+    const todayC   = allL.filter(l => new Date(l.timestamp).toDateString() === today).length;
+    const qualified = leads.filter(l => (l.writtenScore || 0) >= 291);
+    const hotLeads  = leads.filter(l => (l.probability  || 0) >= 80);
+    const avgW = leads.length
+      ? Math.round(leads.reduce((s, l) => s + (l.writtenScore || 0), 0) / leads.length)
+      : 0;
+
+    document.getElementById('kpi-total').textContent     = leads.length;
+    document.getElementById('kpi-today').textContent     = `${todayC} today`;
+    document.getElementById('kpi-qualified').textContent = qualified.length;
+    document.getElementById('kpi-qual-pct').textContent  = leads.length ? Math.round((qualified.length / leads.length) * 100) + '%' : '0%';
+    document.getElementById('kpi-avg').textContent       = avgW || '—';
+    document.getElementById('kpi-hot').textContent       = hotLeads.length;
+
+    renderDailyChart(leads);
+    renderProbDonut(leads);
+    renderScoreBar(leads);
+    renderFunnel(leads);
+    renderAIRChart(leads);
+    renderLeaderboard(leads);
+    renderScatter(leads);
+    renderSectional(leads);
+  }
+
+  // ── 1. Daily Signups Line Chart ─────────
+  function renderDailyChart(leads) {
+    const days   = currentRange > 0 ? currentRange : 30;
+    const labels = [], counts = [];
+
+    for (let i = days - 1; i >= 0; i--) {
+      const d = new Date(); d.setDate(d.getDate() - i);
+      const dayStr = d.toDateString();
+      labels.push(d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }));
+      counts.push(leads.filter(l => new Date(l.timestamp).toDateString() === dayStr).length);
+    }
+
+    charts.daily = new Chart(document.getElementById('daily-chart'), {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [{
+          data: counts,
+          borderColor: GOLD,
+          backgroundColor: 'rgba(240,192,64,0.08)',
+          borderWidth: 2, pointRadius: 4,
+          pointBackgroundColor: GOLD,
+          fill: true, tension: 0.4,
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: gridOpts(),
+      }
+    });
+  }
+
+  // ── 2. Probability Donut ─────────────────
+  function renderProbDonut(leads) {
+    const high = leads.filter(l => (l.probability || 0) >= 80).length;
+    const mid  = leads.filter(l => (l.probability || 0) >= 40 && (l.probability || 0) < 80).length;
+    const low  = leads.filter(l => (l.probability || 0) < 40).length;
+
+    charts.prob = new Chart(document.getElementById('prob-donut'), {
+      type: 'doughnut',
+      data: {
+        labels: ['High 80%+', 'Medium 40-79%', 'Low <40%'],
+        datasets: [{
+          data: [high, mid, low],
+          backgroundColor: [SAFE, GOLD, DANGER],
+          borderColor: '#161a10', borderWidth: 3,
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'bottom', labels: { color: MUTED, padding: 14, boxWidth: 12 } }
+        },
+        cutout: '62%',
+      }
+    });
+  }
+
+  // ── 3. Written Score Bar ─────────────────
+  function renderScoreBar(leads) {
+    const bands = [
+      { l: '500+',    min: 500, max: 900, c: GOLD   },
+      { l: '420-499', min: 420, max: 499, c: GOLD   },
+      { l: '360-419', min: 360, max: 419, c: SAFE   },
+      { l: '305-359', min: 305, max: 359, c: '#FFC107' },
+      { l: '270-304', min: 270, max: 304, c: '#FF9800' },
+      { l: '<270',    min: 0,   max: 269, c: DANGER },
+    ];
+
+    const counts = bands.map(b =>
+      leads.filter(l => (l.writtenScore || 0) >= b.min && (l.writtenScore || 0) <= b.max).length
+    );
+
+    charts.score = new Chart(document.getElementById('score-bar'), {
+      type: 'bar',
+      data: {
+        labels: bands.map(b => b.l),
+        datasets: [{
+          data: counts,
+          backgroundColor: bands.map(b => b.c),
+          borderRadius: 3, borderSkipped: false,
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          ...gridOpts(),
+          y: { ...gridOpts().y, ticks: { ...gridOpts().y.ticks, stepSize: 1 } }
+        },
+      }
+    });
+  }
+
+  // ── 4. Conversion Funnel ─────────────────
+  function renderFunnel(leads) {
+    const total     = leads.length;
+    const sectOk    = leads.filter(l => l.sectionalPassed).length;
+    const qualified = leads.filter(l => (l.writtenScore || 0) >= 291).length;
+    const highProb  = leads.filter(l => (l.probability  || 0) >= 80).length;
+
+    const steps = [
+      { label: 'Total Users',       count: total,     color: GOLD },
+      { label: 'Sectional Cleared', count: sectOk,    color: '#00BCD4' },
+      { label: 'Written Qualified', count: qualified,  color: SAFE },
+      { label: 'High Probability',  count: highProb,   color: '#8BC34A' },
+    ];
+
+    const maxC = Math.max(total, 1);
+    document.getElementById('funnel-bars').innerHTML = steps.map(s => `
+      <div class="funnel-row">
+        <div class="funnel-label">${s.label}</div>
+        <div class="funnel-bar-bg">
+          <div class="funnel-bar-fill" style="width:${(s.count/maxC)*100}%; background:${s.color}"></div>
+        </div>
+        <div class="funnel-count" style="color:${s.color}">${s.count}</div>
+      </div>
+    `).join('');
+
+    const rate = total > 0 ? Math.round((highProb / total) * 100) : 0;
+    document.getElementById('conversion-rate').textContent = `${rate}% hot leads`;
+  }
+
+  // ── 5. AIR Distribution Horizontal Bar ──
+  function renderAIRChart(leads) {
+    const bands = [
+      { l: 'AIR 1–25',    min: 1100, c: '#FFD700' },
+      { l: 'AIR 26–100',  min: 1000, c: SAFE      },
+      { l: 'AIR 101–250', min: 900,  c: '#00BCD4' },
+      { l: 'AIR 251–450', min: 820,  c: '#4CAF50' },
+      { l: 'AIR 451–650', min: 750,  c: '#8BC34A' },
+      { l: 'AIR 651–800', min: 700,  c: '#FFC107' },
+      { l: 'AIR 801–1K',  min: 654,  c: '#FF9800' },
+      { l: 'Not Selected',min: 0,    c: DANGER    },
+    ];
+
+    const counts = bands.map((b, i) =>
+      leads.filter(l => {
+        const t = l.totalScore || 0;
+        const next = bands[i - 1];
+        return next ? t >= b.min && t < next.min : t >= b.min;
+      }).length
+    );
+
+    charts.air = new Chart(document.getElementById('air-chart'), {
+      type: 'bar',
+      data: {
+        labels: bands.map(b => b.l),
+        datasets: [{
+          data: counts,
+          backgroundColor: bands.map(b => b.c),
+          borderRadius: 3, borderSkipped: false,
+        }]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { color: GRID_COLOR }, ticks: { color: MUTED, stepSize: 1 } },
+          y: { grid: { display: false },    ticks: { color: MUTED } },
+        },
+      }
+    });
+  }
+
+  // ── 6. Leaderboard ───────────────────────
+  function renderLeaderboard(leads) {
+    const top = [...leads]
+      .sort((a, b) => (b.totalScore || 0) - (a.totalScore || 0))
+      .slice(0, 8);
+
+    const el = document.getElementById('leaderboard-body');
+    if (!top.length) {
+      el.innerHTML = `<div class="lb-row"><div class="font-mono text-xs" style="color:var(--muted);grid-column:1/-1;text-align:center;padding:20px">No data yet</div></div>`;
+      return;
+    }
+
+    el.innerHTML = top.map((l, i) => {
+      const prob = l.probability || 0;
+      const badgeCls = prob >= 80 ? 'badge-green' : prob >= 55 ? 'badge-gold' : prob >= 25 ? 'badge-orange' : 'badge-red';
+      return `
+      <div class="lb-row">
+        <div class="lb-rank ${i < 3 ? 'top' : ''}">${i + 1}</div>
+        <div>
+          <div style="font-family:'Rajdhani',sans-serif;font-weight:600;font-size:14px;color:var(--text)">${l.name || '—'}</div>
+          <div class="font-mono text-xs" style="color:var(--muted)">${l.phone || ''}</div>
+        </div>
+        <div class="font-mono text-sm" style="text-align:right;color:var(--khaki)">${l.writtenScore || 0}</div>
+        <div class="font-mono text-sm" style="text-align:right;color:var(--gold);font-weight:700">${l.totalScore || 0}</div>
+        <div style="text-align:right"><span class="badge ${badgeCls}">${prob}%</span></div>
+      </div>`;
+    }).join('');
+  }
+
+  // ── 7. Math vs GAT Scatter ───────────────
+  function renderScatter(leads) {
+    const points = leads.map(l => ({
+      x: l.mathScore || 0,
+      y: l.gatScore  || 0,
+    }));
+
+    charts.scatter = new Chart(document.getElementById('scatter-chart'), {
+      type: 'scatter',
+      data: {
+        datasets: [{
+          label: 'Candidates',
+          data: points,
+          backgroundColor: 'rgba(240,192,64,0.5)',
+          borderColor: GOLD,
+          borderWidth: 1,
+          pointRadius: 5,
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ...gridOpts().x, title: { display: true, text: 'Math Score (max 300)', color: MUTED } },
+          y: { ...gridOpts().y, title: { display: true, text: 'GAT Score (max 600)',  color: MUTED } },
+        },
+      }
+    });
+  }
+
+  // ── 8. Sectional Pass/Fail ───────────────
+  function renderSectional(leads) {
+    const bothPass  = leads.filter(l => l.mathPassed && l.gatPassed).length;
+    const mathFail  = leads.filter(l => !l.mathPassed && l.gatPassed).length;
+    const gatFail   = leads.filter(l => l.mathPassed && !l.gatPassed).length;
+    const bothFail  = leads.filter(l => !l.mathPassed && !l.gatPassed).length;
+
+    charts.sect = new Chart(document.getElementById('sectional-chart'), {
+      type: 'doughnut',
+      data: {
+        labels: ['Both Cleared', 'Math Failed', 'GAT Failed', 'Both Failed'],
+        datasets: [{
+          data: [bothPass, mathFail, gatFail, bothFail],
+          backgroundColor: [SAFE, DANGER, '#FF9800', '#c0392b'],
+          borderColor: '#161a10', borderWidth: 3,
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'bottom', labels: { color: MUTED, padding: 12, boxWidth: 12 } }
+        },
+        cutout: '55%',
+      }
+    });
+  }
+
+  // ═══════════════════════════════════════
+  //  SEED DEMO DATA (remove in production)
+  // ═══════════════════════════════════════
+  if (!localStorage.getItem('nda_leads')) {
+    const demo = [
+      { name:'Arjun Sharma',  phone:'9876543210', age:17, mathScore:180, gatScore:280, writtenScore:460, ssb:380, totalScore:840, airMin:251, airMax:450, probability:88, mathPassed:true,  gatPassed:true,  sectionalPassed:true,  timestamp: new Date(Date.now()-3600000).toISOString()   },
+      { name:'Ravi Verma',    phone:'9123456780', age:18, mathScore:95,  gatScore:210, writtenScore:305, ssb:350, totalScore:655, airMin:801, airMax:1000,probability:25, mathPassed:true,  gatPassed:true,  sectionalPassed:true,  timestamp: new Date(Date.now()-7200000).toISOString()   },
+      { name:'Karan Singh',   phone:'9988776655', age:17, mathScore:220, gatScore:350, writtenScore:570, ssb:420, totalScore:990, airMin:101, airMax:250, probability:95, mathPassed:true,  gatPassed:true,  sectionalPassed:true,  timestamp: new Date(Date.now()-86400000).toISOString()  },
+      { name:'Mohit Yadav',   phone:'9871234560', age:16, mathScore:60,  gatScore:130, writtenScore:190, ssb:0,   totalScore:190, airMin:1001,airMax:9999,probability:5,  mathPassed:false, gatPassed:false, sectionalPassed:false, timestamp: new Date(Date.now()-172800000).toISOString() },
+      { name:'Priya Chauhan', phone:'9456789012', age:17, mathScore:155, gatScore:260, writtenScore:415, ssb:360, totalScore:775, airMin:451, airMax:650, probability:75, mathPassed:true,  gatPassed:true,  sectionalPassed:true,  timestamp: new Date().toISOString()                    },
+      { name:'Amit Tiwari',   phone:'9312345678', age:18, mathScore:200, gatScore:320, writtenScore:520, ssb:400, totalScore:920, airMin:101, airMax:250, probability:95, mathPassed:true,  gatPassed:true,  sectionalPassed:true,  timestamp: new Date(Date.now()-43200000).toISOString()  },
+      { name:'Sneha Gupta',   phone:'9687654321', age:17, mathScore:70,  gatScore:180, writtenScore:250, ssb:0,   totalScore:250, airMin:1001,airMax:9999,probability:5,  mathPassed:false, gatPassed:true,  sectionalPassed:false, timestamp: new Date(Date.now()-21600000).toISOString()  },
+    ];
+    localStorage.setItem('nda_leads', JSON.stringify(demo));
+  }
+
+  // ═══════════════════════════════════════
+  //  START
+  // ═══════════════════════════════════════
+  initDashboard();
+
+  </script>
+</body>
+</html>

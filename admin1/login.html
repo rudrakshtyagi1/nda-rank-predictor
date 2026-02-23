@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NDA Predictor — Admin Login</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --olive:   #4a5240;
+      --army:    #2d3a1e;
+      --khaki:   #c8b560;
+      --gold:    #f0c040;
+      --danger:  #e63946;
+      --safe:    #52b788;
+      --bg:      #0d0f0a;
+      --surface: #161a10;
+      --surface2:#1e2416;
+      --text:    #e8e4d0;
+      --muted:   #7a7a65;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Rajdhani', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    /* ── Animated Grid Background ── */
+    .grid-bg {
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(192,178,96,0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(192,178,96,0.05) 1px, transparent 1px);
+      background-size: 40px 40px;
+      animation: grid-drift 20s linear infinite;
+      pointer-events: none;
+    }
+
+    @keyframes grid-drift {
+      from { background-position: 0 0; }
+      to   { background-position: 40px 40px; }
+    }
+
+    /* ── Scanning Line ── */
+    .scan-line {
+      position: fixed;
+      top: -4px; left: 0; right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      opacity: 0.4;
+      animation: scan 4s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    @keyframes scan {
+      0%   { top: -4px; opacity: 0; }
+      10%  { opacity: 0.4; }
+      90%  { opacity: 0.4; }
+      100% { top: 100vh; opacity: 0; }
+    }
+
+    /* ── Corner Decorations ── */
+    .corner {
+      position: fixed;
+      width: 60px; height: 60px;
+      pointer-events: none;
+      opacity: 0.3;
+    }
+    .corner-tl { top: 20px; left: 20px; border-top: 1px solid var(--khaki); border-left: 1px solid var(--khaki); }
+    .corner-tr { top: 20px; right: 20px; border-top: 1px solid var(--khaki); border-right: 1px solid var(--khaki); }
+    .corner-bl { bottom: 20px; left: 20px; border-bottom: 1px solid var(--khaki); border-left: 1px solid var(--khaki); }
+    .corner-br { bottom: 20px; right: 20px; border-bottom: 1px solid var(--khaki); border-right: 1px solid var(--khaki); }
+
+    /* ── Glow Orbs ── */
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      pointer-events: none;
+      filter: blur(80px);
+      opacity: 0.15;
+    }
+    .orb-1 { width: 500px; height: 500px; background: var(--army); top: -200px; left: -100px; animation: orb-pulse 7s ease-in-out infinite; }
+    .orb-2 { width: 400px; height: 400px; background: rgba(240,192,64,0.3); bottom: -150px; right: -100px; animation: orb-pulse 9s ease-in-out infinite reverse; }
+
+    @keyframes orb-pulse {
+      0%, 100% { transform: scale(1); }
+      50%       { transform: scale(1.2); }
+    }
+
+    /* ── Login Card ── */
+    .login-card {
+      background: var(--surface);
+      border: 1px solid rgba(200,181,96,0.2);
+      border-radius: 6px;
+      padding: 48px 40px;
+      width: 100%;
+      max-width: 420px;
+      position: relative;
+      z-index: 10;
+      animation: card-in 0.7s cubic-bezier(0.34,1.56,0.64,1) forwards;
+    }
+
+    @keyframes card-in {
+      from { opacity: 0; transform: scale(0.88) translateY(30px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    /* Top accent line */
+    .login-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    }
+
+    /* ── Shield Icon ── */
+    .shield-wrap {
+      width: 72px; height: 72px;
+      border: 1px solid rgba(200,181,96,0.3);
+      border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 24px;
+      background: rgba(240,192,64,0.06);
+      position: relative;
+      animation: shield-glow 3s ease-in-out infinite;
+    }
+
+    @keyframes shield-glow {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(240,192,64,0); }
+      50%       { box-shadow: 0 0 20px 4px rgba(240,192,64,0.15); }
+    }
+
+    /* ── Input ── */
+    .login-input {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid rgba(200,181,96,0.2);
+      color: var(--text);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 16px;
+      padding: 14px 16px;
+      border-radius: 3px;
+      outline: none;
+      transition: border-color 0.25s, box-shadow 0.25s;
+      letter-spacing: 0.08em;
+      text-align: center;
+    }
+
+    .login-input:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(240,192,64,0.1);
+    }
+
+    .login-input.error {
+      border-color: var(--danger);
+      box-shadow: 0 0 0 3px rgba(230,57,70,0.1);
+      animation: shake 0.4s ease;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%       { transform: translateX(-8px); }
+      40%       { transform: translateX(8px); }
+      60%       { transform: translateX(-4px); }
+      80%       { transform: translateX(4px); }
+    }
+
+    .login-input::placeholder {
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: 0.15em;
+    }
+
+    /* ── Password Toggle ── */
+    .input-wrap { position: relative; }
+
+    .toggle-pass {
+      position: absolute;
+      right: 14px; top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      color: var(--muted);
+      font-size: 16px;
+      transition: color 0.2s;
+      background: none; border: none;
+      padding: 4px;
+    }
+    .toggle-pass:hover { color: var(--gold); }
+
+    /* ── Login Button ── */
+    .btn-login {
+      width: 100%;
+      background: var(--gold);
+      color: var(--army);
+      font-family: 'Bebas Neue', cursive;
+      font-size: 22px;
+      letter-spacing: 0.15em;
+      padding: 16px;
+      border: none; border-radius: 3px;
+      cursor: pointer;
+      position: relative; overflow: hidden;
+      transition: transform 0.15s, box-shadow 0.2s;
+    }
+
+    .btn-login::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 60%);
+    }
+
+    .btn-login:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(240,192,64,0.4);
+    }
+
+    .btn-login:active { transform: translateY(0); }
+
+    .btn-login:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    /* ── Loader Dots ── */
+    .loader-dots {
+      display: none;
+      gap: 4px;
+      justify-content: center;
+    }
+
+    .loader-dots span {
+      width: 6px; height: 6px;
+      background: var(--army);
+      border-radius: 50%;
+      animation: dot-bounce 0.6s ease-in-out infinite;
+    }
+
+    .loader-dots span:nth-child(2) { animation-delay: 0.1s; }
+    .loader-dots span:nth-child(3) { animation-delay: 0.2s; }
+
+    @keyframes dot-bounce {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-5px); }
+    }
+
+    /* ── Attempts Counter ── */
+    .attempts-bar {
+      display: flex;
+      gap: 6px;
+      justify-content: center;
+      margin-top: 8px;
+    }
+
+    .attempt-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: rgba(200,181,96,0.2);
+      border: 1px solid rgba(200,181,96,0.3);
+      transition: background 0.3s;
+    }
+
+    .attempt-dot.used { background: var(--danger); border-color: var(--danger); }
+
+    /* ── Status Messages ── */
+    .status-msg {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-align: center;
+      min-height: 20px;
+      transition: all 0.3s;
+    }
+
+    /* ── Footer Info ── */
+    .info-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      background: var(--surface2);
+      border: 1px solid rgba(200,181,96,0.08);
+      border-radius: 3px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: 0.06em;
+    }
+
+    /* ── Typing Effect ── */
+    .typewriter {
+      overflow: hidden;
+      border-right: 2px solid var(--gold);
+      white-space: nowrap;
+      animation: typing 2s steps(20) forwards, blink-cursor 0.7s step-end infinite;
+      width: 0;
+    }
+
+    @keyframes typing {
+      from { width: 0; }
+      to   { width: 100%; }
+    }
+
+    @keyframes blink-cursor {
+      from, to { border-color: transparent; }
+      50%       { border-color: var(--gold); }
+    }
+
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--olive); border-radius: 2px; }
+  </style>
+</head>
+
+<body>
+
+  <!-- Background Effects -->
+  <div class="grid-bg"></div>
+  <div class="scan-line"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+
+  <!-- Corner Decorations -->
+  <div class="corner corner-tl"></div>
+  <div class="corner corner-tr"></div>
+  <div class="corner corner-bl"></div>
+  <div class="corner corner-br"></div>
+
+  <!-- Login Card -->
+  <div class="login-card">
+
+    <!-- Shield Icon -->
+    <div class="shield-wrap">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#f0c040" stroke-width="1.5">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        <polyline points="9 12 11 14 15 10"/>
+      </svg>
+    </div>
+
+    <!-- Header -->
+    <div class="text-center mb-8">
+      <div style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:0.25em; color:var(--khaki); opacity:0.7; margin-bottom:6px">
+        RESTRICTED ACCESS
+      </div>
+      <h1 style="font-family:'Bebas Neue',cursive; font-size:42px; color:var(--gold); letter-spacing:0.08em; line-height:1">
+        ADMIN PANEL
+      </h1>
+      <div style="font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--muted); margin-top:6px; overflow:hidden">
+        <span class="typewriter">NDA Rank Predictor · Leads Dashboard</span>
+      </div>
+    </div>
+
+    <!-- System Info -->
+    <div class="info-row mb-6">
+      <div style="width:6px; height:6px; border-radius:50%; background:var(--safe); animation: blink-dot 1.5s ease-in-out infinite; flex-shrink:0"></div>
+      <span>SYSTEM ONLINE · <span id="current-time">--:--:--</span></span>
+    </div>
+
+    <!-- Password Field -->
+    <div class="mb-3">
+      <div style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:0.15em; color:var(--muted); text-transform:uppercase; margin-bottom:8px">
+        Access Code
+      </div>
+      <div class="input-wrap">
+        <input
+          type="password"
+          id="password-input"
+          class="login-input"
+          placeholder="ENTER ADMIN PASSWORD"
+          maxlength="32"
+          autocomplete="current-password"
+          onkeydown="handleKeyDown(event)"
+          oninput="onPasswordInput()"
+        />
+        <button class="toggle-pass" onclick="togglePassword()" id="toggle-btn" title="Show/Hide">
+          👁
+        </button>
+      </div>
+    </div>
+
+    <!-- Status Message -->
+    <div class="status-msg mb-4" id="status-msg"></div>
+
+    <!-- Login Button -->
+    <button class="btn-login" id="login-btn" onclick="attemptLogin()">
+      <span id="btn-text">🔐 ACCESS DASHBOARD</span>
+      <div class="loader-dots" id="btn-loader">
+        <span></span><span></span><span></span>
+      </div>
+    </button>
+
+    <!-- Attempts Indicator -->
+    <div class="attempts-bar mt-4" id="attempts-bar">
+      <div class="attempt-dot" id="dot-1"></div>
+      <div class="attempt-dot" id="dot-2"></div>
+      <div class="attempt-dot" id="dot-3"></div>
+    </div>
+    <div style="font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--muted); text-align:center; margin-top:6px; opacity:0.5">
+      3 attempts allowed
+    </div>
+
+    <!-- Divider -->
+    <div style="display:flex; align-items:center; gap:12px; margin:24px 0; opacity:0.3">
+      <div style="flex:1; height:1px; background:rgba(200,181,96,0.2)"></div>
+      <span style="font-family:'JetBrains Mono',monospace; font-size:9px; color:var(--muted); letter-spacing:0.15em">SECURE</span>
+      <div style="flex:1; height:1px; background:rgba(200,181,96,0.2)"></div>
+    </div>
+
+    <!-- Footer -->
+    <div style="text-align:center">
+      <a href="../index.html" style="font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--muted); text-decoration:none; transition:color 0.2s"
+         onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--muted)'">
+        ← Back to Predictor
+      </a>
+    </div>
+
+  </div>
+
+  <!-- Lockout Overlay -->
+  <div id="lockout-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.95); z-index:200; display:none; align-items:center; justify-content:center; text-align:center">
+    <div>
+      <div style="font-size:64px; margin-bottom:16px">🔒</div>
+      <div style="font-family:'Bebas Neue',cursive; font-size:48px; color:var(--danger)">ACCESS DENIED</div>
+      <div style="font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--muted); margin-top:12px">
+        Too many failed attempts.<br/>
+        Locked for <span id="lockout-timer">30</span> seconds.
+      </div>
+    </div>
+  </div>
+
+  <style>
+    @keyframes blink-dot {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.2; }
+    }
+  </style>
+
+  <script>
+    // ── Config ─────────────────────────────────
+    const ADMIN_PASS    = 'admin123'; // Change this!
+    const MAX_ATTEMPTS  = 3;
+    const LOCKOUT_SECS  = 30;
+
+    let attempts    = 0;
+    let isLocked    = false;
+    let lockTimer   = null;
+    let showingPass = false;
+
+    // ── Live Clock ──────────────────────────────
+    function updateClock() {
+      const now = new Date();
+      document.getElementById('current-time').textContent =
+        now.toLocaleTimeString('en-IN', { hour12: false });
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // ── Toggle Password Visibility ──────────────
+    function togglePassword() {
+      const inp = document.getElementById('password-input');
+      showingPass = !showingPass;
+      inp.type = showingPass ? 'text' : 'password';
+      document.getElementById('toggle-btn').textContent = showingPass ? '🙈' : '👁';
+    }
+
+    // ── Input Change ────────────────────────────
+    function onPasswordInput() {
+      const inp = document.getElementById('password-input');
+      inp.classList.remove('error');
+      setStatus('', '');
+    }
+
+    // ── Enter Key ───────────────────────────────
+    function handleKeyDown(e) {
+      if (e.key === 'Enter') attemptLogin();
+    }
+
+    // ── Status Message ──────────────────────────
+    function setStatus(msg, color = 'var(--muted)') {
+      const el = document.getElementById('status-msg');
+      el.textContent = msg;
+      el.style.color = color;
+    }
+
+    // ── Mark Attempt Dot ────────────────────────
+    function markAttempt(n) {
+      const dot = document.getElementById(`dot-${n}`);
+      if (dot) dot.classList.add('used');
+    }
+
+    // ── Login Attempt ───────────────────────────
+    function attemptLogin() {
+      if (isLocked) return;
+
+      const pass = document.getElementById('password-input').value;
+      const btn  = document.getElementById('login-btn');
+      const txt  = document.getElementById('btn-text');
+      const ldr  = document.getElementById('btn-loader');
+
+      if (!pass) {
+        setStatus('⚠ Enter your password', 'var(--danger)');
+        document.getElementById('password-input').classList.add('error');
+        return;
+      }
+
+      // Show loader
+      btn.disabled     = true;
+      txt.style.display = 'none';
+      ldr.style.display = 'flex';
+
+      setTimeout(() => {
+        if (pass === ADMIN_PASS) {
+          // ✅ Success
+          setStatus('✓ Access Granted! Redirecting...', 'var(--safe)');
+          sessionStorage.setItem('nda_admin', '1');
+
+          setTimeout(() => {
+            window.location.href = 'dashboard.html';
+          }, 800);
+
+        } else {
+          // ❌ Wrong password
+          attempts++;
+          markAttempt(attempts);
+
+          btn.disabled      = false;
+          txt.style.display = 'inline';
+          ldr.style.display = 'none';
+
+          document.getElementById('password-input').value = '';
+          document.getElementById('password-input').classList.add('error');
+
+          if (attempts >= MAX_ATTEMPTS) {
+            startLockout();
+          } else {
+            setStatus(`✗ Wrong password · ${MAX_ATTEMPTS - attempts} attempt${MAX_ATTEMPTS - attempts === 1 ? '' : 's'} left`, 'var(--danger)');
+          }
+        }
+      }, 900);
+    }
+
+    // ── Lockout ─────────────────────────────────
+    function startLockout() {
+      isLocked = true;
+      let remaining = LOCKOUT_SECS;
+
+      const overlay = document.getElementById('lockout-overlay');
+      overlay.style.display = 'flex';
+
+      const btn = document.getElementById('login-btn');
+      btn.disabled = true;
+
+      lockTimer = setInterval(() => {
+        remaining--;
+        document.getElementById('lockout-timer').textContent = remaining;
+        if (remaining <= 0) {
+          clearInterval(lockTimer);
+          isLocked  = false;
+          attempts  = 0;
+          overlay.style.display = 'none';
+          btn.disabled = false;
+          // Reset dots
+          [1,2,3].forEach(i => {
+            const d = document.getElementById(`dot-${i}`);
+            if (d) d.classList.remove('used');
+          });
+          setStatus('', '');
+          document.getElementById('password-input').focus();
+        }
+      }, 1000);
+    }
+
+    // ── Auto-redirect if already logged in ──────
+    if (sessionStorage.getItem('nda_admin') === '1') {
+      window.location.href = 'dashboard.html';
+    }
+
+    // ── Focus on Load ────────────────────────────
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        document.getElementById('password-input').focus();
+      }, 800);
+    });
+  </script>
+
+</body>
+</html>

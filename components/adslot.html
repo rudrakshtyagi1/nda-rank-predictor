@@ -1,0 +1,87 @@
+<!-- components/ad-slot.html -->
+<!-- 
+  MONETIZATION SLOT — Coaching banner placeholder
+  Replace the content inside .ad-content div with actual coaching ad
+  Sell this space to NDA coaching institutes for ₹15,000-25,000/month
+-->
+
+<div class="ad-slot-wrap" style="margin: 16px 0;">
+
+  <!-- AD SLOT — Replace below with actual coaching ad -->
+  <div class="ad-content" style="
+    background: linear-gradient(135deg, #1a2010 0%, #1e2a12 100%);
+    border: 1px solid rgba(200,181,96,0.25);
+    border-radius: 4px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  "
+  onmouseover="this.style.borderColor='rgba(240,192,64,0.4)'"
+  onmouseout="this.style.borderColor='rgba(200,181,96,0.25)'"
+  onclick="document.getElementById('ad-slot').click()"
+  >
+
+    <!-- Sponsored Label -->
+    <div style="position:absolute; top:6px; right:10px; font-family:'JetBrains Mono',monospace; font-size:8px; letter-spacing:0.15em; color:rgba(200,181,96,0.4); text-transform:uppercase;">
+      SPONSORED
+    </div>
+
+    <!-- Icon -->
+    <div style="width:44px; height:44px; background:rgba(240,192,64,0.1); border:1px solid rgba(240,192,64,0.2); border-radius:3px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+      <span style="font-size:22px;">🎖️</span>
+    </div>
+
+    <!-- Text -->
+    <div style="flex:1; min-width:0;">
+      <div style="font-family:'Bebas Neue',cursive; font-size:18px; color:#f0c040; letter-spacing:0.06em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+        <!-- REPLACE: Coaching Name -->
+        TOP NDA COACHING — FREE DEMO CLASS
+      </div>
+      <div style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#7a7a65; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+        <!-- REPLACE: Coaching tagline -->
+        Expert faculty · 500+ selections · Call now
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <a id="ad-slot"
+       href="tel:+919999999999"
+       <!-- REPLACE: Coaching phone/URL -->
+       style="background:#f0c040; color:#2d3a1e; font-family:'Bebas Neue',cursive; font-size:14px; letter-spacing:0.08em; padding:8px 16px; border-radius:2px; text-decoration:none; white-space:nowrap; flex-shrink:0; transition:opacity 0.2s;"
+       onmouseover="this.style.opacity='0.85'"
+       onmouseout="this.style.opacity='1'"
+       onclick="event.stopPropagation()"
+    >
+      CALL NOW
+    </a>
+
+  </div>
+  <!-- END AD SLOT -->
+
+</div>
+
+<!--
+  ═══════════════════════════════════════════════════════
+  HOW TO CUSTOMIZE THIS AD SLOT:
+
+  1. Replace "TOP NDA COACHING — FREE DEMO CLASS" with coaching name
+  2. Replace tagline with coaching's USP
+  3. Replace href="tel:+919999999999" with actual phone/website
+  4. Change CTA button text if needed
+  5. For image logo: replace the emoji div with <img> tag
+
+  PRICING SUGGESTION:
+  ├── Banner only:     ₹10,000/month
+  ├── Banner + Leads:  ₹25,000/month
+  └── Exclusive:       ₹40,000/month
+
+  To add multiple ad slots, just include this component
+  multiple times with different coaching data.
+  ═══════════════════════════════════════════════════════
+-->

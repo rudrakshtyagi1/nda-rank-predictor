@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NDA Predictor — Admin Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+
+  <style>
+    :root {
+      --olive:   #4a5240;
+      --army:    #2d3a1e;
+      --khaki:   #c8b560;
+      --gold:    #f0c040;
+      --danger:  #e63946;
+      --safe:    #52b788;
+      --bg:      #0d0f0a;
+      --surface: #161a10;
+      --surface2:#1e2416;
+      --text:    #e8e4d0;
+      --muted:   #7a7a65;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Rajdhani', sans-serif;
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(192,178,96,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(192,178,96,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none; z-index: 0;
+    }
+
+    .font-display { font-family: 'Bebas Neue', cursive; letter-spacing: 0.05em; }
+    .font-mono    { font-family: 'JetBrains Mono', monospace; }
+    .font-ui      { font-family: 'Rajdhani', sans-serif; font-weight: 600; }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      position: fixed; top: 0; left: 0;
+      width: 220px; height: 100vh;
+      background: var(--surface);
+      border-right: 1px solid rgba(200,181,96,0.1);
+      z-index: 50;
+      display: flex; flex-direction: column;
+    }
+
+    .sidebar-logo {
+      padding: 20px 18px;
+      border-bottom: 1px solid rgba(200,181,96,0.1);
+    }
+
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 11px 18px;
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 600; font-size: 13px;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      cursor: pointer;
+      border-left: 2px solid transparent;
+      transition: all 0.2s;
+      text-transform: uppercase;
+    }
+
+    .nav-item:hover { color: var(--text); background: rgba(200,181,96,0.05); }
+
+    .nav-item.active {
+      color: var(--gold);
+      border-left-color: var(--gold);
+      background: rgba(240,192,64,0.06);
+    }
+
+    /* ── Main Content ── */
+    .main-content {
+      margin-left: 220px;
+      padding: 28px;
+      position: relative; z-index: 1;
+      min-height: 100vh;
+    }
+
+    /* ── Stat Cards ── */
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid rgba(200,181,96,0.12);
+      border-radius: 4px;
+      padding: 20px;
+      position: relative; overflow: hidden;
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--khaki), transparent);
+      opacity: 0.4;
+    }
+
+    .stat-value {
+      font-family: 'Bebas Neue', cursive;
+      font-size: 44px; line-height: 1;
+      color: var(--gold);
+    }
+
+    .stat-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px; letter-spacing: 0.15em;
+      color: var(--muted); text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    .stat-delta {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px; margin-top: 8px;
+    }
+
+    /* ── Section Card ── */
+    .section-card {
+      background: var(--surface);
+      border: 1px solid rgba(200,181,96,0.12);
+      border-radius: 4px;
+      position: relative; overflow: hidden;
+    }
+
+    .section-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--khaki), transparent);
+      opacity: 0.3;
+    }
+
+    .section-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px; letter-spacing: 0.2em;
+      color: var(--khaki); text-transform: uppercase; opacity: 0.7;
+    }
+
+    /* ── Table ── */
+    .leads-table { width: 100%; border-collapse: collapse; }
+
+    .leads-table th {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px; letter-spacing: 0.15em;
+      color: var(--khaki); text-transform: uppercase;
+      padding: 12px 16px; text-align: left;
+      background: rgba(200,181,96,0.05);
+      border-bottom: 1px solid rgba(200,181,96,0.1);
+      white-space: nowrap;
+    }
+
+    .leads-table td {
+      padding: 12px 16px;
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 600; font-size: 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      color: var(--text);
+      white-space: nowrap;
+    }
+
+    .leads-table tr:hover td { background: rgba(200,181,96,0.04); }
+    .leads-table tr:last-child td { border-bottom: none; }
+
+    /* ── Badges ── */
+    .badge {
+      display: inline-block;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px; letter-spacing: 0.08em;
+      padding: 3px 8px; border-radius: 99px;
+    }
+
+    .badge-gold   { background: rgba(240,192,64,0.15); color: var(--gold);   border: 1px solid rgba(240,192,64,0.3); }
+    .badge-green  { background: rgba(82,183,136,0.15); color: var(--safe);   border: 1px solid rgba(82,183,136,0.3); }
+    .badge-red    { background: rgba(230,57,70,0.15);  color: var(--danger); border: 1px solid rgba(230,57,70,0.3); }
+    .badge-orange { background: rgba(255,152,0,0.15);  color: #FF9800;       border: 1px solid rgba(255,152,0,0.3); }
+
+    /* ── Search & Filter Bar ── */
+    .search-input {
+      background: var(--surface2);
+      border: 1px solid rgba(200,181,96,0.2);
+      color: var(--text);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      padding: 9px 14px;
+      border-radius: 3px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .search-input:focus { border-color: var(--gold); }
+    .search-input::placeholder { color: var(--muted); }
+
+    /* ── Export Button ── */
+    .btn-export {
+      background: var(--gold);
+      color: var(--army);
+      font-family: 'Bebas Neue', cursive;
+      font-size: 16px; letter-spacing: 0.1em;
+      padding: 9px 20px;
+      border: none; border-radius: 3px;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .btn-export:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px rgba(240,192,64,0.3);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--muted);
+      font-family: 'Bebas Neue', cursive;
+      font-size: 16px; letter-spacing: 0.1em;
+      padding: 9px 20px;
+      border: 1px solid rgba(200,181,96,0.2);
+      border-radius: 3px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-secondary:hover { color: var(--text); border-color: rgba(200,181,96,0.4); }
+
+    /* ── Login Screen ── */
+    .login-screen {
+      position: fixed; inset: 0;
+      background: var(--bg);
+      z-index: 200;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .login-box {
+      background: var(--surface);
+      border: 1px solid rgba(200,181,96,0.25);
+      border-radius: 6px;
+      padding: 40px 36px;
+      width: 100%; max-width: 380px;
+      text-align: center;
+    }
+
+    .login-input {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid rgba(200,181,96,0.2);
+      color: var(--text);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 15px;
+      padding: 12px 16px;
+      border-radius: 3px;
+      outline: none;
+      transition: border-color 0.2s;
+      text-align: center;
+      letter-spacing: 0.1em;
+    }
+    .login-input:focus { border-color: var(--gold); }
+    .login-input::placeholder { color: var(--muted); font-size: 12px; letter-spacing: 0.05em; }
+
+    .btn-login {
+      width: 100%;
+      background: var(--gold);
+      color: var(--army);
+      font-family: 'Bebas Neue', cursive;
+      font-size: 20px; letter-spacing: 0.12em;
+      padding: 14px;
+      border: none; border-radius: 3px;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+      margin-top: 16px;
+    }
+    .btn-login:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(240,192,64,0.3);
+    }
+
+    /* ── Chart Container ── */
+    .chart-wrap { position: relative; height: 220px; }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--olive); border-radius: 2px; }
+
+    /* ── Table Scroll ── */
+    .table-scroll { overflow-x: auto; }
+
+    /* ── Animations ── */
+    @keyframes fade-up {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .fade-up { animation: fade-up 0.5s ease forwards; opacity: 0; }
+    .d1 { animation-delay: 0.05s; } .d2 { animation-delay: 0.12s; }
+    .d3 { animation-delay: 0.2s;  } .d4 { animation-delay: 0.28s; }
+    .d5 { animation-delay: 0.36s; }
+
+    /* ── Mobile Sidebar ── */
+    @media (max-width: 768px) {
+      .sidebar { width: 100%; height: auto; position: relative; flex-direction: row; flex-wrap: wrap; }
+      .main-content { margin-left: 0; padding: 16px; }
+      .sidebar-logo { width: 100%; }
+      .nav-item { flex: 1; justify-content: center; min-width: 80px; border-left: none; border-bottom: 2px solid transparent; }
+      .nav-item.active { border-left: none; border-bottom-color: var(--gold); }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ═══════════════════════ LOGIN SCREEN ═══════════════════════ -->
+  <div class="login-screen" id="login-screen">
+    <div class="login-box">
+      <div style="font-family:'Bebas Neue',cursive; font-size:14px; letter-spacing:0.2em; color:var(--khaki); opacity:0.7; margin-bottom:8px">RESTRICTED ACCESS</div>
+      <h1 class="font-display text-4xl mb-2" style="color:var(--gold)">ADMIN PANEL</h1>
+      <p class="font-mono text-xs mb-8" style="color:var(--muted)">NDA Rank Predictor · Leads Dashboard</p>
+
+      <input type="password" id="admin-password" class="login-input" placeholder="Enter admin password" />
+      <div id="login-error" class="font-mono text-xs mt-2" style="color:var(--danger); min-height:16px;"></div>
+      <button class="btn-login" onclick="checkLogin()">🔐 ACCESS DASHBOARD</button>
+
+      <p class="font-mono text-xs mt-6" style="color:var(--muted); opacity:0.5">
+        Default: admin123 · Change in firebase-config.js
+      </p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════ SIDEBAR ═══════════════════════ -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="flex items-center gap-2">
+        <div style="width:24px; height:24px; border:1px solid var(--khaki); display:flex; align-items:center; justify-content:center; opacity:0.8">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color:var(--khaki)">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+          </svg>
+        </div>
+        <span class="font-display text-base" style="color:var(--text); letter-spacing:0.08em">NDA ADMIN</span>
+      </div>
+      <div class="font-mono text-xs mt-1" style="color:var(--muted)">Leads Dashboard</div>
+    </div>
+
+    <nav style="padding:12px 0; flex:1">
+      <div class="nav-item active" onclick="showTab('overview')">
+        <span>📊</span> Overview
+      </div>
+      <div class="nav-item" onclick="showTab('leads')">
+        <span>👥</span> All Leads
+      </div>
+      <div class="nav-item" onclick="showTab('analytics')">
+        <span>📈</span> Analytics
+      </div>
+      <div class="nav-item" onclick="showTab('scores')">
+        <span>🎯</span> Score Analysis
+      </div>
+    </nav>
+
+    <div style="padding:16px 18px; border-top:1px solid rgba(200,181,96,0.1)">
+      <div class="font-mono text-xs" style="color:var(--muted)">Logged in as Admin</div>
+      <button onclick="logout()" class="font-mono text-xs mt-2 cursor-pointer" style="color:var(--danger); background:none; border:none">
+        → Logout
+      </button>
+    </div>
+  </aside>
+
+  <!-- ═══════════════════════ MAIN CONTENT ═══════════════════════ -->
+  <div class="main-content">
+
+    <!-- ── OVERVIEW TAB ── -->
+    <div id="tab-overview">
+
+      <div class="flex items-center justify-between mb-6 fade-up d1">
+        <div>
+          <p class="section-label">Dashboard</p>
+          <h1 class="font-display text-4xl" style="color:var(--text)">OVERVIEW</h1>
+        </div>
+        <div class="font-mono text-xs" style="color:var(--muted)" id="last-updated">Loading...</div>
+      </div>
+
+      <!-- Stat Cards -->
+      <div class="grid grid-cols-2 gap-4 mb-6 fade-up d2" id="stat-cards">
+        <div class="stat-card">
+          <div class="stat-value" id="stat-total">0</div>
+          <div class="stat-label">Total Leads</div>
+          <div class="stat-delta" style="color:var(--safe)" id="stat-today">+0 today</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-qualified">0</div>
+          <div class="stat-label">Qualified Written</div>
+          <div class="stat-delta" style="color:var(--muted)" id="stat-qual-pct">0% of total</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-avg-written">—</div>
+          <div class="stat-label">Avg Written Score</div>
+          <div class="stat-delta" style="color:var(--muted)">Out of 900</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-high-prob">0</div>
+          <div class="stat-label">High Chance (80%+)</div>
+          <div class="stat-delta" style="color:var(--gold)" id="stat-high-pct">Hot leads</div>
+        </div>
+      </div>
+
+      <!-- Recent Leads -->
+      <div class="section-card fade-up d3">
+        <div class="flex items-center justify-between p-5 border-b" style="border-color:rgba(200,181,96,0.1)">
+          <div>
+            <p class="section-label">Latest Activity</p>
+            <h2 class="font-display text-2xl" style="color:var(--text)">RECENT LEADS</h2>
+          </div>
+          <button class="btn-export" onclick="showTab('leads')">VIEW ALL</button>
+        </div>
+        <div class="table-scroll">
+          <table class="leads-table" id="recent-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Phone</th>
+                <th>Written</th>
+                <th>Total</th>
+                <th>AIR</th>
+                <th>Prob</th>
+                <th>Time</th>
+              </tr>
+            </thead>
+            <tbody id="recent-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── LEADS TAB ── -->
+    <div id="tab-leads" style="display:none">
+
+      <div class="flex items-center justify-between mb-6 fade-up d1">
+        <div>
+          <p class="section-label">Database</p>
+          <h1 class="font-display text-4xl" style="color:var(--text)">ALL LEADS</h1>
+        </div>
+        <div class="flex gap-2">
+          <button class="btn-secondary" onclick="clearAllLeads()">🗑 Clear</button>
+          <button class="btn-export" onclick="exportCSV()">📥 Export CSV</button>
+        </div>
+      </div>
+
+      <!-- Search + Filter -->
+      <div class="flex gap-3 mb-4 fade-up d2 flex-wrap">
+        <input type="text" id="search-input" class="search-input" placeholder="Search name or phone..."
+               oninput="filterLeads()" style="flex:1; min-width:200px" />
+        <select id="filter-prob" class="search-input" onchange="filterLeads()">
+          <option value="">All Probability</option>
+          <option value="high">High (80%+)</option>
+          <option value="mid">Medium (40-79%)</option>
+          <option value="low">Low (below 40%)</option>
+        </select>
+        <select id="filter-sect" class="search-input" onchange="filterLeads()">
+          <option value="">All Status</option>
+          <option value="1">Sectional Cleared</option>
+          <option value="0">Sectional Failed</option>
+        </select>
+      </div>
+
+      <div class="section-card fade-up d3">
+        <div class="table-scroll">
+          <table class="leads-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Phone</th>
+                <th>Age</th>
+                <th>Math</th>
+                <th>GAT</th>
+                <th>Written</th>
+                <th>SSB</th>
+                <th>Total</th>
+                <th>AIR Range</th>
+                <th>Prob %</th>
+                <th>Sectional</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody id="all-leads-tbody"></tbody>
+          </table>
+        </div>
+        <div class="p-4 font-mono text-xs" style="color:var(--muted); border-top:1px solid rgba(200,181,96,0.08)">
+          Showing <span id="showing-count">0</span> of <span id="total-count">0</span> leads
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ANALYTICS TAB ── -->
+    <div id="tab-analytics" style="display:none">
+
+      <div class="mb-6 fade-up d1">
+        <p class="section-label">Insights</p>
+        <h1 class="font-display text-4xl" style="color:var(--text)">ANALYTICS</h1>
+      </div>
+
+      <div class="grid grid-cols-1 gap-4 mb-4 fade-up d2" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr))">
+
+        <!-- Score Distribution Chart -->
+        <div class="section-card p-5">
+          <p class="section-label mb-1">Score Distribution</p>
+          <h3 class="font-display text-xl mb-4" style="color:var(--text)">WRITTEN MARKS SPREAD</h3>
+          <div class="chart-wrap">
+            <canvas id="score-dist-chart"></canvas>
+          </div>
+        </div>
+
+        <!-- Probability Distribution -->
+        <div class="section-card p-5">
+          <p class="section-label mb-1">Selection Chances</p>
+          <h3 class="font-display text-xl mb-4" style="color:var(--text)">PROBABILITY SPLIT</h3>
+          <div class="chart-wrap">
+            <canvas id="prob-chart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Daily Signups -->
+      <div class="section-card p-5 fade-up d3">
+        <p class="section-label mb-1">Growth</p>
+        <h3 class="font-display text-xl mb-4" style="color:var(--text)">DAILY SIGNUPS (LAST 7 DAYS)</h3>
+        <div class="chart-wrap">
+          <canvas id="daily-chart"></canvas>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── SCORE ANALYSIS TAB ── -->
+    <div id="tab-scores" style="display:none">
+
+      <div class="mb-6 fade-up d1">
+        <p class="section-label">Deep Dive</p>
+        <h1 class="font-display text-4xl" style="color:var(--text)">SCORE ANALYSIS</h1>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4 mb-4 fade-up d2" id="score-analysis-cards">
+        <!-- Filled by JS -->
+      </div>
+
+      <!-- AIR Distribution -->
+      <div class="section-card p-5 fade-up d3">
+        <p class="section-label mb-4">AIR Band Distribution</p>
+        <div id="air-bands-list"></div>
+      </div>
+
+    </div>
+
+  </div><!-- end main-content -->
+
+  <script>
+  // ═══════════════════════════════════════
+  //  AUTH
+  // ═══════════════════════════════════════
+  const ADMIN_PASS = 'admin123'; // Change this!
+
+  function checkLogin() {
+    const pass = document.getElementById('admin-password').value;
+    if (pass === ADMIN_PASS) {
+      document.getElementById('login-screen').style.display = 'none';
+      sessionStorage.setItem('nda_admin', '1');
+      initDashboard();
+    } else {
+      document.getElementById('login-error').textContent = '⚠ Wrong password';
+      document.getElementById('admin-password').value = '';
+    }
+  }
+
+  function logout() {
+    sessionStorage.removeItem('nda_admin');
+    document.getElementById('login-screen').style.display = 'flex';
+  }
+
+  // Enter key support
+  document.getElementById('admin-password').addEventListener('keydown', e => {
+    if (e.key === 'Enter') checkLogin();
+  });
+
+  // Auto-login if session active
+  if (sessionStorage.getItem('nda_admin') === '1') {
+    document.getElementById('login-screen').style.display = 'none';
+    setTimeout(initDashboard, 100);
+  }
+
+  // ═══════════════════════════════════════
+  //  DATA — Load from localStorage
+  // ═══════════════════════════════════════
+  function getLeads() {
+    return JSON.parse(localStorage.getItem('nda_leads') || '[]')
+      .map((l, i) => ({ ...l, id: i + 1 }))
+      .reverse(); // newest first
+  }
+
+  // ═══════════════════════════════════════
+  //  TAB NAVIGATION
+  // ═══════════════════════════════════════
+  const TABS = ['overview', 'leads', 'analytics', 'scores'];
+
+  function showTab(tab) {
+    TABS.forEach(t => {
+      document.getElementById(`tab-${t}`).style.display = t === tab ? 'block' : 'none';
+    });
+    document.querySelectorAll('.nav-item').forEach((el, i) => {
+      el.classList.toggle('active', TABS[i] === tab);
+    });
+    if (tab === 'analytics') renderCharts();
+    if (tab === 'scores')    renderScoreAnalysis();
+  }
+
+  // ═══════════════════════════════════════
+  //  HELPERS
+  // ═══════════════════════════════════════
+  function probBadge(p) {
+    if (p >= 88) return `<span class="badge badge-green">${p}%</span>`;
+    if (p >= 55) return `<span class="badge badge-gold">${p}%</span>`;
+    if (p >= 25) return `<span class="badge badge-orange">${p}%</span>`;
+    return `<span class="badge badge-red">${p}%</span>`;
+  }
+
+  function sectBadge(passed) {
+    return passed
+      ? `<span class="badge badge-green">CLEAR</span>`
+      : `<span class="badge badge-red">FAIL</span>`;
+  }
+
+  function timeAgo(ts) {
+    if (!ts) return '—';
+    const diff = Date.now() - new Date(ts).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1)  return 'Just now';
+    if (mins < 60) return `${mins}m ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24)  return `${hrs}h ago`;
+    return `${Math.floor(hrs / 24)}d ago`;
+  }
+
+  function formatDate(ts) {
+    if (!ts) return '—';
+    return new Date(ts).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: '2-digit' });
+  }
+
+  // ═══════════════════════════════════════
+  //  OVERVIEW — Stat Cards + Recent Table
+  // ═══════════════════════════════════════
+  function renderOverview() {
+    const leads = getLeads();
+    const today = new Date().toDateString();
+    const todayLeads = leads.filter(l => new Date(l.timestamp).toDateString() === today);
+    const qualified  = leads.filter(l => (l.writtenScore || 0) >= 291);
+    const highProb   = leads.filter(l => (l.probability  || 0) >= 80);
+    const avgWritten = leads.length
+      ? Math.round(leads.reduce((s, l) => s + (l.writtenScore || 0), 0) / leads.length)
+      : 0;
+
+    document.getElementById('stat-total').textContent     = leads.length;
+    document.getElementById('stat-today').textContent     = `+${todayLeads.length} today`;
+    document.getElementById('stat-qualified').textContent = qualified.length;
+    document.getElementById('stat-qual-pct').textContent  = leads.length ? `${Math.round((qualified.length / leads.length) * 100)}% of total` : '0%';
+    document.getElementById('stat-avg-written').textContent = avgWritten || '—';
+    document.getElementById('stat-high-prob').textContent  = highProb.length;
+    document.getElementById('stat-high-pct').textContent   = `${highProb.length} hot leads`;
+    document.getElementById('last-updated').textContent    = `Updated: ${new Date().toLocaleTimeString()}`;
+
+    // Recent 5 leads
+    const tbody = document.getElementById('recent-tbody');
+    const recent = leads.slice(0, 5);
+
+    if (recent.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="7" class="font-mono text-xs text-center py-8" style="color:var(--muted)">No leads yet. Share the predictor link!</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = recent.map(l => `
+      <tr>
+        <td class="font-ui">${l.name || '—'}</td>
+        <td class="font-mono text-sm">${l.phone || '—'}</td>
+        <td class="font-mono text-sm">${l.writtenScore || 0}</td>
+        <td class="font-mono text-sm">${l.totalScore || 0}</td>
+        <td class="font-mono text-xs" style="color:var(--gold)">
+          ${l.airMin && l.airMax ? `${l.airMin}–${l.airMax}` : '—'}
+        </td>
+        <td>${probBadge(l.probability || 0)}</td>
+        <td class="font-mono text-xs" style="color:var(--muted)">${timeAgo(l.timestamp)}</td>
+      </tr>
+    `).join('');
+  }
+
+  // ═══════════════════════════════════════
+  //  ALL LEADS TABLE
+  // ═══════════════════════════════════════
+  let allLeads = [];
+
+  function renderAllLeads(leads) {
+    const tbody = document.getElementById('all-leads-tbody');
+    document.getElementById('showing-count').textContent = leads.length;
+    document.getElementById('total-count').textContent   = allLeads.length;
+
+    if (leads.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="13" class="font-mono text-xs text-center py-8" style="color:var(--muted)">No leads found.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = leads.map((l, i) => `
+      <tr>
+        <td class="font-mono text-xs" style="color:var(--muted)">${allLeads.length - allLeads.indexOf(l)}</td>
+        <td class="font-ui">${l.name || '—'}</td>
+        <td class="font-mono text-sm" style="color:var(--gold)">${l.phone || '—'}</td>
+        <td class="font-mono text-sm">${l.age || '—'}</td>
+        <td class="font-mono text-sm">${l.mathScore || 0}</td>
+        <td class="font-mono text-sm">${l.gatScore  || 0}</td>
+        <td class="font-mono text-sm">${l.writtenScore || 0}</td>
+        <td class="font-mono text-sm">${l.ssb || 0}</td>
+        <td class="font-mono text-sm" style="color:var(--text); font-weight:700">${l.totalScore || 0}</td>
+        <td class="font-mono text-xs" style="color:var(--gold)">
+          ${l.airMin && l.airMax ? `${l.airMin}–${l.airMax}` : '—'}
+        </td>
+        <td>${probBadge(l.probability || 0)}</td>
+        <td>${sectBadge(l.sectionalPassed)}</td>
+        <td class="font-mono text-xs" style="color:var(--muted)">${formatDate(l.timestamp)}</td>
+      </tr>
+    `).join('');
+  }
+
+  function filterLeads() {
+    const query  = document.getElementById('search-input').value.toLowerCase();
+    const prob   = document.getElementById('filter-prob').value;
+    const sect   = document.getElementById('filter-sect').value;
+
+    let filtered = allLeads.filter(l => {
+      const matchQuery = !query ||
+        (l.name  || '').toLowerCase().includes(query) ||
+        (l.phone || '').includes(query);
+
+      const p = l.probability || 0;
+      const matchProb = !prob ||
+        (prob === 'high' && p >= 80) ||
+        (prob === 'mid'  && p >= 40 && p < 80) ||
+        (prob === 'low'  && p < 40);
+
+      const matchSect = !sect ||
+        (sect === '1' && l.sectionalPassed) ||
+        (sect === '0' && !l.sectionalPassed);
+
+      return matchQuery && matchProb && matchSect;
+    });
+
+    renderAllLeads(filtered);
+  }
+
+  function clearAllLeads() {
+    if (confirm('Delete ALL leads? This cannot be undone.')) {
+      localStorage.removeItem('nda_leads');
+      allLeads = [];
+      renderOverview();
+      renderAllLeads([]);
+    }
+  }
+
+  // ═══════════════════════════════════════
+  //  EXPORT CSV
+  // ═══════════════════════════════════════
+  function exportCSV() {
+    const leads = getLeads();
+    if (!leads.length) { alert('No leads to export!'); return; }
+
+    const headers = ['Name','Phone','Age','Math','GAT','Written','SSB','Total','AIR Min','AIR Max','Probability%','Sectional','Date'];
+    const rows = leads.map(l => [
+      l.name, l.phone, l.age,
+      l.mathScore, l.gatScore, l.writtenScore, l.ssb, l.totalScore,
+      l.airMin, l.airMax, l.probability,
+      l.sectionalPassed ? 'Cleared' : 'Failed',
+      formatDate(l.timestamp)
+    ].map(v => `"${v || ''}"`).join(','));
+
+    const csv  = [headers.join(','), ...rows].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = `NDA_Leads_${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  // ═══════════════════════════════════════
+  //  CHARTS
+  // ═══════════════════════════════════════
+  let chartsInit = false;
+
+  function renderCharts() {
+    if (chartsInit) return;
+    chartsInit = true;
+
+    const leads = getLeads();
+    const GOLD  = '#f0c040';
+    const SAFE  = '#52b788';
+    const DNGR  = '#e63946';
+
+    Chart.defaults.color = '#7a7a65';
+    Chart.defaults.font.family = 'JetBrains Mono, monospace';
+    Chart.defaults.font.size   = 11;
+
+    // 1. Score Distribution (Written)
+    const bands = [
+      { label: '500+', count: 0 }, { label: '420-499', count: 0 },
+      { label: '360-419', count: 0 }, { label: '305-359', count: 0 },
+      { label: '270-304', count: 0 }, { label: '<270', count: 0 },
+    ];
+    leads.forEach(l => {
+      const w = l.writtenScore || 0;
+      if (w >= 500)      bands[0].count++;
+      else if (w >= 420) bands[1].count++;
+      else if (w >= 360) bands[2].count++;
+      else if (w >= 305) bands[3].count++;
+      else if (w >= 270) bands[4].count++;
+      else               bands[5].count++;
+    });
+
+    new Chart(document.getElementById('score-dist-chart'), {
+      type: 'bar',
+      data: {
+        labels: bands.map(b => b.label),
+        datasets: [{
+          data: bands.map(b => b.count),
+          backgroundColor: [GOLD, GOLD, SAFE, '#FFC107', '#FF9800', DNGR],
+          borderRadius: 3, borderSkipped: false,
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { color: 'rgba(200,181,96,0.06)' }, ticks: { color: '#7a7a65' } },
+          y: { grid: { color: 'rgba(200,181,96,0.06)' }, ticks: { color: '#7a7a65', stepSize: 1 } },
+        }
+      }
+    });
+
+    // 2. Probability Donut
+    const probBands = { 'High (80%+)': 0, 'Med (40-79%)': 0, 'Low (<40%)': 0 };
+    leads.forEach(l => {
+      const p = l.probability || 0;
+      if (p >= 80)      probBands['High (80%+)']++;
+      else if (p >= 40) probBands['Med (40-79%)']++;
+      else              probBands['Low (<40%)']++;
+    });
+
+    new Chart(document.getElementById('prob-chart'), {
+      type: 'doughnut',
+      data: {
+        labels: Object.keys(probBands),
+        datasets: [{
+          data: Object.values(probBands),
+          backgroundColor: [SAFE, GOLD, DNGR],
+          borderColor: '#161a10', borderWidth: 3,
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'bottom', labels: { color: '#7a7a65', padding: 16 } }
+        },
+        cutout: '65%',
+      }
+    });
+
+    // 3. Daily Signups (last 7 days)
+    const days = Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(); d.setDate(d.getDate() - (6 - i));
+      return d.toDateString();
+    });
+
+    const dailyCounts = days.map(day =>
+      leads.filter(l => new Date(l.timestamp).toDateString() === day).length
+    );
+
+    const dayLabels = days.map(d => {
+      const dt = new Date(d);
+      return dt.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric' });
+    });
+
+    new Chart(document.getElementById('daily-chart'), {
+      type: 'line',
+      data: {
+        labels: dayLabels,
+        datasets: [{
+          data: dailyCounts,
+          borderColor: GOLD,
+          backgroundColor: 'rgba(240,192,64,0.08)',
+          borderWidth: 2, pointRadius: 4,
+          pointBackgroundColor: GOLD,
+          fill: true, tension: 0.4,
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { color: 'rgba(200,181,96,0.06)' }, ticks: { color: '#7a7a65' } },
+          y: { grid: { color: 'rgba(200,181,96,0.06)' }, ticks: { color: '#7a7a65', stepSize: 1 } },
+        }
+      }
+    });
+  }
+
+  // ═══════════════════════════════════════
+  //  SCORE ANALYSIS TAB
+  // ═══════════════════════════════════════
+  function renderScoreAnalysis() {
+    const leads = getLeads();
+    if (!leads.length) {
+      document.getElementById('score-analysis-cards').innerHTML =
+        `<div class="font-mono text-xs" style="color:var(--muted)">No data yet.</div>`;
+      return;
+    }
+
+    const writtenScores = leads.map(l => l.writtenScore || 0);
+    const mathScores    = leads.map(l => l.mathScore    || 0);
+    const gatScores     = leads.map(l => l.gatScore     || 0);
+    const totalScores   = leads.map(l => l.totalScore   || 0);
+
+    const avg = arr => Math.round(arr.reduce((a, b) => a + b, 0) / arr.length);
+    const max = arr => Math.max(...arr);
+    const min = arr => Math.min(...arr);
+
+    document.getElementById('score-analysis-cards').innerHTML = [
+      { label: 'Math Score',    avg: avg(mathScores),    max: max(mathScores),    min: min(mathScores),    outOf: 300 },
+      { label: 'GAT Score',     avg: avg(gatScores),     max: max(gatScores),     min: min(gatScores),     outOf: 600 },
+      { label: 'Written Score', avg: avg(writtenScores), max: max(writtenScores), min: min(writtenScores), outOf: 900 },
+      { label: 'Total Score',   avg: avg(totalScores),   max: max(totalScores),   min: min(totalScores),   outOf: 1800 },
+    ].map(s => `
+      <div class="stat-card">
+        <div class="section-label mb-2">${s.label} / ${s.outOf}</div>
+        <div class="stat-value">${s.avg}</div>
+        <div class="stat-label">Average</div>
+        <div class="flex justify-between mt-3">
+          <span class="font-mono text-xs" style="color:var(--safe)">↑ ${s.max}</span>
+          <span class="font-mono text-xs" style="color:var(--danger)">↓ ${s.min}</span>
+        </div>
+      </div>
+    `).join('');
+
+    // AIR Band Distribution
+    const airBands = [
+      { label: 'AIR 1–25 (Topper)',         min: 1100, count: 0, color: '#FFD700' },
+      { label: 'AIR 26–100 (Excellent)',     min: 1000, count: 0, color: '#00C853' },
+      { label: 'AIR 101–250 (Very Strong)',  min: 900,  count: 0, color: '#00BCD4' },
+      { label: 'AIR 251–450 (Strong)',       min: 820,  count: 0, color: '#4CAF50' },
+      { label: 'AIR 451–650 (Decent)',       min: 750,  count: 0, color: '#8BC34A' },
+      { label: 'AIR 651–800 (Borderline)',   min: 700,  count: 0, color: '#FFC107' },
+      { label: 'AIR 801–1000 (Risky)',       min: 654,  count: 0, color: '#FF9800' },
+      { label: 'Not Selected',               min: 0,    count: 0, color: '#F44336' },
+    ];
+
+    leads.forEach(l => {
+      const t = l.totalScore || 0;
+      if      (t >= 1100) airBands[0].count++;
+      else if (t >= 1000) airBands[1].count++;
+      else if (t >= 900)  airBands[2].count++;
+      else if (t >= 820)  airBands[3].count++;
+      else if (t >= 750)  airBands[4].count++;
+      else if (t >= 700)  airBands[5].count++;
+      else if (t >= 654)  airBands[6].count++;
+      else                airBands[7].count++;
+    });
+
+    const maxCount = Math.max(...airBands.map(b => b.count), 1);
+    document.getElementById('air-bands-list').innerHTML = airBands.map(b => `
+      <div class="flex items-center gap-3 mb-3">
+        <div class="font-mono text-xs" style="color:var(--muted); width:180px; flex-shrink:0">${b.label}</div>
+        <div style="flex:1; background:var(--surface2); border-radius:99px; height:8px; overflow:hidden">
+          <div style="height:100%; border-radius:99px; width:${(b.count / maxCount) * 100}%;
+                      background:${b.color}; transition:width 0.8s ease"></div>
+        </div>
+        <div class="font-mono text-sm" style="color:${b.color}; min-width:28px; text-align:right">${b.count}</div>
+      </div>
+    `).join('');
+  }
+
+  // ═══════════════════════════════════════
+  //  INIT
+  // ═══════════════════════════════════════
+  function initDashboard() {
+    allLeads = getLeads();
+    renderOverview();
+    renderAllLeads(allLeads);
+  }
+
+  // Seed demo data if empty (remove in production)
+  if (!localStorage.getItem('nda_leads')) {
+    const demoLeads = [
+      { name: 'Arjun Sharma',  phone: '9876543210', age: 17, mathScore: 180, gatScore: 280, writtenScore: 460, ssb: 380, totalScore: 840, airMin: 251, airMax: 450, probability: 88, sectionalPassed: true,  timestamp: new Date(Date.now() - 3600000).toISOString() },
+      { name: 'Ravi Verma',    phone: '9123456780', age: 18, mathScore: 95,  gatScore: 210, writtenScore: 305, ssb: 350, totalScore: 655, airMin: 801, airMax: 1000,probability: 25, sectionalPassed: true,  timestamp: new Date(Date.now() - 7200000).toISOString() },
+      { name: 'Karan Singh',   phone: '9988776655', age: 17, mathScore: 220, gatScore: 350, writtenScore: 570, ssb: 420, totalScore: 990, airMin: 101, airMax: 250, probability: 95, sectionalPassed: true,  timestamp: new Date(Date.now() - 86400000).toISOString() },
+      { name: 'Mohit Yadav',   phone: '9871234560', age: 16, mathScore: 60,  gatScore: 130, writtenScore: 190, ssb: 0,   totalScore: 190, airMin: 1001,airMax: 9999,probability: 5,  sectionalPassed: false, timestamp: new Date(Date.now() - 172800000).toISOString() },
+      { name: 'Priya Chauhan', phone: '9456789012', age: 17, mathScore: 155, gatScore: 260, writtenScore: 415, ssb: 360, totalScore: 775, airMin: 451, airMax: 650, probability: 75, sectionalPassed: true,  timestamp: new Date().toISOString() },
+    ];
+    localStorage.setItem('nda_leads', JSON.stringify(demoLeads));
+  }
+
+  </script>
+</body>
+</html>

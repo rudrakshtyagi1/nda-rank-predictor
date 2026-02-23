@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>404 — Page Not Found | NDA Rank Predictor</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --gold: #f0c040; --danger: #e63946; --bg: #0d0f0a;
+      --surface: #161a10; --text: #e8e4d0; --muted: #7a7a65; --khaki: #c8b560;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: 'Rajdhani', sans-serif;
+      min-height: 100vh; display: flex; align-items: center; justify-content: center;
+      overflow: hidden;
+    }
+    body::before {
+      content: ''; position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(192,178,96,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(192,178,96,0.04) 1px, transparent 1px);
+      background-size: 40px 40px; pointer-events: none;
+    }
+    .corner { position: fixed; width: 50px; height: 50px; opacity: 0.25; pointer-events: none; }
+    .tl { top: 20px; left: 20px; border-top: 1px solid var(--khaki); border-left: 1px solid var(--khaki); }
+    .tr { top: 20px; right: 20px; border-top: 1px solid var(--khaki); border-right: 1px solid var(--khaki); }
+    .bl { bottom: 20px; left: 20px; border-bottom: 1px solid var(--khaki); border-left: 1px solid var(--khaki); }
+    .br { bottom: 20px; right: 20px; border-bottom: 1px solid var(--khaki); border-right: 1px solid var(--khaki); }
+
+    .glitch {
+      font-family: 'Bebas Neue', cursive;
+      font-size: clamp(100px, 25vw, 200px);
+      color: var(--gold); line-height: 1;
+      position: relative; letter-spacing: 0.05em;
+      animation: glitch-main 3s infinite;
+    }
+    .glitch::before, .glitch::after {
+      content: '404'; position: absolute; top: 0; left: 0; right: 0;
+    }
+    .glitch::before {
+      color: var(--danger); clip-path: polygon(0 0, 100% 0, 100% 35%, 0 35%);
+      animation: glitch-top 3s infinite; opacity: 0.8;
+    }
+    .glitch::after {
+      color: #00BCD4; clip-path: polygon(0 65%, 100% 65%, 100% 100%, 0 100%);
+      animation: glitch-bot 3s infinite; opacity: 0.8;
+    }
+    @keyframes glitch-main {
+      0%,90%,100% { transform: translate(0); }
+      92% { transform: translate(-2px, 1px); }
+      94% { transform: translate(2px, -1px); }
+      96% { transform: translate(-1px, 2px); }
+    }
+    @keyframes glitch-top {
+      0%,90%,100% { transform: translate(0); }
+      92% { transform: translate(4px, 0); }
+      94% { transform: translate(-4px, 0); }
+    }
+    @keyframes glitch-bot {
+      0%,90%,100% { transform: translate(0); }
+      92% { transform: translate(-4px, 0); }
+      94% { transform: translate(4px, 0); }
+    }
+    .btn-home {
+      display: inline-block;
+      background: var(--gold); color: #2d3a1e;
+      font-family: 'Bebas Neue', cursive; font-size: 20px; letter-spacing: 0.1em;
+      padding: 14px 36px; border-radius: 3px; text-decoration: none;
+      transition: transform 0.15s, box-shadow 0.2s;
+    }
+    .btn-home:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(240,192,64,0.35); }
+    .countdown { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--muted); margin-top: 12px; }
+
+    @keyframes fade-up {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .fu1 { animation: fade-up 0.5s ease 0.1s forwards; opacity: 0; }
+    .fu2 { animation: fade-up 0.5s ease 0.2s forwards; opacity: 0; }
+    .fu3 { animation: fade-up 0.5s ease 0.3s forwards; opacity: 0; }
+    .fu4 { animation: fade-up 0.5s ease 0.4s forwards; opacity: 0; }
+  </style>
+</head>
+<body>
+  <div class="corner tl"></div><div class="corner tr"></div>
+  <div class="corner bl"></div><div class="corner br"></div>
+
+  <div style="text-align:center; padding: 20px; position:relative; z-index:1">
+    <div style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:0.2em; color:var(--khaki); opacity:0.6; margin-bottom:12px" class="fu1">
+      MISSION FAILED · ERROR CODE
+    </div>
+    <div class="glitch fu1">404</div>
+
+    <div class="fu2" style="margin-top:16px">
+      <div style="font-family:'Bebas Neue',cursive; font-size:32px; color:var(--text); letter-spacing:0.08em">
+        PAGE NOT FOUND
+      </div>
+      <p style="font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--muted); margin-top:8px; max-width:360px; margin-left:auto; margin-right:auto; line-height:1.6">
+        The page you're looking for has gone AWOL. <br/>It may have been moved or never existed.
+      </p>
+    </div>
+
+    <div class="fu3" style="margin-top:32px">
+      <a href="index.html" class="btn-home">⚡ BACK TO PREDICTOR</a>
+    </div>
+
+    <div class="countdown fu4" id="countdown">Auto-redirecting in <span id="secs">10</span>s...</div>
+  </div>
+
+  <script>
+    let s = 10;
+    const t = setInterval(() => {
+      s--;
+      document.getElementById('secs').textContent = s;
+      if (s <= 0) { clearInterval(t); window.location.href = 'index.html'; }
+    }, 1000);
+  </script>
+</body>
+</html>

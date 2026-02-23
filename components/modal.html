@@ -1,0 +1,260 @@
+<!-- components/modals.html -->
+<!-- 
+  Load this once in your HTML body.
+  Control via: showModal('lead-modal') / hideModal('lead-modal')
+-->
+
+<!-- ═══════════════════════════════════════
+     LEAD CAPTURE MODAL
+     Shown when user clicks "Predict" button
+═══════════════════════════════════════ -->
+<div id="lead-modal" style="
+  position:fixed; inset:0;
+  background:rgba(0,0,0,0.85);
+  backdrop-filter:blur(6px);
+  -webkit-backdrop-filter:blur(6px);
+  z-index:200;
+  display:none; align-items:center; justify-content:center;
+  padding:20px;
+" onclick="handleModalOverlayClick(event, 'lead-modal')">
+
+  <div style="
+    background:#161a10;
+    border:1px solid rgba(200,181,96,0.3);
+    border-radius:6px;
+    padding:32px 28px;
+    width:100%; max-width:420px;
+    position:relative;
+    animation:modal-in 0.35s cubic-bezier(0.34,1.56,0.64,1);
+  ">
+    <!-- Top accent -->
+    <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#f0c040,transparent);"></div>
+
+    <!-- Header -->
+    <div style="margin-bottom:20px;">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.2em;color:#c8b560;opacity:0.7;text-transform:uppercase;margin-bottom:4px;">
+        Almost There!
+      </div>
+      <h2 style="font-family:'Bebas Neue',cursive;font-size:34px;color:#f0c040;letter-spacing:0.06em;line-height:1;">
+        GET YOUR RESULT
+      </h2>
+      <p style="font-family:'Rajdhani',sans-serif;font-weight:600;font-size:13px;color:#7a7a65;margin-top:6px;">
+        Enter your details to unlock your predicted AIR rank and full analysis.
+      </p>
+    </div>
+
+    <!-- Form Fields -->
+    <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:8px;">
+
+      <div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.15em;color:#7a7a65;text-transform:uppercase;margin-bottom:6px;">Full Name</div>
+        <input type="text" id="modal-name" placeholder="Your full name"
+          style="width:100%;background:#1e2416;border:1px solid rgba(200,181,96,0.2);color:#e8e4d0;font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:600;padding:12px 16px;border-radius:3px;outline:none;transition:border-color 0.2s;"
+          onfocus="this.style.borderColor='#f0c040'" onblur="this.style.borderColor='rgba(200,181,96,0.2)'"
+        />
+      </div>
+
+      <div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.15em;color:#7a7a65;text-transform:uppercase;margin-bottom:6px;">Phone Number</div>
+        <input type="tel" id="modal-phone" placeholder="10-digit mobile number" maxlength="10"
+          style="width:100%;background:#1e2416;border:1px solid rgba(200,181,96,0.2);color:#e8e4d0;font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;padding:12px 16px;border-radius:3px;outline:none;transition:border-color 0.2s;letter-spacing:0.08em;"
+          onfocus="this.style.borderColor='#f0c040'" onblur="this.style.borderColor='rgba(200,181,96,0.2)'"
+        />
+      </div>
+
+      <div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.15em;color:#7a7a65;text-transform:uppercase;margin-bottom:6px;">Your Age</div>
+        <input type="number" id="modal-age" placeholder="16–19" min="16" max="19"
+          style="width:100%;background:#1e2416;border:1px solid rgba(200,181,96,0.2);color:#e8e4d0;font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;padding:12px 16px;border-radius:3px;outline:none;transition:border-color 0.2s;text-align:center;"
+          onfocus="this.style.borderColor='#f0c040'" onblur="this.style.borderColor='rgba(200,181,96,0.2)'"
+        />
+      </div>
+
+    </div>
+
+    <!-- Error Message -->
+    <div id="modal-error" style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#e63946;min-height:18px;margin-bottom:12px;"></div>
+
+    <!-- Submit Button -->
+    <button id="modal-submit"
+      style="width:100%;background:#f0c040;color:#2d3a1e;font-family:'Bebas Neue',cursive;font-size:22px;letter-spacing:0.12em;padding:17px;border:none;border-radius:3px;cursor:pointer;position:relative;overflow:hidden;transition:transform 0.15s,box-shadow 0.15s;display:flex;align-items:center;justify-content:center;gap:8px;"
+      onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 28px rgba(240,192,64,0.35)'"
+      onmouseout="this.style.transform='';this.style.boxShadow=''"
+      onclick="handleLeadSubmit()"
+    >
+      <span id="modal-btn-text">🎯 SHOW MY RANK</span>
+      <div id="modal-loader" style="display:none;width:18px;height:18px;border:2px solid rgba(45,58,30,0.3);border-top-color:#2d3a1e;border-radius:50%;animation:spin 0.7s linear infinite;"></div>
+    </button>
+
+    <!-- Cancel -->
+    <button onclick="hideModal('lead-modal')"
+      style="width:100%;background:none;border:none;color:#7a7a65;font-family:'JetBrains Mono',monospace;font-size:11px;padding:10px;cursor:pointer;margin-top:4px;transition:color 0.2s;"
+      onmouseover="this.style.color='#e8e4d0'" onmouseout="this.style.color='#7a7a65'"
+    >Cancel</button>
+
+    <!-- Privacy Note -->
+    <p style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#7a7a65;text-align:center;margin-top:8px;opacity:0.6;line-height:1.5;">
+      🔒 Your data is safe. We don't share it with third parties.
+    </p>
+
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════
+     DISCLAIMER MODAL
+     Show on first visit or footer click
+═══════════════════════════════════════ -->
+<div id="disclaimer-modal" style="
+  position:fixed; inset:0;
+  background:rgba(0,0,0,0.8);
+  backdrop-filter:blur(4px);
+  z-index:200;
+  display:none; align-items:center; justify-content:center;
+  padding:20px;
+" onclick="handleModalOverlayClick(event, 'disclaimer-modal')">
+
+  <div style="
+    background:#161a10;
+    border:1px solid rgba(200,181,96,0.25);
+    border-radius:6px;
+    padding:28px 24px;
+    width:100%; max-width:400px;
+    position:relative;
+    animation:modal-in 0.35s cubic-bezier(0.34,1.56,0.64,1);
+  ">
+    <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#e63946,transparent);"></div>
+
+    <div style="text-align:center;margin-bottom:16px;">
+      <div style="font-size:36px;margin-bottom:8px;">⚠️</div>
+      <h2 style="font-family:'Bebas Neue',cursive;font-size:28px;color:#e8e4d0;letter-spacing:0.06em;">IMPORTANT DISCLAIMER</h2>
+    </div>
+
+    <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#7a7a65;line-height:1.8;margin-bottom:20px;">
+      <p style="margin-bottom:8px;">✦ This tool provides <span style="color:#f0c040;">estimated predictions only</span> based on historical UPSC NDA data (2021–2025).</p>
+      <p style="margin-bottom:8px;">✦ It is <span style="color:#e63946;">NOT an official UPSC tool</span> and has no affiliation with UPSC or Ministry of Defence.</p>
+      <p style="margin-bottom:8px;">✦ Actual rank depends on exam difficulty, vacancies, and number of candidates — which change every year.</p>
+      <p>✦ Always check <span style="color:#f0c040;">upsc.gov.in</span> for official information.</p>
+    </div>
+
+    <button onclick="acceptDisclaimer()"
+      style="width:100%;background:#f0c040;color:#2d3a1e;font-family:'Bebas Neue',cursive;font-size:20px;letter-spacing:0.1em;padding:14px;border:none;border-radius:3px;cursor:pointer;transition:transform 0.15s;"
+      onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform=''"
+    >
+      ✓ I UNDERSTAND, PROCEED
+    </button>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════
+     SHARE SUCCESS MODAL
+     Shown after share card is generated
+═══════════════════════════════════════ -->
+<div id="share-modal" style="
+  position:fixed; inset:0;
+  background:rgba(0,0,0,0.85);
+  backdrop-filter:blur(6px);
+  z-index:200;
+  display:none; align-items:center; justify-content:center;
+  padding:20px;
+" onclick="handleModalOverlayClick(event, 'share-modal')">
+
+  <div style="
+    background:#161a10;
+    border:1px solid rgba(82,183,136,0.3);
+    border-radius:6px;
+    padding:32px 28px;
+    width:100%; max-width:380px;
+    text-align:center;
+    animation:modal-in 0.35s cubic-bezier(0.34,1.56,0.64,1);
+  ">
+    <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#52b788,transparent);"></div>
+    <div style="font-size:48px;margin-bottom:12px;">🎉</div>
+    <h2 style="font-family:'Bebas Neue',cursive;font-size:30px;color:#52b788;letter-spacing:0.06em;">CARD DOWNLOADED!</h2>
+    <p style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#7a7a65;margin-top:8px;line-height:1.6;">
+      Your result card has been saved.<br/>Share it on WhatsApp Status or Instagram!
+    </p>
+    <button onclick="hideModal('share-modal')"
+      style="margin-top:20px;background:#52b788;color:#0d0f0a;font-family:'Bebas Neue',cursive;font-size:18px;letter-spacing:0.1em;padding:12px 32px;border:none;border-radius:3px;cursor:pointer;"
+    >DONE ✓</button>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════
+     MODAL UTILITIES (JS)
+═══════════════════════════════════════ -->
+<style>
+  @keyframes modal-in {
+    from { opacity:0; transform:scale(0.88) translateY(20px); }
+    to   { opacity:1; transform:scale(1) translateY(0); }
+  }
+  @keyframes spin { to { transform:rotate(360deg); } }
+</style>
+
+<script>
+  // ── Show/Hide Modal ──────────────────────
+  function showModal(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  }
+
+  function hideModal(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.style.display = 'none';
+    document.body.style.overflow = '';
+  }
+
+  // Click outside to close
+  function handleModalOverlayClick(event, id) {
+    if (event.target === document.getElementById(id)) hideModal(id);
+  }
+
+  // ESC key to close all modals
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      ['lead-modal', 'disclaimer-modal', 'share-modal'].forEach(hideModal);
+    }
+  });
+
+  // ── Disclaimer Accept ───────────────────
+  function acceptDisclaimer() {
+    localStorage.setItem('nda_disclaimer_accepted', '1');
+    hideModal('disclaimer-modal');
+  }
+
+  // Auto-show disclaimer on first visit
+  if (!localStorage.getItem('nda_disclaimer_accepted')) {
+    window.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => showModal('disclaimer-modal'), 800);
+    });
+  }
+
+  // ── Lead Submit (called from index.html) ─
+  function handleLeadSubmit() {
+    const name  = document.getElementById('modal-name')?.value.trim()  || '';
+    const phone = document.getElementById('modal-phone')?.value.trim() || '';
+    const age   = parseInt(document.getElementById('modal-age')?.value) || 0;
+    const errEl = document.getElementById('modal-error');
+
+    errEl.textContent = '';
+
+    if (name.length < 2)          { errEl.textContent = '⚠ Enter your full name';          return; }
+    if (!/^\d{10}$/.test(phone))  { errEl.textContent = '⚠ Enter valid 10-digit number';   return; }
+    if (age < 16 || age > 19)     { errEl.textContent = '⚠ Age must be between 16 and 19'; return; }
+
+    // Show loader
+    document.getElementById('modal-btn-text').style.display = 'none';
+    document.getElementById('modal-loader').style.display   = 'block';
+    document.getElementById('modal-submit').disabled        = true;
+
+    // This function is overridden in index.html with actual submit logic
+    if (typeof window.onLeadSubmit === 'function') {
+      window.onLeadSubmit({ name, phone, age });
+    }
+  }
+</script>

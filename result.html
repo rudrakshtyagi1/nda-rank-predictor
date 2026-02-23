@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Your NDA Rank Prediction — Result</title>
+  <meta name="description" content="Your predicted NDA All India Rank based on UPSC historical data." />
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --olive:   #4a5240;
+      --army:    #2d3a1e;
+      --khaki:   #c8b560;
+      --gold:    #f0c040;
+      --danger:  #e63946;
+      --safe:    #52b788;
+      --bg:      #0d0f0a;
+      --surface: #161a10;
+      --surface2:#1e2416;
+      --text:    #e8e4d0;
+      --muted:   #7a7a65;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Rajdhani', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(192,178,96,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(192,178,96,0.04) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none; z-index: 0;
+    }
+
+    .font-display { font-family: 'Bebas Neue', cursive; letter-spacing: 0.05em; }
+    .font-mono    { font-family: 'JetBrains Mono', monospace; }
+    .font-ui      { font-family: 'Rajdhani', sans-serif; font-weight: 600; }
+
+    /* ── Section Card ── */
+    .section-card {
+      background: var(--surface);
+      border: 1px solid rgba(200,181,96,0.15);
+      border-radius: 4px;
+      position: relative;
+      overflow: hidden;
+    }
+    .section-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--khaki), transparent);
+      opacity: 0.5;
+    }
+
+    .section-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px; letter-spacing: 0.2em;
+      color: var(--khaki); text-transform: uppercase; opacity: 0.7;
+    }
+
+    /* ── AIR Hero Card ── */
+    .air-card {
+      background: var(--surface);
+      border-radius: 6px;
+      position: relative;
+      overflow: hidden;
+      padding: 36px 24px;
+      text-align: center;
+    }
+
+    .air-card-glow {
+      position: absolute;
+      width: 300px; height: 300px;
+      border-radius: 50%;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      filter: blur(60px);
+      opacity: 0.25;
+      transition: background 0.5s;
+    }
+
+    .air-number {
+      font-family: 'Bebas Neue', cursive;
+      font-size: 88px;
+      line-height: 1;
+      letter-spacing: 0.03em;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ── Probability Meter ── */
+    .prob-bar-wrap {
+      background: var(--surface2);
+      border-radius: 99px;
+      height: 10px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .prob-bar-fill {
+      height: 100%;
+      border-radius: 99px;
+      transition: width 1.4s cubic-bezier(0.34,1.1,0.64,1);
+      width: 0%;
+    }
+
+    /* ── Score Pill ── */
+    .score-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--surface2);
+      border: 1px solid rgba(200,181,96,0.15);
+      border-radius: 99px;
+      padding: 6px 14px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--text);
+    }
+
+    /* ── Sectional Row ── */
+    .sectional-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(200,181,96,0.08);
+    }
+    .sectional-row:last-child { border-bottom: none; }
+
+    .badge-pass {
+      background: rgba(82,183,136,0.15);
+      color: var(--safe);
+      border: 1px solid rgba(82,183,136,0.3);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px; letter-spacing: 0.1em;
+      padding: 3px 10px; border-radius: 99px;
+    }
+
+    .badge-fail {
+      background: rgba(230,57,70,0.15);
+      color: var(--danger);
+      border: 1px solid rgba(230,57,70,0.3);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px; letter-spacing: 0.1em;
+      padding: 3px 10px; border-radius: 99px;
+    }
+
+    /* ── Next Steps ── */
+    .step-card {
+      background: var(--surface2);
+      border: 1px solid rgba(200,181,96,0.1);
+      border-radius: 3px;
+      padding: 14px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .step-number {
+      font-family: 'Bebas Neue', cursive;
+      font-size: 28px;
+      color: var(--gold);
+      opacity: 0.4;
+      line-height: 1;
+      min-width: 28px;
+    }
+
+    /* ── Share Card (hidden canvas) ── */
+    #share-canvas { display: none; }
+
+    /* ── Share Button ── */
+    .btn-share {
+      width: 100%;
+      background: transparent;
+      border: 1px solid var(--gold);
+      color: var(--gold);
+      font-family: 'Bebas Neue', cursive;
+      font-size: 20px;
+      letter-spacing: 0.1em;
+      padding: 16px;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .btn-share:hover {
+      background: rgba(240,192,64,0.1);
+      transform: translateY(-1px);
+    }
+
+    .btn-retry {
+      width: 100%;
+      background: var(--gold);
+      color: var(--army);
+      font-family: 'Bebas Neue', cursive;
+      font-size: 20px;
+      letter-spacing: 0.1em;
+      padding: 16px;
+      border-radius: 3px;
+      cursor: pointer;
+      border: none;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .btn-retry:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(240,192,64,0.3);
+    }
+
+    /* ── Animations ── */
+    @keyframes fade-up {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .fade-up { animation: fade-up 0.55s ease forwards; opacity: 0; }
+    .d1 { animation-delay: 0.05s; }
+    .d2 { animation-delay: 0.15s; }
+    .d3 { animation-delay: 0.25s; }
+    .d4 { animation-delay: 0.35s; }
+    .d5 { animation-delay: 0.45s; }
+    .d6 { animation-delay: 0.55s; }
+
+    @keyframes count-up {
+      from { opacity: 0; transform: scale(0.7); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+    .count-up { animation: count-up 0.7s cubic-bezier(0.34,1.56,0.64,1) forwards; }
+
+    /* ── Disqualified Banner ── */
+    .dq-banner {
+      background: rgba(230,57,70,0.1);
+      border: 1px solid rgba(230,57,70,0.4);
+      border-radius: 4px;
+      padding: 20px;
+      text-align: center;
+    }
+
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--olive); border-radius: 2px; }
+  </style>
+</head>
+
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="relative z-10 flex items-center justify-between px-5 py-4 border-b border-white/5">
+    <div class="flex items-center gap-3">
+      <div class="w-7 h-7 border border-[var(--khaki)] flex items-center justify-center opacity-80">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color:var(--khaki)">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+        </svg>
+      </div>
+      <span style="font-family:'Bebas Neue',cursive; letter-spacing:0.05em; font-size:18px;">NDA PREDICTOR</span>
+    </div>
+    <a href="index.html" class="font-mono text-xs px-3 py-2 rounded"
+       style="color:var(--muted); border:1px solid rgba(200,181,96,0.15)">← Recalculate</a>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="relative z-10 px-5 max-w-lg mx-auto pb-20 pt-6" id="result-main">
+    <!-- Filled by JS -->
+  </main>
+
+  <!-- Hidden Canvas for Share Card -->
+  <canvas id="share-canvas" width="1080" height="1080"></canvas>
+
+  <script>
+  // ═══════════════════════════════════════════
+  //  READ URL PARAMS
+  // ═══════════════════════════════════════════
+  const params   = new URLSearchParams(window.location.search);
+  const name     = params.get('name')     || 'Cadet';
+  const math     = parseFloat(params.get('math'))    || 0;
+  const gat      = parseFloat(params.get('gat'))     || 0;
+  const written  = parseFloat(params.get('written')) || 0;
+  const ssb      = parseFloat(params.get('ssb'))     || 0;
+  const total    = parseFloat(params.get('total'))   || 0;
+  const airMin   = parseInt(params.get('airMin'))    || 1001;
+  const airMax   = parseInt(params.get('airMax'))    || 9999;
+  const prob     = parseInt(params.get('prob'))      || 5;
+  const tag      = params.get('tag')     || 'NOT SELECTED ❌';
+  const color    = params.get('color')   || '#F44336';
+  const sectOk   = params.get('sectional') === '1';
+  const mathPass = params.get('mathPass')   === '1';
+  const gatPass  = params.get('gatPass')    === '1';
+  const age      = parseInt(params.get('age')) || 17;
+
+  // ═══════════════════════════════════════════
+  //  CUTOFF CONTEXT (avg last 5 yrs)
+  // ═══════════════════════════════════════════
+  const AVG_WRITTEN_CUTOFF = 318;
+  const AVG_FINAL_CUTOFF   = 683;
+  const SAFE_WRITTEN       = 360;
+  const SAFE_FINAL         = 700;
+
+  // ═══════════════════════════════════════════
+  //  NEXT STEPS LOGIC
+  // ═══════════════════════════════════════════
+  function getNextSteps() {
+    if (!sectOk) {
+      return [
+        { icon: '📖', title: 'Sectional Score Improve Karo', body: `${!mathPass ? 'Math mein aur practice chahiye. ' : ''}${!gatPass ? 'GAT mein aur focus karo — Current Affairs + English.' : ''}` },
+        { icon: '📅', title: 'Next Attempt ki Taiyari Shuru Karo', body: 'NDA exam saal mein 2 baar aata hai. Abhi se plan banao.' },
+        { icon: '🎯', title: 'Mock Tests Do', body: 'Weekly mock test se weak areas identify karo aur improve karo.' },
+      ];
+    }
+    if (prob >= 88) return [
+      { icon: '🪖', title: 'SSB ki Taiyari Shuru Karo', body: 'Written strong hai. Ab SSB pe focus do — GD, Lecturette, Psychology tests.' },
+      { icon: '🏃', title: 'Physical Fitness Maintain Karo', body: 'Daily running, push-ups, pull-ups. NDA physical test ke liye ready raho.' },
+      { icon: '📰', title: 'Current Affairs Daily Padho', body: 'SSB interview mein defence news + current affairs poochha jata hai.' },
+    ];
+    if (prob >= 55) return [
+      { icon: '🎯', title: 'SSB Score Maximize Karo', body: 'Selection probability 55-88% hai — SSB mein strong performance zaroori hai.' },
+      { icon: '🪖', title: 'Mock SSB Practice Karo', body: 'SSB coaching ya online mock se OIR, PPDT, GTO practice karo.' },
+      { icon: '💪', title: 'Physical Fitness', body: 'Physical test mein koi compromise mat karo — daily train karo.' },
+    ];
+    return [
+      { icon: '📖', title: 'Written Score Improve Karo', body: `Tera written score ${written}/900 hai. Safe zone ${SAFE_WRITTEN}+ hai. Agle attempt mein improve karo.` },
+      { icon: '🔁', title: 'Next Attempt Plan Karo', body: 'Abhi se NDA 2 ya next year ke liye strategy banao. Time hai.' },
+      { icon: '📊', title: 'Weak Subjects Identify Karo', body: 'Math ya GAT — jo weak hai uspe extra time do. Previous papers solve karo.' },
+    ];
+  }
+
+  // ═══════════════════════════════════════════
+  //  RENDER PAGE
+  // ═══════════════════════════════════════════
+  function renderResult() {
+    const main = document.getElementById('result-main');
+
+    if (!sectOk) {
+      // DISQUALIFIED VIEW
+      main.innerHTML = `
+        <div class="fade-up d1 mb-5">
+          <p class="section-label mb-1">Result for ${name}</p>
+          <h2 style="font-family:'Bebas Neue',cursive; font-size:36px; color:var(--text)">YOUR ANALYSIS</h2>
+        </div>
+
+        <div class="dq-banner mb-5 fade-up d2">
+          <div style="font-family:'Bebas Neue',cursive; font-size:48px; color:var(--danger)">SECTIONAL CUTOFF FAIL</div>
+          <p class="font-ui mt-2" style="color:var(--muted)">
+            ${!mathPass && !gatPass ? 'Both Math and GAT sectional cutoff not cleared.' : !mathPass ? 'Math sectional cutoff not cleared.' : 'GAT sectional cutoff not cleared.'}
+          </p>
+          <p class="font-mono text-xs mt-3" style="color:var(--danger); opacity:0.7">
+            Even if total score is high — sectional fail = full disqualification
+          </p>
+        </div>
+
+        ${renderScoreBreakdown()}
+        ${renderSectionalAnalysis()}
+        ${renderNextSteps()}
+        ${renderActions()}
+      `;
+    } else {
+      // QUALIFIED VIEW
+      main.innerHTML = `
+        <div class="fade-up d1 mb-2">
+          <p class="section-label">Result for ${name}</p>
+        </div>
+
+        ${renderAIRCard()}
+        ${renderProbabilityMeter()}
+        ${renderScoreBreakdown()}
+        ${renderSectionalAnalysis()}
+        ${renderCutoffComparison()}
+        ${renderNextSteps()}
+        ${renderActions()}
+      `;
+    }
+
+    // Animate probability bar
+    setTimeout(() => {
+      const fill = document.getElementById('prob-fill');
+      if (fill) fill.style.width = prob + '%';
+    }, 400);
+  }
+
+  // ── AIR Hero Card ────────────────────────
+  function renderAIRCard() {
+    const airDisplay = airMax >= 9999
+      ? '1000+'
+      : `${airMin}–${airMax}`;
+
+    return `
+    <div class="air-card mb-4 fade-up d2" style="border:1px solid ${color}33">
+      <div class="air-card-glow" style="background:${color}"></div>
+      <p class="section-label mb-3">Predicted All India Rank</p>
+      <div class="air-number count-up" style="color:${color}">${airDisplay}</div>
+      <div class="font-display text-2xl mt-2" style="color:var(--text); letter-spacing:0.08em">${tag}</div>
+      <p class="font-mono text-xs mt-3" style="color:var(--muted)">
+        Based on UPSC NDA data 2021–2025 · Total Score: ${total}/1800
+      </p>
+    </div>`;
+  }
+
+  // ── Probability Meter ────────────────────
+  function renderProbabilityMeter() {
+    const probColor = prob >= 88 ? 'var(--safe)' : prob >= 55 ? 'var(--gold)' : 'var(--danger)';
+    return `
+    <div class="section-card p-5 mb-4 fade-up d3">
+      <div class="flex items-center justify-between mb-3">
+        <p class="section-label">Selection Probability</p>
+        <span class="font-display text-3xl" style="color:${probColor}">${prob}%</span>
+      </div>
+      <div class="prob-bar-wrap">
+        <div class="prob-bar-fill" id="prob-fill" style="background:${probColor}; width:0%"></div>
+      </div>
+      <p class="font-mono text-xs mt-3" style="color:var(--muted)">
+        ${prob >= 88 ? '🟢 Very high chance of selection. Focus on SSB now.' :
+          prob >= 55 ? '🟡 Good chance. SSB performance will be decisive.' :
+          prob >= 25 ? '🟠 Low chance. Written score needs improvement.' :
+                       '🔴 Very low. Focus on next attempt.'}
+      </p>
+    </div>`;
+  }
+
+  // ── Score Breakdown ──────────────────────
+  function renderScoreBreakdown() {
+    return `
+    <div class="section-card p-5 mb-4 fade-up d3">
+      <p class="section-label mb-4">Score Breakdown</p>
+
+      <div class="grid grid-cols-2 gap-2 mb-3">
+        <div style="background:var(--surface2); border:1px solid rgba(200,181,96,0.1); border-radius:3px; padding:14px; text-align:center">
+          <div style="font-family:'JetBrains Mono',monospace; font-size:26px; color:var(--gold); font-weight:700">${math}</div>
+          <div class="font-mono text-xs mt-1" style="color:var(--muted)">MATH / 300</div>
+          <div class="font-mono text-xs mt-1" style="color:${math >= 120 ? 'var(--safe)' : math >= 75 ? 'var(--gold)' : 'var(--danger)'}">${math >= 120 ? '✓ Strong' : math >= 75 ? '~ Qualifying' : '✗ Low'}</div>
+        </div>
+        <div style="background:var(--surface2); border:1px solid rgba(200,181,96,0.1); border-radius:3px; padding:14px; text-align:center">
+          <div style="font-family:'JetBrains Mono',monospace; font-size:26px; color:var(--gold); font-weight:700">${gat}</div>
+          <div class="font-mono text-xs mt-1" style="color:var(--muted)">GAT / 600</div>
+          <div class="font-mono text-xs mt-1" style="color:${gat >= 220 ? 'var(--safe)' : gat >= 150 ? 'var(--gold)' : 'var(--danger)'}">${gat >= 220 ? '✓ Strong' : gat >= 150 ? '~ Qualifying' : '✗ Low'}</div>
+        </div>
+      </div>
+
+      <div style="background:var(--surface2); border:1px solid rgba(200,181,96,0.1); border-radius:3px; padding:14px; margin-bottom:8px">
+        <div class="flex justify-between items-center">
+          <span class="font-ui text-sm" style="color:var(--muted); text-transform:uppercase; letter-spacing:0.08em">Written Total</span>
+          <span class="font-mono text-xl font-bold" style="color:var(--text)">${written} <span style="color:var(--muted); font-size:13px">/ 900</span></span>
+        </div>
+        <div class="font-mono text-xs mt-1" style="color:${written >= SAFE_WRITTEN ? 'var(--safe)' : written >= AVG_WRITTEN_CUTOFF ? 'var(--gold)' : 'var(--danger)'}">
+          ${written >= SAFE_WRITTEN ? '✓ Above safe zone (360+)' : written >= AVG_WRITTEN_CUTOFF ? '~ Near average cutoff (318)' : '✗ Below average cutoff'}
+        </div>
+      </div>
+
+      ${ssb > 0 ? `
+      <div style="background:var(--surface2); border:1px solid rgba(200,181,96,0.1); border-radius:3px; padding:14px; margin-bottom:8px">
+        <div class="flex justify-between items-center">
+          <span class="font-ui text-sm" style="color:var(--muted); text-transform:uppercase; letter-spacing:0.08em">SSB Score</span>
+          <span class="font-mono text-xl font-bold" style="color:var(--text)">${ssb} <span style="color:var(--muted); font-size:13px">/ 900</span></span>
+        </div>
+        <div class="font-mono text-xs mt-1" style="color:${ssb >= 366 ? 'var(--safe)' : 'var(--gold)'}">
+          ${ssb >= 366 ? '✓ Above average SSB of selected candidates' : '~ Below avg SSB of selected (~366)'}
+        </div>
+      </div>` : ''}
+
+      <div style="background:rgba(240,192,64,0.06); border:1px solid rgba(240,192,64,0.2); border-radius:3px; padding:14px">
+        <div class="flex justify-between items-center">
+          <span class="font-display text-lg" style="color:var(--gold); letter-spacing:0.1em">TOTAL SCORE</span>
+          <span class="font-display text-3xl" style="color:var(--gold)">${total} <span style="font-size:16px; color:var(--muted)">/ 1800</span></span>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  // ── Sectional Analysis ───────────────────
+  function renderSectionalAnalysis() {
+    return `
+    <div class="section-card p-5 mb-4 fade-up d4">
+      <p class="section-label mb-4">Sectional Cutoff Analysis</p>
+
+      <div class="sectional-row">
+        <div>
+          <div class="font-ui text-sm" style="color:var(--text)">Mathematics</div>
+          <div class="font-mono text-xs mt-1" style="color:var(--muted)">${math} marks | Min required: 75 (25% of 300)</div>
+        </div>
+        <span class="${mathPass ? 'badge-pass' : 'badge-fail'}">${mathPass ? 'CLEARED ✓' : 'FAILED ✗'}</span>
+      </div>
+
+      <div class="sectional-row">
+        <div>
+          <div class="font-ui text-sm" style="color:var(--text)">GAT</div>
+          <div class="font-mono text-xs mt-1" style="color:var(--muted)">${gat} marks | Min required: 150 (25% of 600)</div>
+        </div>
+        <span class="${gatPass ? 'badge-pass' : 'badge-fail'}">${gatPass ? 'CLEARED ✓' : 'FAILED ✗'}</span>
+      </div>
+
+      <div class="sectional-row">
+        <div>
+          <div class="font-ui text-sm" style="color:var(--text)">Overall Sectional Status</div>
+          <div class="font-mono text-xs mt-1" style="color:var(--muted)">Both papers must clear individually</div>
+        </div>
+        <span class="${sectOk ? 'badge-pass' : 'badge-fail'}">${sectOk ? 'QUALIFIED ✓' : 'DISQUALIFIED ✗'}</span>
+      </div>
+    </div>`;
+  }
+
+  // ── Cutoff Comparison ────────────────────
+  function renderCutoffComparison() {
+    const writtenVsAvg = written - AVG_WRITTEN_CUTOFF;
+    const totalVsAvg   = total > 0 ? total - AVG_FINAL_CUTOFF : null;
+
+    return `
+    <div class="section-card p-5 mb-4 fade-up d4">
+      <p class="section-label mb-4">Cutoff Comparison (5-Year Avg)</p>
+
+      <div class="space-y-3">
+        <div>
+          <div class="flex justify-between mb-1">
+            <span class="font-ui text-xs" style="color:var(--muted); text-transform:uppercase">Your Written vs Avg Cutoff (318)</span>
+            <span class="font-mono text-xs" style="color:${writtenVsAvg >= 0 ? 'var(--safe)' : 'var(--danger)'}">
+              ${writtenVsAvg >= 0 ? '+' : ''}${writtenVsAvg.toFixed(1)}
+            </span>
+          </div>
+          <div style="background:var(--surface2); border-radius:99px; height:8px; overflow:hidden">
+            <div style="height:100%; border-radius:99px; width:${Math.min((written/900)*100, 100)}%;
+                        background:${written >= SAFE_WRITTEN ? 'var(--safe)' : written >= AVG_WRITTEN_CUTOFF ? 'var(--gold)' : 'var(--danger)'};
+                        transition:width 1.2s ease"></div>
+          </div>
+        </div>
+
+        ${totalVsAvg !== null ? `
+        <div>
+          <div class="flex justify-between mb-1">
+            <span class="font-ui text-xs" style="color:var(--muted); text-transform:uppercase">Your Total vs Avg Final Cutoff (683)</span>
+            <span class="font-mono text-xs" style="color:${totalVsAvg >= 0 ? 'var(--safe)' : 'var(--danger)'}">
+              ${totalVsAvg >= 0 ? '+' : ''}${totalVsAvg.toFixed(1)}
+            </span>
+          </div>
+          <div style="background:var(--surface2); border-radius:99px; height:8px; overflow:hidden">
+            <div style="height:100%; border-radius:99px; width:${Math.min((total/1800)*100, 100)}%;
+                        background:${total >= SAFE_FINAL ? 'var(--safe)' : total >= AVG_FINAL_CUTOFF ? 'var(--gold)' : 'var(--danger)'};
+                        transition:width 1.4s ease"></div>
+          </div>
+        </div>` : ''}
+
+        <div class="font-mono text-xs pt-2" style="color:var(--muted)">
+          Safe written target: ${SAFE_WRITTEN}+ | Safe final target: ${SAFE_FINAL}+
+        </div>
+      </div>
+    </div>`;
+  }
+
+  // ── Next Steps ───────────────────────────
+  function renderNextSteps() {
+    const steps = getNextSteps();
+    return `
+    <div class="section-card p-5 mb-4 fade-up d5">
+      <p class="section-label mb-4">Your Next Steps</p>
+      <div class="space-y-3">
+        ${steps.map((s, i) => `
+          <div class="step-card">
+            <div class="step-number">${i + 1}</div>
+            <div>
+              <div class="font-ui text-sm" style="color:var(--text)">${s.icon} ${s.title}</div>
+              <div class="font-ui text-sm mt-1" style="color:var(--muted); font-weight:400">${s.body}</div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>`;
+  }
+
+  // ── Actions (Share + Retry) ──────────────
+  function renderActions() {
+    return `
+    <div class="space-y-3 fade-up d6">
+      <button class="btn-share" onclick="generateShareCard()">
+        📤 SHARE ON WHATSAPP
+      </button>
+      <button class="btn-retry" onclick="window.location.href='index.html'">
+        🔁 RECALCULATE
+      </button>
+      <p class="text-center font-mono text-xs" style="color:var(--muted)">
+        Disclaimer: This is an estimated prediction based on historical UPSC data. Not an official tool.
+      </p>
+    </div>`;
+  }
+
+  // ═══════════════════════════════════════════
+  //  SHARE CARD GENERATOR (Canvas API)
+  // ═══════════════════════════════════════════
+  function generateShareCard() {
+    const canvas = document.getElementById('share-canvas');
+    const ctx    = canvas.getContext('2d');
+    const W = 1080, H = 1080;
+
+    // Background
+    ctx.fillStyle = '#0d0f0a';
+    ctx.fillRect(0, 0, W, H);
+
+    // Grid pattern
+    ctx.strokeStyle = 'rgba(192,178,96,0.06)';
+    ctx.lineWidth = 1;
+    for (let x = 0; x < W; x += 40) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
+    for (let y = 0; y < H; y += 40) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+
+    // Gold accent top bar
+    const grad = ctx.createLinearGradient(0, 0, W, 0);
+    grad.addColorStop(0, 'transparent');
+    grad.addColorStop(0.5, '#f0c040');
+    grad.addColorStop(1, 'transparent');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, 3);
+
+    // Brand
+    ctx.fillStyle = 'rgba(200,181,96,0.5)';
+    ctx.font = '500 28px JetBrains Mono, monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('NDA RANK PREDICTOR', W / 2, 70);
+
+    // Name
+    ctx.fillStyle = '#e8e4d0';
+    ctx.font = 'bold 48px Rajdhani, sans-serif';
+    ctx.fillText(name.toUpperCase(), W / 2, 160);
+
+    // AIR Label
+    ctx.fillStyle = '#7a7a65';
+    ctx.font = '500 30px JetBrains Mono, monospace';
+    ctx.fillText('PREDICTED ALL INDIA RANK', W / 2, 230);
+
+    // AIR Number
+    ctx.fillStyle = color;
+    ctx.font = '900 200px Rajdhani, sans-serif';
+    const airTxt = airMax >= 9999 ? '1000+' : `${airMin}–${airMax}`;
+    ctx.fillText(airTxt, W / 2, 450);
+
+    // Tag
+    ctx.fillStyle = '#e8e4d0';
+    ctx.font = 'bold 52px Rajdhani, sans-serif';
+    ctx.fillText(tag, W / 2, 530);
+
+    // Scores
+    ctx.fillStyle = 'rgba(200,181,96,0.15)';
+    ctx.beginPath();
+    ctx.roundRect(140, 580, 800, 160, 8);
+    ctx.fill();
+
+    ctx.fillStyle = '#f0c040';
+    ctx.font = 'bold 32px JetBrains Mono, monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText(`Written: ${written}/900`, 180, 640);
+    ctx.fillText(`SSB:     ${ssb}/900`, 180, 690);
+    ctx.textAlign = 'right';
+    ctx.fillText(`Total: ${total}/1800`, 900, 640);
+    ctx.fillStyle = color;
+    ctx.font = 'bold 40px JetBrains Mono, monospace';
+    ctx.fillText(`${prob}% Selection Chance`, 900, 700);
+
+    // Probability bar
+    ctx.fillStyle = '#1e2416';
+    ctx.beginPath();
+    ctx.roundRect(140, 780, 800, 16, 8);
+    ctx.fill();
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.roundRect(140, 780, (800 * prob) / 100, 16, 8);
+    ctx.fill();
+
+    // Footer
+    ctx.textAlign = 'center';
+    ctx.fillStyle = 'rgba(122,122,101,0.6)';
+    ctx.font = '500 24px JetBrains Mono, monospace';
+    ctx.fillText('Based on UPSC NDA Data 2021-2025 · Not an official UPSC tool', W / 2, 880);
+
+    ctx.fillStyle = '#f0c040';
+    ctx.font = 'bold 28px Rajdhani, sans-serif';
+    ctx.fillText('Predict yours → nda-predictor.vercel.app', W / 2, 940);
+
+    // Bottom bar
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, H - 3, W, 3);
+
+    // Download / Share
+    canvas.toBlob(blob => {
+      const url = URL.createObjectURL(blob);
+      const a   = document.createElement('a');
+      a.href     = url;
+      a.download = `NDA_Rank_${name.replace(/\s+/g, '_')}.png`;
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+  }
+
+  // ═══════════════════════════════════════════
+  //  INIT
+  // ═══════════════════════════════════════════
+  renderResult();
+
+  // Animate progress bars after render
+  setTimeout(() => {
+    document.querySelectorAll('[style*="transition:width"]').forEach(el => {
+      const w = el.style.width;
+      el.style.width = '0%';
+      setTimeout(() => { el.style.width = w; }, 100);
+    });
+  }, 500);
+
+  </script>
+</body>
+</html>
