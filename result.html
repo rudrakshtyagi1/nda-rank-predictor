@@ -1,717 +1,573 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Your NDA Rank Prediction — Result</title>
-  <meta name="description" content="Your predicted NDA All India Rank based on UPSC historical data." />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Your NDA Rank Prediction — Result</title>
+<meta name="robots" content="noindex" />
+<link rel="manifest" href="manifest.json" />
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; min-height: 100vh; overflow-x: hidden; }
+:root {
+  --green:    #00ff88;
+  --green2:   #00cc66;
+  --gold:     #f0c040;
+  --khaki:    #c8b560;
+  --danger:   #e63946;
+  --safe:     #52b788;
+  --bg:       #060a06;
+  --surface:  #0d130d;
+  --surface2: #111811;
+  --text:     #d4f0d4;
+  --muted:    #4a7a4a;
+}
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Rajdhani', sans-serif;
+  animation: page-fadein 0.8s ease forwards;
+}
+@keyframes page-fadein {
+  from { opacity: 0; filter: brightness(0.3) blur(4px); }
+  to   { opacity: 1; filter: brightness(1)   blur(0px); }
+}
+#hud-bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+#hud-bg::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(0,255,136,0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,255,136,0.07) 1px, transparent 1px);
+  background-size: 48px 48px;
+  animation: grid-pulse 4s ease-in-out infinite;
+}
+#hud-bg::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at center, transparent 35%, #060a06 100%);
+}
+@keyframes grid-pulse { 0%,100% { opacity: 0.6; } 50% { opacity: 1; } }
+#radar-wrap {
+  position: fixed; width: 1000px; height: 1000px;
+  top: 50%; left: 50%; transform: translate(-50%, -50%);
+  pointer-events: none; z-index: 0;
+}
+#radar-sweep {
+  width: 100%; height: 100%; border-radius: 50%;
+  border: 1px solid rgba(0,255,136,0.06);
+  position: relative; animation: radar-rotate 10s linear infinite;
+}
+#radar-sweep::before {
+  content: ''; position: absolute; inset: 0; border-radius: 50%;
+  background: conic-gradient(from 0deg, transparent 0deg, transparent 310deg, rgba(0,255,136,0.03) 335deg, rgba(0,255,136,0.2) 355deg, rgba(0,255,136,0.3) 360deg);
+}
+#radar-sweep::after {
+  content: ''; position: absolute; inset: 12%; border-radius: 50%;
+  border: 1px solid rgba(0,255,136,0.04);
+  box-shadow: 0 0 0 70px rgba(0,255,136,0.015), 0 0 0 140px rgba(0,255,136,0.01);
+}
+.radar-center {
+  position: absolute; top:50%; left:50%; transform: translate(-50%,-50%);
+  width: 8px; height: 8px; background: var(--green); border-radius: 50%;
+  box-shadow: 0 0 14px var(--green), 0 0 28px var(--green);
+  animation: blink 2s ease-in-out infinite;
+}
+@keyframes radar-rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+#mglow {
+  position: fixed; width:700px; height:700px; border-radius: 50%;
+  pointer-events:none; z-index:1; transform: translate(-50%,-50%);
+  background: radial-gradient(circle, rgba(0,255,136,0.055) 0%, rgba(0,255,136,0.025) 35%, transparent 70%);
+  mix-blend-mode: screen; transition: none;
+}
+.particle {
+  position: fixed; width:2px; height:2px; background: var(--green);
+  border-radius:50%; pointer-events:none; z-index:0; opacity:0;
+  animation: pfloat linear infinite;
+}
+@keyframes pfloat {
+  0%   { transform: translateY(100vh) translateX(0); opacity:0; }
+  8%   { opacity: 0.5; }
+  92%  { opacity: 0.3; }
+  100% { transform: translateY(-8vh) translateX(var(--drift)); opacity:0; }
+}
+nav {
+  position: relative; z-index: 10;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 4vw;
+  border-bottom: 1px solid rgba(0,255,136,0.1);
+  background: rgba(6,10,6,0.7); backdrop-filter: blur(14px);
+}
+.nav-logo {
+  width: 32px; height: 32px; border: 1px solid var(--green);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 12px rgba(0,255,136,0.35), inset 0 0 10px rgba(0,255,136,0.06);
+  animation: logo-pulse 3s ease-in-out infinite; cursor: pointer;
+}
+@keyframes logo-pulse {
+  0%,100% { box-shadow: 0 0 10px rgba(0,255,136,0.3), inset 0 0 8px rgba(0,255,136,0.05); }
+  50%      { box-shadow: 0 0 22px rgba(0,255,136,0.7), inset 0 0 16px rgba(0,255,136,0.12); }
+}
+.nav-brand {
+  font-family: 'Bebas Neue', cursive; font-size: 19px; letter-spacing: 0.08em;
+  color: var(--text); position: relative; cursor: default;
+}
+.nav-brand::before, .nav-brand::after {
+  content: attr(data-text); position: absolute; top:0; left:0;
+  font-family: 'Bebas Neue', cursive; font-size: inherit; letter-spacing: inherit; opacity: 0;
+}
+.nav-brand::before { color: var(--green); }
+.nav-brand::after  { color: var(--gold); }
+.nav-brand:hover::before { animation: g-before 0.35s infinite; }
+.nav-brand:hover::after  { animation: g-after  0.35s infinite; }
+@keyframes g-before {
+  0%,100% { opacity:0; transform:translate(0); }
+  30%     { opacity:0.7; transform:translate(-3px,1px); clip-path:polygon(0 25%,100% 25%,100% 45%,0 45%); }
+  60%     { opacity:0; }
+}
+@keyframes g-after {
+  0%,100% { opacity:0; transform:translate(0); }
+  40%     { opacity:0.6; transform:translate(3px,-1px); clip-path:polygon(0 60%,100% 60%,100% 78%,0 78%); }
+  70%     { opacity:0; }
+}
+.btn-recalc {
+  font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.1em;
+  color: var(--green); padding: 8px 16px; border: 1px solid rgba(0,255,136,0.25);
+  border-radius: 2px; background: rgba(0,255,136,0.04); text-decoration: none; cursor: pointer;
+  position: relative; overflow: hidden; transition: border-color 0.2s, box-shadow 0.2s, color 0.2s;
+}
+.btn-recalc:hover {
+  border-color: var(--green); box-shadow: 0 0 14px rgba(0,255,136,0.25); color: #fff;
+  animation: btn-glitch 0.4s infinite;
+}
+@keyframes btn-glitch {
+  0%,100% { transform: translate(0); } 20% { transform: translate(-2px, 1px); }
+  40%     { transform: translate(2px, -1px); } 60% { transform: translate(-1px, 0); }
+  80%     { transform: translate(1px, 1px); }
+}
+#result-main { position: relative; z-index: 5; width: 100%; padding: 28px 4vw 100px; }
+.section-card {
+  background: var(--surface); border: 1px solid rgba(0,255,136,0.12);
+  border-radius: 5px; position: relative; overflow: hidden;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+.section-card::before {
+  content: ''; position: absolute; top:0; left:0; right:0; height:1px;
+  background: linear-gradient(90deg, transparent, var(--green), transparent); opacity: 0.35;
+}
+.section-card:hover { border-color: rgba(0,255,136,0.28); box-shadow: 0 0 30px rgba(0,255,136,0.06); }
+.section-label {
+  font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.2em;
+  color: var(--green); text-transform: uppercase; opacity: 0.65;
+}
+.cm { position:absolute; width:14px; height:14px; pointer-events:none; opacity:0.45; }
+.cm.tl { top:7px;  left:7px;  border-top:1px solid var(--green); border-left:1px solid var(--green); }
+.cm.tr { top:7px;  right:7px; border-top:1px solid var(--green); border-right:1px solid var(--green); }
+.cm.bl { bottom:7px; left:7px;  border-bottom:1px solid var(--green); border-left:1px solid var(--green); }
+.cm.br { bottom:7px; right:7px; border-bottom:1px solid var(--green); border-right:1px solid var(--green); }
 
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
-
-  <style>
-    :root {
-      --olive:   #4a5240;
-      --army:    #2d3a1e;
-      --khaki:   #c8b560;
-      --gold:    #f0c040;
-      --danger:  #e63946;
-      --safe:    #52b788;
-      --bg:      #0d0f0a;
-      --surface: #161a10;
-      --surface2:#1e2416;
-      --text:    #e8e4d0;
-      --muted:   #7a7a65;
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      background-color: var(--bg);
-      color: var(--text);
-      font-family: 'Rajdhani', sans-serif;
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-
-    body::before {
-      content: '';
-      position: fixed; inset: 0;
-      background-image:
-        linear-gradient(rgba(192,178,96,0.04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(192,178,96,0.04) 1px, transparent 1px);
-      background-size: 40px 40px;
-      pointer-events: none; z-index: 0;
-    }
-
-    .font-display { font-family: 'Bebas Neue', cursive; letter-spacing: 0.05em; }
-    .font-mono    { font-family: 'JetBrains Mono', monospace; }
-    .font-ui      { font-family: 'Rajdhani', sans-serif; font-weight: 600; }
-
-    /* ── Section Card ── */
-    .section-card {
-      background: var(--surface);
-      border: 1px solid rgba(200,181,96,0.15);
-      border-radius: 4px;
-      position: relative;
-      overflow: hidden;
-    }
-    .section-card::before {
-      content: '';
-      position: absolute; top: 0; left: 0; right: 0;
-      height: 2px;
-      background: linear-gradient(90deg, transparent, var(--khaki), transparent);
-      opacity: 0.5;
-    }
-
-    .section-label {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 10px; letter-spacing: 0.2em;
-      color: var(--khaki); text-transform: uppercase; opacity: 0.7;
-    }
-
-    /* ── AIR Hero Card ── */
-    .air-card {
-      background: var(--surface);
-      border-radius: 6px;
-      position: relative;
-      overflow: hidden;
-      padding: 36px 24px;
-      text-align: center;
-    }
-
-    .air-card-glow {
-      position: absolute;
-      width: 300px; height: 300px;
-      border-radius: 50%;
-      top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      pointer-events: none;
-      filter: blur(60px);
-      opacity: 0.25;
-      transition: background 0.5s;
-    }
-
-    .air-number {
-      font-family: 'Bebas Neue', cursive;
-      font-size: 88px;
-      line-height: 1;
-      letter-spacing: 0.03em;
-      position: relative;
-      z-index: 1;
-    }
-
-    /* ── Probability Meter ── */
-    .prob-bar-wrap {
-      background: var(--surface2);
-      border-radius: 99px;
-      height: 10px;
-      overflow: hidden;
-      position: relative;
-    }
-
-    .prob-bar-fill {
-      height: 100%;
-      border-radius: 99px;
-      transition: width 1.4s cubic-bezier(0.34,1.1,0.64,1);
-      width: 0%;
-    }
-
-    /* ── Score Pill ── */
-    .score-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: var(--surface2);
-      border: 1px solid rgba(200,181,96,0.15);
-      border-radius: 99px;
-      padding: 6px 14px;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
-      color: var(--text);
-    }
-
-    /* ── Sectional Row ── */
-    .sectional-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 0;
-      border-bottom: 1px solid rgba(200,181,96,0.08);
-    }
-    .sectional-row:last-child { border-bottom: none; }
-
-    .badge-pass {
-      background: rgba(82,183,136,0.15);
-      color: var(--safe);
-      border: 1px solid rgba(82,183,136,0.3);
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 10px; letter-spacing: 0.1em;
-      padding: 3px 10px; border-radius: 99px;
-    }
-
-    .badge-fail {
-      background: rgba(230,57,70,0.15);
-      color: var(--danger);
-      border: 1px solid rgba(230,57,70,0.3);
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 10px; letter-spacing: 0.1em;
-      padding: 3px 10px; border-radius: 99px;
-    }
-
-    /* ── Next Steps ── */
-    .step-card {
-      background: var(--surface2);
-      border: 1px solid rgba(200,181,96,0.1);
-      border-radius: 3px;
-      padding: 14px;
-      display: flex;
-      gap: 12px;
-      align-items: flex-start;
-    }
-
-    .step-number {
-      font-family: 'Bebas Neue', cursive;
-      font-size: 28px;
-      color: var(--gold);
-      opacity: 0.4;
-      line-height: 1;
-      min-width: 28px;
-    }
-
-    /* ── Share Card (hidden canvas) ── */
-    #share-canvas { display: none; }
-
-    /* ── Share Button ── */
-    .btn-share {
-      width: 100%;
-      background: transparent;
-      border: 1px solid var(--gold);
-      color: var(--gold);
-      font-family: 'Bebas Neue', cursive;
-      font-size: 20px;
-      letter-spacing: 0.1em;
-      padding: 16px;
-      border-radius: 3px;
-      cursor: pointer;
-      transition: background 0.2s, transform 0.15s;
-    }
-    .btn-share:hover {
-      background: rgba(240,192,64,0.1);
-      transform: translateY(-1px);
-    }
-
-    .btn-retry {
-      width: 100%;
-      background: var(--gold);
-      color: var(--army);
-      font-family: 'Bebas Neue', cursive;
-      font-size: 20px;
-      letter-spacing: 0.1em;
-      padding: 16px;
-      border-radius: 3px;
-      cursor: pointer;
-      border: none;
-      transition: transform 0.15s, box-shadow 0.15s;
-    }
-    .btn-retry:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(240,192,64,0.3);
-    }
-
-    /* ── Animations ── */
-    @keyframes fade-up {
-      from { opacity: 0; transform: translateY(20px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    .fade-up { animation: fade-up 0.55s ease forwards; opacity: 0; }
-    .d1 { animation-delay: 0.05s; }
-    .d2 { animation-delay: 0.15s; }
-    .d3 { animation-delay: 0.25s; }
-    .d4 { animation-delay: 0.35s; }
-    .d5 { animation-delay: 0.45s; }
-    .d6 { animation-delay: 0.55s; }
-
-    @keyframes count-up {
-      from { opacity: 0; transform: scale(0.7); }
-      to   { opacity: 1; transform: scale(1); }
-    }
-    .count-up { animation: count-up 0.7s cubic-bezier(0.34,1.56,0.64,1) forwards; }
-
-    /* ── Disqualified Banner ── */
-    .dq-banner {
-      background: rgba(230,57,70,0.1);
-      border: 1px solid rgba(230,57,70,0.4);
-      border-radius: 4px;
-      padding: 20px;
-      text-align: center;
-    }
-
-    ::-webkit-scrollbar { width: 4px; }
-    ::-webkit-scrollbar-track { background: var(--bg); }
-    ::-webkit-scrollbar-thumb { background: var(--olive); border-radius: 2px; }
-  </style>
+/* AIR CARD — beam-wrap completely removed */
+.air-card {
+  background: var(--surface); border-radius: 6px; position: relative; overflow: hidden;
+  padding: 40px 28px; text-align: center; margin-bottom: 20px;
+}
+.air-card-glow {
+  position: absolute; width:400px; height:400px; border-radius:50%; top:50%; left:50%;
+  transform: translate(-50%,-50%); pointer-events:none; filter:blur(70px); opacity:0.2;
+  animation: glow-pulse 3s ease-in-out infinite;
+}
+@keyframes glow-pulse {
+  0%,100% { opacity:0.18; transform:translate(-50%,-50%) scale(1); }
+  50%      { opacity:0.32; transform:translate(-50%,-50%) scale(1.15); }
+}
+.air-number {
+  font-family: 'Bebas Neue', cursive; font-size: 96px; line-height: 1; letter-spacing: 0.03em;
+  position: relative; z-index:1; text-shadow: 0 0 40px currentColor; display: block;
+}
+.tag-display {
+  font-family: 'Bebas Neue', cursive; font-size: 26px; letter-spacing: 0.1em;
+  position: relative; z-index:1; display: inline-block; margin-top: 8px;
+}
+.tag-display.is-topper {
+  color: var(--gold);
+  text-shadow: 0 0 10px rgba(240,192,64,0.9), 0 0 25px rgba(240,192,64,0.5), 0 0 50px rgba(240,192,64,0.25);
+  animation: tag-glitch 5s infinite;
+}
+.tag-display.is-good {
+  color: var(--green);
+  text-shadow: 0 0 10px rgba(0,255,136,0.6), 0 0 24px rgba(0,255,136,0.3);
+  animation: tag-glitch 7s infinite;
+}
+.tag-display.is-bad { color: var(--danger); }
+@keyframes tag-glitch {
+  0%,88%,100% { transform:translate(0); filter:none; }
+  89% { transform:translate(-3px,1px); filter:hue-rotate(30deg); }
+  90% { transform:translate(3px,-1px); filter:hue-rotate(-20deg); }
+  91% { transform:translate(-2px,2px) skewX(1deg); }
+  92% { transform:translate(0); filter:none; }
+  95% { transform:translate(1px,-1px); filter:brightness(1.6); }
+  96% { transform:translate(0); filter:none; }
+}
+.prob-bar-wrap {
+  background: rgba(0,255,136,0.06); border: 1px solid rgba(0,255,136,0.1);
+  border-radius: 99px; height: 12px; overflow:hidden; position:relative;
+}
+.prob-bar-fill {
+  height: 100%; border-radius:99px; width:0%;
+  transition: width 2s cubic-bezier(0.16,1,0.3,1); position: relative; overflow:hidden;
+}
+.prob-bar-fill::after {
+  content:''; position:absolute; inset:0;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.35) 50%, transparent 100%);
+  animation: shimmer 2.5s linear infinite;
+}
+@keyframes shimmer { from { transform:translateX(-100%); } to { transform:translateX(300%); } }
+.pulse-dot {
+  display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+  margin-right: 6px; animation: dot-pulse 1.4s ease-in-out infinite; vertical-align: middle;
+}
+@keyframes dot-pulse {
+  0%,100% { opacity:1; transform:scale(1); } 50% { opacity:0.5; transform:scale(0.8); }
+}
+.score-box {
+  background: var(--surface2); border: 1px solid rgba(0,255,136,0.1);
+  border-radius: 4px; padding: 16px; text-align: center; position: relative; overflow: hidden;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+.score-box:hover { border-color: rgba(0,255,136,0.35); box-shadow: 0 0 20px rgba(0,255,136,0.08); }
+.score-box::before {
+  content:''; position:absolute; inset:0;
+  background-image: linear-gradient(rgba(0,255,136,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(0,255,136,0.04) 1px, transparent 1px);
+  background-size: 16px 16px; animation: scan-grid 4s linear infinite;
+}
+@keyframes scan-grid { from { background-position: 0 0; } to { background-position: 0 32px; } }
+.score-num {
+  font-family: 'JetBrains Mono', monospace; font-size: 30px; font-weight: 700;
+  color: var(--gold); position: relative; z-index:1; text-shadow: 0 0 12px rgba(240,192,64,0.4);
+}
+.score-label { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted); margin-top: 4px; position: relative; z-index:1; }
+.status-blink { animation: status-blink 2.4s ease-in-out infinite; }
+@keyframes status-blink { 0%,45%,55%,100% { opacity:1; } 50% { opacity:0.25; } }
+.badge-pass {
+  background: rgba(0,255,136,0.1); color: var(--green); border: 1px solid rgba(0,255,136,0.3);
+  font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.1em;
+  padding: 4px 12px; border-radius: 99px; text-shadow: 0 0 8px rgba(0,255,136,0.4);
+}
+.badge-fail {
+  background: rgba(230,57,70,0.12); color: var(--danger); border: 1px solid rgba(230,57,70,0.3);
+  font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.1em;
+  padding: 4px 12px; border-radius: 99px;
+}
+.sectional-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 13px 0; border-bottom: 1px solid rgba(0,255,136,0.06);
+}
+.sectional-row:last-child { border-bottom: none; }
+.step-card {
+  background: rgba(0,255,136,0.03); border: 1px solid rgba(0,255,136,0.08);
+  border-radius: 3px; padding: 14px; display: flex; gap: 14px; align-items: flex-start;
+  transition: border-color 0.25s, background 0.25s;
+}
+.step-card:hover { border-color: rgba(0,255,136,0.22); background: rgba(0,255,136,0.06); }
+.step-num { font-family: 'Bebas Neue', cursive; font-size: 30px; color: var(--gold); opacity: 0.45; line-height: 1; min-width: 26px; }
+.btn-share {
+  width: 100%; background: transparent; border: 1px solid var(--gold); color: var(--gold);
+  font-family: 'Bebas Neue', cursive; font-size: 21px; letter-spacing: 0.1em;
+  padding: 17px; border-radius: 3px; cursor: pointer;
+  transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+}
+.btn-share:hover { background: rgba(240,192,64,0.1); box-shadow: 0 0 20px rgba(240,192,64,0.2); transform: translateY(-2px); }
+.btn-retry {
+  width: 100%; position: relative; overflow: hidden;
+  background: linear-gradient(135deg, #00cc66, #00ff88, #00cc66); background-size: 200% 100%;
+  color: #060a06; font-family: 'Bebas Neue', cursive; font-size: 21px; letter-spacing: 0.15em;
+  padding: 17px; border: none; border-radius: 3px; cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.2s, background-position 0.4s;
+  box-shadow: 0 0 20px rgba(0,255,136,0.3);
+}
+.btn-retry::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(115deg, transparent 20%, rgba(255,255,255,0.22) 50%, transparent 80%);
+  transform: translateX(-100%); transition: transform 0.5s;
+}
+.btn-retry:hover { transform: translateY(-3px); box-shadow: 0 0 40px rgba(0,255,136,0.5); background-position: 100% 0; animation: btn-glitch 0.4s infinite; }
+.btn-retry:hover::before { transform: translateX(100%); }
+.dq-banner {
+  background: rgba(230,57,70,0.08); border: 1px solid rgba(230,57,70,0.35);
+  border-radius: 5px; padding: 24px; text-align: center; box-shadow: 0 0 30px rgba(230,57,70,0.08);
+}
+@keyframes fade-up { from { opacity:0; transform:translateY(22px); } to { opacity:1; transform:translateY(0); } }
+.fade-up { animation: fade-up 0.65s cubic-bezier(0.22,1,0.36,1) forwards; opacity:0; }
+.d1 { animation-delay: 0.05s; } .d2 { animation-delay: 0.18s; } .d3 { animation-delay: 0.30s; }
+.d4 { animation-delay: 0.42s; } .d5 { animation-delay: 0.54s; } .d6 { animation-delay: 0.66s; } .d7 { animation-delay: 0.78s; }
+.hud-strip { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: rgba(0,255,136,0.3); letter-spacing: 0.1em; }
+@keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0.15;} }
+#share-canvas { display:none; }
+::-webkit-scrollbar { width:4px; }
+::-webkit-scrollbar-track { background:var(--bg); }
+::-webkit-scrollbar-thumb { background:rgba(0,255,136,0.3); border-radius:2px; }
+@media(max-width:768px) {
+  #result-main > div[style*="grid-template-columns:1fr 1fr"] { display: block !important; }
+  .air-card { padding: 28px 16px !important; }
+}
+@media(max-width:480px) {
+  .air-number { font-size: 68px !important; }
+  #radar-wrap { display:none; }
+  #result-main { padding: 20px 4vw 80px !important; }
+}
+</style>
 </head>
-
 <body>
-
-  <!-- NAVBAR -->
-  <nav class="relative z-10 flex items-center justify-between px-5 py-4 border-b border-white/5">
-    <div class="flex items-center gap-3">
-      <div class="w-7 h-7 border border-[var(--khaki)] flex items-center justify-center opacity-80">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color:var(--khaki)">
-          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-        </svg>
-      </div>
-      <span style="font-family:'Bebas Neue',cursive; letter-spacing:0.05em; font-size:18px;">NDA PREDICTOR</span>
+<div id="hud-bg"></div>
+<div id="mglow"></div>
+<div id="radar-wrap">
+  <div id="radar-sweep"><div class="radar-center"></div></div>
+</div>
+<div id="particles"></div>
+<nav>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <div class="nav-logo" onclick="window.location.href='index.html'">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00ff88" stroke-width="2.5">
+        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+      </svg>
     </div>
-    <a href="index.html" class="font-mono text-xs px-3 py-2 rounded"
-       style="color:var(--muted); border:1px solid rgba(200,181,96,0.15)">← Recalculate</a>
-  </nav>
+    <div>
+      <div class="nav-brand" data-text="NDA PREDICTOR">NDA PREDICTOR</div>
+      <div class="hud-strip">◆ RESULT TERMINAL</div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <div class="hud-strip" id="live-clock">00:00:00</div>
+    <a href="index.html" class="btn-recalc">← RECALCULATE</a>
+  </div>
+</nav>
+<main id="result-main"></main>
+<canvas id="share-canvas" width="1080" height="1080"></canvas>
+<script>
+const mg = document.getElementById('mglow');
+let mx=innerWidth/2, my=innerHeight/2, gx=mx, gy=my;
+document.addEventListener('mousemove', e=>{ mx=e.clientX; my=e.clientY; });
+(function loop(){ gx+=(mx-gx)*0.07; gy+=(my-gy)*0.07; mg.style.left=gx+'px'; mg.style.top=gy+'px'; requestAnimationFrame(loop); })();
 
-  <!-- MAIN -->
-  <main class="relative z-10 px-5 max-w-lg mx-auto pb-20 pt-6" id="result-main">
-    <!-- Filled by JS -->
-  </main>
+const pw = document.getElementById('particles');
+for(let i=0;i<20;i++){
+  const p=document.createElement('div'); p.className='particle';
+  const drift=(Math.random()-.5)*130, dur=12+Math.random()*18, delay=Math.random()*20;
+  p.style.cssText=`left:${Math.random()*100}vw;animation-duration:${dur}s;animation-delay:${delay}s;--drift:${drift}px;`;
+  pw.appendChild(p);
+}
 
-  <!-- Hidden Canvas for Share Card -->
-  <canvas id="share-canvas" width="1080" height="1080"></canvas>
+function tick(){ const n=new Date(), z=v=>String(v).padStart(2,'0'); const el=document.getElementById('live-clock'); if(el) el.textContent=`${z(n.getHours())}:${z(n.getMinutes())}:${z(n.getSeconds())}`; }
+setInterval(tick,1000); tick();
 
-  <script>
-  // ═══════════════════════════════════════════
-  //  READ URL PARAMS
-  // ═══════════════════════════════════════════
-  const params   = new URLSearchParams(window.location.search);
-  const name     = params.get('name')     || 'Cadet';
-  const math     = parseFloat(params.get('math'))    || 0;
-  const gat      = parseFloat(params.get('gat'))     || 0;
-  const written  = parseFloat(params.get('written')) || 0;
-  const ssb      = parseFloat(params.get('ssb'))     || 0;
-  const total    = parseFloat(params.get('total'))   || 0;
-  const airMin   = parseInt(params.get('airMin'))    || 1001;
-  const airMax   = parseInt(params.get('airMax'))    || 9999;
-  const prob     = parseInt(params.get('prob'))      || 5;
-  const tag      = params.get('tag')     || 'NOT SELECTED ❌';
-  const color    = params.get('color')   || '#F44336';
-  const sectOk   = params.get('sectional') === '1';
-  const mathPass = params.get('mathPass')   === '1';
-  const gatPass  = params.get('gatPass')    === '1';
-  const age      = parseInt(params.get('age')) || 17;
+function playBeep(freq=880, dur=0.04, vol=0.08){ try{ const ctx=new(window.AudioContext||window.webkitAudioContext)(); const osc=ctx.createOscillator(); const gain=ctx.createGain(); osc.connect(gain); gain.connect(ctx.destination); osc.type='square'; osc.frequency.value=freq; gain.gain.setValueAtTime(vol,ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+dur); osc.start(ctx.currentTime); osc.stop(ctx.currentTime+dur); }catch(e){} }
 
-  // ═══════════════════════════════════════════
-  //  CUTOFF CONTEXT (avg last 5 yrs)
-  // ═══════════════════════════════════════════
-  const AVG_WRITTEN_CUTOFF = 318;
-  const AVG_FINAL_CUTOFF   = 683;
-  const SAFE_WRITTEN       = 360;
-  const SAFE_FINAL         = 700;
+const CHARS='0123456789ABCDEF!?#@$%&';
+function scrambleNumber(el, finalText, duration=1500){
+  const start=Date.now(); let frame=0;
+  function tick(){ const elapsed=Date.now()-start; const progress=Math.min(elapsed/duration,1);
+    if(progress<1){ let scrambled=''; for(let i=0;i<finalText.length;i++){ if(finalText[i]==='-'||finalText[i]==='+'){ scrambled+=finalText[i]; } else if(Math.random()<progress*1.5){ scrambled+=finalText[i]; } else { scrambled+=CHARS[Math.floor(Math.random()*CHARS.length)]; } } el.textContent=scrambled; if(frame%8===0) playBeep(400+Math.random()*600,0.03,0.05); frame++; requestAnimationFrame(tick); } else { el.textContent=finalText; playBeep(1200,0.08,0.1); setTimeout(()=>playBeep(800,0.12,0.12),100); } }
+  requestAnimationFrame(tick);
+}
 
-  // ═══════════════════════════════════════════
-  //  NEXT STEPS LOGIC
-  // ═══════════════════════════════════════════
-  function getNextSteps() {
-    if (!sectOk) {
-      return [
-        { icon: '📖', title: 'Sectional Score Improve Karo', body: `${!mathPass ? 'Math mein aur practice chahiye. ' : ''}${!gatPass ? 'GAT mein aur focus karo — Current Affairs + English.' : ''}` },
-        { icon: '📅', title: 'Next Attempt ki Taiyari Shuru Karo', body: 'NDA exam saal mein 2 baar aata hai. Abhi se plan banao.' },
-        { icon: '🎯', title: 'Mock Tests Do', body: 'Weekly mock test se weak areas identify karo aur improve karo.' },
-      ];
-    }
-    if (prob >= 88) return [
-      { icon: '🪖', title: 'SSB ki Taiyari Shuru Karo', body: 'Written strong hai. Ab SSB pe focus do — GD, Lecturette, Psychology tests.' },
-      { icon: '🏃', title: 'Physical Fitness Maintain Karo', body: 'Daily running, push-ups, pull-ups. NDA physical test ke liye ready raho.' },
-      { icon: '📰', title: 'Current Affairs Daily Padho', body: 'SSB interview mein defence news + current affairs poochha jata hai.' },
-    ];
-    if (prob >= 55) return [
-      { icon: '🎯', title: 'SSB Score Maximize Karo', body: 'Selection probability 55-88% hai — SSB mein strong performance zaroori hai.' },
-      { icon: '🪖', title: 'Mock SSB Practice Karo', body: 'SSB coaching ya online mock se OIR, PPDT, GTO practice karo.' },
-      { icon: '💪', title: 'Physical Fitness', body: 'Physical test mein koi compromise mat karo — daily train karo.' },
-    ];
-    return [
-      { icon: '📖', title: 'Written Score Improve Karo', body: `Tera written score ${written}/900 hai. Safe zone ${SAFE_WRITTEN}+ hai. Agle attempt mein improve karo.` },
-      { icon: '🔁', title: 'Next Attempt Plan Karo', body: 'Abhi se NDA 2 ya next year ke liye strategy banao. Time hai.' },
-      { icon: '📊', title: 'Weak Subjects Identify Karo', body: 'Math ya GAT — jo weak hai uspe extra time do. Previous papers solve karo.' },
-    ];
-  }
+function countUp(el, target, duration=900){ const start=Date.now(); function tick(){ const t=Math.min((Date.now()-start)/duration,1); const ease=1-Math.pow(1-t,3); el.textContent=Math.round(0+(target-0)*ease); if(t<1) requestAnimationFrame(tick); else el.textContent=target; } requestAnimationFrame(tick); }
 
-  // ═══════════════════════════════════════════
-  //  RENDER PAGE
-  // ═══════════════════════════════════════════
-  function renderResult() {
-    const main = document.getElementById('result-main');
+const P      = new URLSearchParams(location.search);
+const name   = P.get('name')     || 'Cadet';
+const math   = parseFloat(P.get('math'))    || 0;
+const gat    = parseFloat(P.get('gat'))     || 0;
+const written= parseFloat(P.get('written')) || 0;
+const ssb    = parseFloat(P.get('ssb'))     || 0;
+const total  = parseFloat(P.get('total'))   || 0;
+const airMin = parseInt(P.get('airMin'))    || 1001;
+const airMax = parseInt(P.get('airMax'))    || 9999;
+const prob   = parseInt(P.get('prob'))      || 5;
+const tag    = P.get('tag')    || 'NOT SELECTED ❌';
+const color  = P.get('color')  || '#F44336';
+const sectOk = P.get('sectional')==='1';
+const mathPass= P.get('mathPass')==='1';
+const gatPass = P.get('gatPass')==='1';
+const AVG_WRITTEN_CUTOFF = 317;
+const AVG_FINAL_CUTOFF   = 692;
+const SAFE_WRITTEN       = 360;
+const SAFE_FINAL         = 700;
 
-    if (!sectOk) {
-      // DISQUALIFIED VIEW
-      main.innerHTML = `
-        <div class="fade-up d1 mb-5">
-          <p class="section-label mb-1">Result for ${name}</p>
-          <h2 style="font-family:'Bebas Neue',cursive; font-size:36px; color:var(--text)">YOUR ANALYSIS</h2>
-        </div>
+function tagClass(){ if(prob>=88) return 'is-topper'; if(prob>=40) return 'is-good'; return 'is-bad'; }
 
-        <div class="dq-banner mb-5 fade-up d2">
-          <div style="font-family:'Bebas Neue',cursive; font-size:48px; color:var(--danger)">SECTIONAL CUTOFF FAIL</div>
-          <p class="font-ui mt-2" style="color:var(--muted)">
-            ${!mathPass && !gatPass ? 'Both Math and GAT sectional cutoff not cleared.' : !mathPass ? 'Math sectional cutoff not cleared.' : 'GAT sectional cutoff not cleared.'}
-          </p>
-          <p class="font-mono text-xs mt-3" style="color:var(--danger); opacity:0.7">
-            Even if total score is high — sectional fail = full disqualification
-          </p>
-        </div>
+function getNextSteps(){
+  if(!sectOk) return [{icon:'📖',title:'Sectional Score Improve Karo',body:`${!mathPass?'Math mein aur practice chahiye. ':''}${!gatPass?'GAT mein aur focus karo — Current Affairs + English.':''}`},{icon:'📅',title:'Next Attempt ki Taiyari Shuru Karo',body:'NDA exam saal mein 2 baar aata hai. Abhi se plan banao.'},{icon:'🎯',title:'Mock Tests Do',body:'Weekly mock test se weak areas identify karo aur improve karo.'}];
+  if(prob>=88) return [{icon:'🪖',title:'SSB ki Taiyari Shuru Karo',body:'Written strong hai. Ab SSB pe focus do — GD, Lecturette, Psychology tests.'},{icon:'🏃',title:'Physical Fitness Maintain Karo',body:'Daily running, push-ups, pull-ups. NDA physical test ke liye ready raho.'},{icon:'📰',title:'Current Affairs Daily Padho',body:'SSB interview mein defence news + current affairs poochha jata hai.'}];
+  if(prob>=55) return [{icon:'🎯',title:'SSB Score Maximize Karo',body:'Selection probability 55-88% hai — SSB mein strong performance zaroori hai.'},{icon:'🪖',title:'Mock SSB Practice Karo',body:'SSB coaching ya online mock se OIR, PPDT, GTO practice karo.'},{icon:'💪',title:'Physical Fitness',body:'Physical test mein koi compromise mat karo — daily train karo.'}];
+  return [{icon:'📖',title:'Written Score Improve Karo',body:`Tera written score ${written}/900 hai. Safe zone ${SAFE_WRITTEN}+ hai.`},{icon:'🔁',title:'Next Attempt Plan Karo',body:'Abhi se NDA 2 ya next year ke liye strategy banao. Time hai.'},{icon:'📊',title:'Weak Subjects Identify Karo',body:'Math ya GAT — jo weak hai uspe extra time do. Previous papers solve karo.'}];
+}
 
-        ${renderScoreBreakdown()}
-        ${renderSectionalAnalysis()}
-        ${renderNextSteps()}
-        ${renderActions()}
-      `;
-    } else {
-      // QUALIFIED VIEW
-      main.innerHTML = `
-        <div class="fade-up d1 mb-2">
-          <p class="section-label">Result for ${name}</p>
-        </div>
+function renderAIRCard(){
+  const airDisplay = airMax>=9999 ? '1000+' : `${airMin}–${airMax}`;
+  /* NOTE: .beam-wrap divs have been intentionally removed here */
+  return `
+  <div class="air-card fade-up d2" style="border:1px solid ${color}44; margin-bottom:20px;">
+    <div class="cm tl"></div><div class="cm tr"></div>
+    <div class="cm bl"></div><div class="cm br"></div>
+    <div class="air-card-glow" style="background:${color}"></div>
+    <div class="hud-strip" style="justify-content:center;margin-bottom:10px;">◆ PREDICTED ALL INDIA RANK ◆</div>
+    <div class="air-number" id="air-num" style="color:${color}">---</div>
+    <div class="tag-display ${tagClass()}" id="tag-txt">${tag}</div>
+    <p style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);margin-top:12px;position:relative;z-index:1;">
+      Based on UPSC NDA data 2020–2024 &nbsp;·&nbsp; Total Score:
+      <span style="color:var(--green);">${total}/1800</span>
+    </p>
+  </div>`;
+}
 
-        ${renderAIRCard()}
-        ${renderProbabilityMeter()}
-        ${renderScoreBreakdown()}
-        ${renderSectionalAnalysis()}
-        ${renderCutoffComparison()}
-        ${renderNextSteps()}
-        ${renderActions()}
-      `;
-    }
+function renderProbability(){
+  const probColor = prob>=88 ? '#00ff88' : prob>=55 ? '#f0c040' : prob>=25 ? '#ff9800' : '#e63946';
+  const statusMsg = prob>=88 ? `<span class="pulse-dot" style="background:#00ff88;color:#00ff88;box-shadow:0 0 6px #00ff88;"></span>Very high chance of selection. Focus on SSB now.` : prob>=55 ? `<span class="pulse-dot" style="background:#f0c040;color:#f0c040;box-shadow:0 0 6px #f0c040;"></span>Good chance. SSB performance will be decisive.` : prob>=25 ? `<span class="pulse-dot" style="background:#ff9800;color:#ff9800;box-shadow:0 0 6px #ff9800;"></span>Low chance. Written score needs improvement.` : `<span class="pulse-dot" style="background:#e63946;color:#e63946;box-shadow:0 0 6px #e63946;"></span>Very low. Focus on next attempt.`;
+  return `
+  <div class="section-card p-5 fade-up d3" style="margin-bottom:16px;">
+    <div class="cm tl"></div><div class="cm tr"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+      <p class="section-label">Selection Probability</p>
+      <span style="font-family:'Bebas Neue',cursive;font-size:36px;color:${probColor};text-shadow:0 0 14px ${probColor}88;" id="prob-pct">0%</span>
+    </div>
+    <div class="prob-bar-wrap"><div class="prob-bar-fill" id="prob-fill" style="background:linear-gradient(90deg,${probColor}aa,${probColor});"></div></div>
+    <p style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);margin-top:10px;display:flex;align-items:center;">${statusMsg}</p>
+  </div>`;
+}
 
-    // Animate probability bar
-    setTimeout(() => {
-      const fill = document.getElementById('prob-fill');
-      if (fill) fill.style.width = prob + '%';
-    }, 400);
-  }
+function renderScoreBreakdown(){
+  const mathStatus = math>=120 ? '✓ Strong' : math>=75 ? '~ Qualifying' : '✗ Low';
+  const mathColor  = math>=120 ? 'var(--green)' : math>=75 ? 'var(--gold)' : 'var(--danger)';
+  const gatStatus  = gat>=220  ? '✓ Strong' : gat>=150 ? '~ Qualifying' : '✗ Low';
+  const gatColor   = gat>=220  ? 'var(--green)' : gat>=150 ? 'var(--gold)' : 'var(--danger)';
+  return `
+  <div class="section-card p-5 fade-up d3" style="margin-bottom:16px;">
+    <div class="cm tl"></div><div class="cm tr"></div>
+    <p class="section-label" style="margin-bottom:16px;">Score Breakdown</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+      <div class="score-box"><div class="score-num" id="num-math">0</div><div class="score-label">MATH / 300</div><div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:${mathColor};margin-top:6px;position:relative;z-index:1;" class="${math>=75?'status-blink':''}">${mathStatus}</div></div>
+      <div class="score-box"><div class="score-num" id="num-gat">0</div><div class="score-label">GAT / 600</div><div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:${gatColor};margin-top:6px;position:relative;z-index:1;" class="${gat>=150?'status-blink':''}">${gatStatus}</div></div>
+    </div>
+    <div style="background:rgba(0,255,136,0.03);border:1px solid rgba(0,255,136,0.1);border-radius:3px;padding:14px;margin-bottom:8px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:13px;letter-spacing:0.08em;color:var(--muted);text-transform:uppercase;">Written Total</span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:var(--text);"><span id="num-written">0</span><span style="color:var(--muted);font-size:13px;"> / 900</span></span>
+      </div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;margin-top:5px;color:${written>=SAFE_WRITTEN?'var(--green)':written>=AVG_WRITTEN_CUTOFF?'var(--gold)':'var(--danger)'};" class="${written>=SAFE_WRITTEN?'status-blink':''}">${written>=SAFE_WRITTEN?'✓ Above safe zone (360+)':written>=AVG_WRITTEN_CUTOFF?'~ Near average cutoff (317)':'✗ Below average cutoff'}</div>
+    </div>
+    ${ssb>0?`<div style="background:rgba(0,255,136,0.03);border:1px solid rgba(0,255,136,0.1);border-radius:3px;padding:14px;margin-bottom:8px;"><div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:13px;letter-spacing:0.08em;color:var(--muted);text-transform:uppercase;">SSB Score</span><span style="font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:var(--text);"><span id="num-ssb">0</span><span style="color:var(--muted);font-size:13px;"> / 900</span></span></div><div style="font-family:'JetBrains Mono',monospace;font-size:11px;margin-top:5px;color:${ssb>=410?'var(--green)':'var(--gold)'};" class="${ssb>=410?'status-blink':''}">${ssb>=410?'✓ Above avg SSB of selected (NDA 1 2024)':'~ Below avg SSB of selected (~410)'}</div></div>`:''}
+    <div style="background:rgba(240,192,64,0.06);border:1px solid rgba(240,192,64,0.2);border-radius:3px;padding:14px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-family:'Bebas Neue',cursive;font-size:18px;color:var(--gold);letter-spacing:0.1em;">TOTAL SCORE</span>
+        <span style="font-family:'Bebas Neue',cursive;font-size:32px;color:var(--gold);text-shadow:0 0 14px rgba(240,192,64,0.4);"><span id="num-total">0</span><span style="font-size:15px;color:var(--muted);"> / 1800</span></span>
+      </div>
+    </div>
+  </div>`;
+}
 
-  // ── AIR Hero Card ────────────────────────
-  function renderAIRCard() {
-    const airDisplay = airMax >= 9999
-      ? '1000+'
-      : `${airMin}–${airMax}`;
+function renderSectional(){
+  return `
+  <div class="section-card p-5 fade-up d4" style="margin-bottom:16px;">
+    <div class="cm tl"></div><div class="cm tr"></div>
+    <p class="section-label" style="margin-bottom:16px;">Sectional Cutoff Analysis</p>
+    <div class="sectional-row"><div><div style="font-family:'Rajdhani',sans-serif;font-weight:700;color:var(--text);">Mathematics</div><div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);margin-top:3px;">${math} marks | Min: ${mathPass?'✓':''} 75 (25% of 300)</div></div><span class="${mathPass?'badge-pass':'badge-fail'}">${mathPass?'CLEARED ✓':'FAILED ✗'}</span></div>
+    <div class="sectional-row"><div><div style="font-family:'Rajdhani',sans-serif;font-weight:700;color:var(--text);">GAT</div><div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);margin-top:3px;">${gat} marks | Min: ${gatPass?'✓':''} 150 (25% of 600)</div></div><span class="${gatPass?'badge-pass':'badge-fail'}">${gatPass?'CLEARED ✓':'FAILED ✗'}</span></div>
+    <div class="sectional-row"><div><div style="font-family:'Rajdhani',sans-serif;font-weight:700;color:var(--text);">Overall Status</div><div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);margin-top:3px;">Both papers must clear individually</div></div><span class="${sectOk?'badge-pass':'badge-fail'}">${sectOk?'QUALIFIED ✓':'DISQUALIFIED ✗'}</span></div>
+  </div>`;
+}
 
-    return `
-    <div class="air-card mb-4 fade-up d2" style="border:1px solid ${color}33">
-      <div class="air-card-glow" style="background:${color}"></div>
-      <p class="section-label mb-3">Predicted All India Rank</p>
-      <div class="air-number count-up" style="color:${color}">${airDisplay}</div>
-      <div class="font-display text-2xl mt-2" style="color:var(--text); letter-spacing:0.08em">${tag}</div>
-      <p class="font-mono text-xs mt-3" style="color:var(--muted)">
-        Based on UPSC NDA data 2021–2025 · Total Score: ${total}/1800
-      </p>
+function renderCutoffComparison(){
+  const wDiff = written - AVG_WRITTEN_CUTOFF;
+  const tDiff = total>0 ? total - AVG_FINAL_CUTOFF : null;
+  return `
+  <div class="section-card p-5 fade-up d5" style="margin-bottom:16px;">
+    <div class="cm tl"></div><div class="cm tr"></div>
+    <p class="section-label" style="margin-bottom:16px;">Cutoff Comparison — 10 Year Average</p>
+    <div style="margin-bottom:14px;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);">YOUR WRITTEN vs AVG CUTOFF (317)</span><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:${wDiff>=0?'var(--green)':'var(--danger)'};">${wDiff>=0?'+':''}${wDiff.toFixed(1)}</span></div>
+      <div style="background:rgba(0,255,136,0.06);border-radius:99px;height:8px;overflow:hidden;"><div style="height:100%;border-radius:99px;background:${written>=SAFE_WRITTEN?'var(--green)':written>=AVG_WRITTEN_CUTOFF?'var(--gold)':'var(--danger)'};width:0%;transition:width 1.6s ease;" data-target="${Math.min((written/900)*100,100)}"></div></div>
+    </div>
+    ${tDiff!==null?`<div><div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);">YOUR TOTAL vs AVG FINAL CUTOFF (692)</span><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:${tDiff>=0?'var(--green)':'var(--danger)'};">${tDiff>=0?'+':''}${tDiff.toFixed(1)}</span></div><div style="background:rgba(0,255,136,0.06);border-radius:99px;height:8px;overflow:hidden;"><div style="height:100%;border-radius:99px;background:${total>=SAFE_FINAL?'var(--green)':total>=AVG_FINAL_CUTOFF?'var(--gold)':'var(--danger)'};width:0%;transition:width 1.8s ease;" data-target="${Math.min((total/1800)*100,100)}"></div></div></div>`:''}
+    <p style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);margin-top:10px;">Safe written: 360+ &nbsp;|&nbsp; Safe final: 700+</p>
+  </div>`;
+}
+
+function renderNextSteps(){
+  return `
+  <div class="section-card p-5 fade-up d6" style="margin-bottom:16px;">
+    <div class="cm tl"></div>
+    <p class="section-label" style="margin-bottom:16px;">Your Next Steps</p>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      ${getNextSteps().map((s,i)=>`<div class="step-card"><div class="step-num">${i+1}</div><div><div style="font-family:'Rajdhani',sans-serif;font-weight:700;color:var(--text);font-size:15px;">${s.icon} ${s.title}</div><div style="font-family:'Rajdhani',sans-serif;color:var(--muted);font-size:14px;margin-top:3px;">${s.body}</div></div></div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function renderActions(){
+  return `
+  <div style="display:flex;flex-direction:column;gap:10px;" class="fade-up d7">
+    <button class="btn-share" onclick="generateShareCard()">📤 SHARE ON WHATSAPP</button>
+    <button class="btn-retry" onclick="window.location.href='index.html'">🔁 RECALCULATE</button>
+    <p style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(0,255,136,0.2);margin-top:6px;letter-spacing:0.05em;">ESTIMATED PREDICTION BASED ON UPSC NDA DATA 2020–2024 · NOT AN OFFICIAL UPSC TOOL</p>
+  </div>`;
+}
+
+function renderResult(){
+  const main = document.getElementById('result-main');
+  if(!sectOk){
+    main.innerHTML = `
+    <div class="fade-up d1" style="margin-bottom:16px;"><p class="section-label">Result for ${name}</p><h2 style="font-family:'Bebas Neue',cursive;font-size:clamp(32px,4vw,54px);color:var(--text);">YOUR ANALYSIS</h2></div>
+    <div class="dq-banner fade-up d2" style="margin-bottom:20px;"><div style="font-family:'Bebas Neue',cursive;font-size:clamp(36px,5vw,62px);color:var(--danger);text-shadow:0 0 20px rgba(230,57,70,0.5);">SECTIONAL CUTOFF FAIL</div><p style="font-family:'Rajdhani',sans-serif;font-weight:600;color:var(--muted);margin-top:8px;">${!mathPass&&!gatPass?'Both Math and GAT sectional cutoff not cleared.':!mathPass?'Math sectional cutoff not cleared.':'GAT sectional cutoff not cleared.'}</p><p style="font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(230,57,70,0.6);margin-top:10px;">Even if total score is high — sectional fail = full disqualification</p></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;"><div>${renderScoreBreakdown()}${renderSectional()}</div><div>${renderNextSteps()}${renderActions()}</div></div>`;
+  } else {
+    main.innerHTML = `
+    <div class="fade-up d1" style="margin-bottom:12px;"><p class="section-label">Result for <span style="color:var(--green);">${name}</span></p></div>
+    ${renderAIRCard()}
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;margin-top:0;">
+      <div>${renderProbability()}${renderScoreBreakdown()}${renderSectional()}</div>
+      <div>${renderCutoffComparison()}${renderNextSteps()}${renderActions()}</div>
     </div>`;
   }
+  setTimeout(()=>{
+    const airEl = document.getElementById('air-num');
+    if(airEl){ const airDisplay = airMax>=9999 ? '1000+' : `${airMin}–${airMax}`; scrambleNumber(airEl, airDisplay, 1500); }
+    setTimeout(()=>{ const fill = document.getElementById('prob-fill'); if(fill){ fill.style.width = prob+'%'; } const pctEl = document.getElementById('prob-pct'); if(pctEl){ let cur=0; const step=()=>{ cur=Math.min(cur+1,prob); pctEl.textContent=cur+'%'; if(cur<prob) setTimeout(step, 2000/prob); }; step(); } }, 300);
+    setTimeout(()=>{ const nm=document.getElementById('num-math'); const ng=document.getElementById('num-gat'); const nw=document.getElementById('num-written'); const nt=document.getElementById('num-total'); const ns=document.getElementById('num-ssb'); if(nm) countUp(nm,math,800); if(ng) countUp(ng,gat,900); if(nw) countUp(nw,written,700); if(nt) countUp(nt,total,1000); if(ns) countUp(ns,ssb,750); }, 500);
+    setTimeout(()=>{ document.querySelectorAll('[data-target]').forEach(el=>{ el.style.width = el.dataset.target + '%'; }); }, 600);
+  }, 200);
+}
+renderResult();
 
-  // ── Probability Meter ────────────────────
-  function renderProbabilityMeter() {
-    const probColor = prob >= 88 ? 'var(--safe)' : prob >= 55 ? 'var(--gold)' : 'var(--danger)';
-    return `
-    <div class="section-card p-5 mb-4 fade-up d3">
-      <div class="flex items-center justify-between mb-3">
-        <p class="section-label">Selection Probability</p>
-        <span class="font-display text-3xl" style="color:${probColor}">${prob}%</span>
-      </div>
-      <div class="prob-bar-wrap">
-        <div class="prob-bar-fill" id="prob-fill" style="background:${probColor}; width:0%"></div>
-      </div>
-      <p class="font-mono text-xs mt-3" style="color:var(--muted)">
-        ${prob >= 88 ? '🟢 Very high chance of selection. Focus on SSB now.' :
-          prob >= 55 ? '🟡 Good chance. SSB performance will be decisive.' :
-          prob >= 25 ? '🟠 Low chance. Written score needs improvement.' :
-                       '🔴 Very low. Focus on next attempt.'}
-      </p>
-    </div>`;
-  }
-
-  // ── Score Breakdown ──────────────────────
-  function renderScoreBreakdown() {
-    return `
-    <div class="section-card p-5 mb-4 fade-up d3">
-      <p class="section-label mb-4">Score Breakdown</p>
-
-      <div class="grid grid-cols-2 gap-2 mb-3">
-        <div style="background:var(--surface2); border:1px solid rgba(200,181,96,0.1); border-radius:3px; padding:14px; text-align:center">
-          <div style="font-family:'JetBrains Mono',monospace; font-size:26px; color:var(--gold); font-weight:700">${math}</div>
-          <div class="font-mono text-xs mt-1" style="color:var(--muted)">MATH / 300</div>
-          <div class="font-mono text-xs mt-1" style="color:${math >= 120 ? 'var(--safe)' : math >= 75 ? 'var(--gold)' : 'var(--danger)'}">${math >= 120 ? '✓ Strong' : math >= 75 ? '~ Qualifying' : '✗ Low'}</div>
-        </div>
-        <div style="background:var(--surface2); border:1px solid rgba(200,181,96,0.1); border-radius:3px; padding:14px; text-align:center">
-          <div style="font-family:'JetBrains Mono',monospace; font-size:26px; color:var(--gold); font-weight:700">${gat}</div>
-          <div class="font-mono text-xs mt-1" style="color:var(--muted)">GAT / 600</div>
-          <div class="font-mono text-xs mt-1" style="color:${gat >= 220 ? 'var(--safe)' : gat >= 150 ? 'var(--gold)' : 'var(--danger)'}">${gat >= 220 ? '✓ Strong' : gat >= 150 ? '~ Qualifying' : '✗ Low'}</div>
-        </div>
-      </div>
-
-      <div style="background:var(--surface2); border:1px solid rgba(200,181,96,0.1); border-radius:3px; padding:14px; margin-bottom:8px">
-        <div class="flex justify-between items-center">
-          <span class="font-ui text-sm" style="color:var(--muted); text-transform:uppercase; letter-spacing:0.08em">Written Total</span>
-          <span class="font-mono text-xl font-bold" style="color:var(--text)">${written} <span style="color:var(--muted); font-size:13px">/ 900</span></span>
-        </div>
-        <div class="font-mono text-xs mt-1" style="color:${written >= SAFE_WRITTEN ? 'var(--safe)' : written >= AVG_WRITTEN_CUTOFF ? 'var(--gold)' : 'var(--danger)'}">
-          ${written >= SAFE_WRITTEN ? '✓ Above safe zone (360+)' : written >= AVG_WRITTEN_CUTOFF ? '~ Near average cutoff (318)' : '✗ Below average cutoff'}
-        </div>
-      </div>
-
-      ${ssb > 0 ? `
-      <div style="background:var(--surface2); border:1px solid rgba(200,181,96,0.1); border-radius:3px; padding:14px; margin-bottom:8px">
-        <div class="flex justify-between items-center">
-          <span class="font-ui text-sm" style="color:var(--muted); text-transform:uppercase; letter-spacing:0.08em">SSB Score</span>
-          <span class="font-mono text-xl font-bold" style="color:var(--text)">${ssb} <span style="color:var(--muted); font-size:13px">/ 900</span></span>
-        </div>
-        <div class="font-mono text-xs mt-1" style="color:${ssb >= 366 ? 'var(--safe)' : 'var(--gold)'}">
-          ${ssb >= 366 ? '✓ Above average SSB of selected candidates' : '~ Below avg SSB of selected (~366)'}
-        </div>
-      </div>` : ''}
-
-      <div style="background:rgba(240,192,64,0.06); border:1px solid rgba(240,192,64,0.2); border-radius:3px; padding:14px">
-        <div class="flex justify-between items-center">
-          <span class="font-display text-lg" style="color:var(--gold); letter-spacing:0.1em">TOTAL SCORE</span>
-          <span class="font-display text-3xl" style="color:var(--gold)">${total} <span style="font-size:16px; color:var(--muted)">/ 1800</span></span>
-        </div>
-      </div>
-    </div>`;
-  }
-
-  // ── Sectional Analysis ───────────────────
-  function renderSectionalAnalysis() {
-    return `
-    <div class="section-card p-5 mb-4 fade-up d4">
-      <p class="section-label mb-4">Sectional Cutoff Analysis</p>
-
-      <div class="sectional-row">
-        <div>
-          <div class="font-ui text-sm" style="color:var(--text)">Mathematics</div>
-          <div class="font-mono text-xs mt-1" style="color:var(--muted)">${math} marks | Min required: 75 (25% of 300)</div>
-        </div>
-        <span class="${mathPass ? 'badge-pass' : 'badge-fail'}">${mathPass ? 'CLEARED ✓' : 'FAILED ✗'}</span>
-      </div>
-
-      <div class="sectional-row">
-        <div>
-          <div class="font-ui text-sm" style="color:var(--text)">GAT</div>
-          <div class="font-mono text-xs mt-1" style="color:var(--muted)">${gat} marks | Min required: 150 (25% of 600)</div>
-        </div>
-        <span class="${gatPass ? 'badge-pass' : 'badge-fail'}">${gatPass ? 'CLEARED ✓' : 'FAILED ✗'}</span>
-      </div>
-
-      <div class="sectional-row">
-        <div>
-          <div class="font-ui text-sm" style="color:var(--text)">Overall Sectional Status</div>
-          <div class="font-mono text-xs mt-1" style="color:var(--muted)">Both papers must clear individually</div>
-        </div>
-        <span class="${sectOk ? 'badge-pass' : 'badge-fail'}">${sectOk ? 'QUALIFIED ✓' : 'DISQUALIFIED ✗'}</span>
-      </div>
-    </div>`;
-  }
-
-  // ── Cutoff Comparison ────────────────────
-  function renderCutoffComparison() {
-    const writtenVsAvg = written - AVG_WRITTEN_CUTOFF;
-    const totalVsAvg   = total > 0 ? total - AVG_FINAL_CUTOFF : null;
-
-    return `
-    <div class="section-card p-5 mb-4 fade-up d4">
-      <p class="section-label mb-4">Cutoff Comparison (5-Year Avg)</p>
-
-      <div class="space-y-3">
-        <div>
-          <div class="flex justify-between mb-1">
-            <span class="font-ui text-xs" style="color:var(--muted); text-transform:uppercase">Your Written vs Avg Cutoff (318)</span>
-            <span class="font-mono text-xs" style="color:${writtenVsAvg >= 0 ? 'var(--safe)' : 'var(--danger)'}">
-              ${writtenVsAvg >= 0 ? '+' : ''}${writtenVsAvg.toFixed(1)}
-            </span>
-          </div>
-          <div style="background:var(--surface2); border-radius:99px; height:8px; overflow:hidden">
-            <div style="height:100%; border-radius:99px; width:${Math.min((written/900)*100, 100)}%;
-                        background:${written >= SAFE_WRITTEN ? 'var(--safe)' : written >= AVG_WRITTEN_CUTOFF ? 'var(--gold)' : 'var(--danger)'};
-                        transition:width 1.2s ease"></div>
-          </div>
-        </div>
-
-        ${totalVsAvg !== null ? `
-        <div>
-          <div class="flex justify-between mb-1">
-            <span class="font-ui text-xs" style="color:var(--muted); text-transform:uppercase">Your Total vs Avg Final Cutoff (683)</span>
-            <span class="font-mono text-xs" style="color:${totalVsAvg >= 0 ? 'var(--safe)' : 'var(--danger)'}">
-              ${totalVsAvg >= 0 ? '+' : ''}${totalVsAvg.toFixed(1)}
-            </span>
-          </div>
-          <div style="background:var(--surface2); border-radius:99px; height:8px; overflow:hidden">
-            <div style="height:100%; border-radius:99px; width:${Math.min((total/1800)*100, 100)}%;
-                        background:${total >= SAFE_FINAL ? 'var(--safe)' : total >= AVG_FINAL_CUTOFF ? 'var(--gold)' : 'var(--danger)'};
-                        transition:width 1.4s ease"></div>
-          </div>
-        </div>` : ''}
-
-        <div class="font-mono text-xs pt-2" style="color:var(--muted)">
-          Safe written target: ${SAFE_WRITTEN}+ | Safe final target: ${SAFE_FINAL}+
-        </div>
-      </div>
-    </div>`;
-  }
-
-  // ── Next Steps ───────────────────────────
-  function renderNextSteps() {
-    const steps = getNextSteps();
-    return `
-    <div class="section-card p-5 mb-4 fade-up d5">
-      <p class="section-label mb-4">Your Next Steps</p>
-      <div class="space-y-3">
-        ${steps.map((s, i) => `
-          <div class="step-card">
-            <div class="step-number">${i + 1}</div>
-            <div>
-              <div class="font-ui text-sm" style="color:var(--text)">${s.icon} ${s.title}</div>
-              <div class="font-ui text-sm mt-1" style="color:var(--muted); font-weight:400">${s.body}</div>
-            </div>
-          </div>
-        `).join('')}
-      </div>
-    </div>`;
-  }
-
-  // ── Actions (Share + Retry) ──────────────
-  function renderActions() {
-    return `
-    <div class="space-y-3 fade-up d6">
-      <button class="btn-share" onclick="generateShareCard()">
-        📤 SHARE ON WHATSAPP
-      </button>
-      <button class="btn-retry" onclick="window.location.href='index.html'">
-        🔁 RECALCULATE
-      </button>
-      <p class="text-center font-mono text-xs" style="color:var(--muted)">
-        Disclaimer: This is an estimated prediction based on historical UPSC data. Not an official tool.
-      </p>
-    </div>`;
-  }
-
-  // ═══════════════════════════════════════════
-  //  SHARE CARD GENERATOR (Canvas API)
-  // ═══════════════════════════════════════════
-  function generateShareCard() {
-    const canvas = document.getElementById('share-canvas');
-    const ctx    = canvas.getContext('2d');
-    const W = 1080, H = 1080;
-
-    // Background
-    ctx.fillStyle = '#0d0f0a';
-    ctx.fillRect(0, 0, W, H);
-
-    // Grid pattern
-    ctx.strokeStyle = 'rgba(192,178,96,0.06)';
-    ctx.lineWidth = 1;
-    for (let x = 0; x < W; x += 40) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
-    for (let y = 0; y < H; y += 40) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
-
-    // Gold accent top bar
-    const grad = ctx.createLinearGradient(0, 0, W, 0);
-    grad.addColorStop(0, 'transparent');
-    grad.addColorStop(0.5, '#f0c040');
-    grad.addColorStop(1, 'transparent');
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, W, 3);
-
-    // Brand
-    ctx.fillStyle = 'rgba(200,181,96,0.5)';
-    ctx.font = '500 28px JetBrains Mono, monospace';
-    ctx.textAlign = 'center';
-    ctx.fillText('NDA RANK PREDICTOR', W / 2, 70);
-
-    // Name
-    ctx.fillStyle = '#e8e4d0';
-    ctx.font = 'bold 48px Rajdhani, sans-serif';
-    ctx.fillText(name.toUpperCase(), W / 2, 160);
-
-    // AIR Label
-    ctx.fillStyle = '#7a7a65';
-    ctx.font = '500 30px JetBrains Mono, monospace';
-    ctx.fillText('PREDICTED ALL INDIA RANK', W / 2, 230);
-
-    // AIR Number
-    ctx.fillStyle = color;
-    ctx.font = '900 200px Rajdhani, sans-serif';
-    const airTxt = airMax >= 9999 ? '1000+' : `${airMin}–${airMax}`;
-    ctx.fillText(airTxt, W / 2, 450);
-
-    // Tag
-    ctx.fillStyle = '#e8e4d0';
-    ctx.font = 'bold 52px Rajdhani, sans-serif';
-    ctx.fillText(tag, W / 2, 530);
-
-    // Scores
-    ctx.fillStyle = 'rgba(200,181,96,0.15)';
-    ctx.beginPath();
-    ctx.roundRect(140, 580, 800, 160, 8);
-    ctx.fill();
-
-    ctx.fillStyle = '#f0c040';
-    ctx.font = 'bold 32px JetBrains Mono, monospace';
-    ctx.textAlign = 'left';
-    ctx.fillText(`Written: ${written}/900`, 180, 640);
-    ctx.fillText(`SSB:     ${ssb}/900`, 180, 690);
-    ctx.textAlign = 'right';
-    ctx.fillText(`Total: ${total}/1800`, 900, 640);
-    ctx.fillStyle = color;
-    ctx.font = 'bold 40px JetBrains Mono, monospace';
-    ctx.fillText(`${prob}% Selection Chance`, 900, 700);
-
-    // Probability bar
-    ctx.fillStyle = '#1e2416';
-    ctx.beginPath();
-    ctx.roundRect(140, 780, 800, 16, 8);
-    ctx.fill();
-    ctx.fillStyle = color;
-    ctx.beginPath();
-    ctx.roundRect(140, 780, (800 * prob) / 100, 16, 8);
-    ctx.fill();
-
-    // Footer
-    ctx.textAlign = 'center';
-    ctx.fillStyle = 'rgba(122,122,101,0.6)';
-    ctx.font = '500 24px JetBrains Mono, monospace';
-    ctx.fillText('Based on UPSC NDA Data 2021-2025 · Not an official UPSC tool', W / 2, 880);
-
-    ctx.fillStyle = '#f0c040';
-    ctx.font = 'bold 28px Rajdhani, sans-serif';
-    ctx.fillText('Predict yours → nda-predictor.vercel.app', W / 2, 940);
-
-    // Bottom bar
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, H - 3, W, 3);
-
-    // Download / Share
-    canvas.toBlob(blob => {
-      const url = URL.createObjectURL(blob);
-      const a   = document.createElement('a');
-      a.href     = url;
-      a.download = `NDA_Rank_${name.replace(/\s+/g, '_')}.png`;
-      a.click();
-      URL.revokeObjectURL(url);
-    });
-  }
-
-  // ═══════════════════════════════════════════
-  //  INIT
-  // ═══════════════════════════════════════════
-  renderResult();
-
-  // Animate progress bars after render
-  setTimeout(() => {
-    document.querySelectorAll('[style*="transition:width"]').forEach(el => {
-      const w = el.style.width;
-      el.style.width = '0%';
-      setTimeout(() => { el.style.width = w; }, 100);
-    });
-  }, 500);
-
-  </script>
+function generateShareCard(){
+  const canvas=document.getElementById('share-canvas'); const ctx=canvas.getContext('2d'); const W=1080,H=1080;
+  ctx.fillStyle='#060a06'; ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle='rgba(0,255,136,0.06)'; ctx.lineWidth=1;
+  for(let x=0;x<W;x+=48){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+  for(let y=0;y<H;y+=48){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+  const g=ctx.createLinearGradient(0,0,W,0); g.addColorStop(0,'transparent'); g.addColorStop(0.5,'#00ff88'); g.addColorStop(1,'transparent');
+  ctx.fillStyle=g; ctx.fillRect(0,0,W,3);
+  ctx.fillStyle='rgba(0,255,136,0.5)'; ctx.font='28px monospace'; ctx.textAlign='center'; ctx.fillText('NDA RANK PREDICTOR',W/2,70);
+  ctx.fillStyle='#d4f0d4'; ctx.font='bold 50px sans-serif'; ctx.fillText(name.toUpperCase(),W/2,160);
+  ctx.fillStyle='#4a7a4a'; ctx.font='28px monospace'; ctx.fillText('PREDICTED ALL INDIA RANK',W/2,230);
+  ctx.fillStyle=color; ctx.font='bold 190px sans-serif'; ctx.shadowColor=color; ctx.shadowBlur=40;
+  const airTxt=airMax>=9999?'1000+':`${airMin}–${airMax}`; ctx.fillText(airTxt,W/2,450); ctx.shadowBlur=0;
+  ctx.fillStyle='#d4f0d4'; ctx.font='bold 50px sans-serif'; ctx.fillText(tag,W/2,530);
+  ctx.fillStyle='rgba(0,255,136,0.08)'; ctx.beginPath(); ctx.roundRect(120,570,840,170,8); ctx.fill();
+  ctx.fillStyle='#00ff88'; ctx.font='bold 30px monospace'; ctx.textAlign='left';
+  ctx.fillText(`Written: ${written}/900`,160,630); ctx.fillText(`SSB:     ${ssb}/900`,160,680);
+  ctx.textAlign='right'; ctx.fillText(`Total: ${total}/1800`,940,630); ctx.fillStyle=color; ctx.font='bold 36px monospace'; ctx.fillText(`${prob}% Selection Chance`,940,700);
+  ctx.fillStyle='#111811'; ctx.beginPath(); ctx.roundRect(120,780,840,18,9); ctx.fill();
+  ctx.fillStyle=color; ctx.beginPath(); ctx.roundRect(120,780,(840*prob)/100,18,9); ctx.fill();
+  ctx.textAlign='center'; ctx.fillStyle='rgba(74,122,74,0.6)'; ctx.font='22px monospace'; ctx.fillText('Based on UPSC NDA Data 2020-2024 · Not an official tool',W/2,880);
+  ctx.fillStyle='#00ff88'; ctx.font='bold 26px sans-serif'; ctx.fillText('Predict yours → nda-predictor.vercel.app',W/2,940);
+  ctx.fillStyle=g; ctx.fillRect(0,H-3,W,3);
+  canvas.toBlob(blob=>{ const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`NDA_Rank_${name.replace(/\s+/g,'_')}.png`; a.click(); URL.revokeObjectURL(url); });
+}
+if('serviceWorker' in navigator){ window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{})); }
+</script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="assets/js/firebase-config.js"></script>
 </body>
 </html>

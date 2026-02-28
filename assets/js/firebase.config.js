@@ -11,12 +11,13 @@
 
 // ── YOUR FIREBASE CONFIG (Replace with yours) ──────────────
 const firebaseConfig = {
-  apiKey:            "YOUR_API_KEY",
-  authDomain:        "YOUR_PROJECT_ID.firebaseapp.com",
-  projectId:         "YOUR_PROJECT_ID",
-  storageBucket:     "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId:             "YOUR_APP_ID"
+  apiKey: "AIzaSyDE7IFBmxpayuabpOe6vPWSoYeXjIB5wzk",
+  authDomain: "nda-rank-predictor.firebaseapp.com",
+  projectId: "nda-rank-predictor",
+  storageBucket: "nda-rank-predictor.firebasestorage.app",
+  messagingSenderId: "42974158282",
+  appId: "1:42974158282:web:828937cdc76f8c0091c333",
+  measurementId: "G-V4WWYV0RZW"
 };
 
 // ── Firebase SDKs (v9 Compat Mode) ─────────────────────────
@@ -27,8 +28,8 @@ const firebaseConfig = {
 // <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics-compat.js"></script>
 
 // ── Initialize ──────────────────────────────────────────────
-let db         = null;
-let analytics  = null;
+let db = null;
+let analytics = null;
 let firebaseOk = false;
 
 function initFirebase() {
@@ -43,8 +44,8 @@ function initFirebase() {
       firebase.initializeApp(firebaseConfig);
     }
 
-    db         = firebase.firestore();
-    analytics  = firebase.analytics();
+    db = firebase.firestore();
+    analytics = firebase.analytics();
     firebaseOk = true;
     console.log('✅ Firebase connected!');
     return true;
@@ -61,24 +62,24 @@ function initFirebase() {
 // ============================================================
 async function saveLead(leadData) {
   const lead = {
-    name:            leadData.name         || '',
-    phone:           leadData.phone        || '',
-    age:             leadData.age          || 0,
-    mathScore:       leadData.mathScore    || 0,
-    gatScore:        leadData.gatScore     || 0,
-    writtenScore:    leadData.writtenScore || 0,
-    ssb:             leadData.ssb          || 0,
-    totalScore:      leadData.totalScore   || 0,
-    airMin:          leadData.airMin       || 0,
-    airMax:          leadData.airMax       || 0,
-    probability:     leadData.probability  || 0,
-    tag:             leadData.tag          || '',
+    name: leadData.name || '',
+    phone: leadData.phone || '',
+    age: leadData.age || 0,
+    mathScore: leadData.mathScore || 0,
+    gatScore: leadData.gatScore || 0,
+    writtenScore: leadData.writtenScore || 0,
+    ssb: leadData.ssb || 0,
+    totalScore: leadData.totalScore || 0,
+    airMin: leadData.airMin || 0,
+    airMax: leadData.airMax || 0,
+    probability: leadData.probability || 0,
+    tag: leadData.tag || '',
     sectionalPassed: leadData.sectionalPassed ?? false,
-    mathPassed:      leadData.mathPassed   ?? false,
-    gatPassed:       leadData.gatPassed    ?? false,
-    source:          'nda-predictor-web',
-    timestamp:       new Date().toISOString(),
-    userAgent:       navigator.userAgent.substring(0, 100),
+    mathPassed: leadData.mathPassed ?? false,
+    gatPassed: leadData.gatPassed ?? false,
+    source: 'nda-predictor-web',
+    timestamp: new Date().toISOString(),
+    userAgent: navigator.userAgent.substring(0, 100),
   };
 
   // ── 1. Always save to localStorage (instant, offline-safe) ──
@@ -94,8 +95,8 @@ async function saveLead(leadData) {
       if (analytics) {
         analytics.logEvent('rank_predicted', {
           written_score: lead.writtenScore,
-          probability:   lead.probability,
-          sectional_ok:  lead.sectionalPassed,
+          probability: lead.probability,
+          sectional_ok: lead.sectionalPassed,
         });
       }
 
@@ -173,11 +174,11 @@ async function deleteLead(leadId) {
 async function getAnalyticsSummary() {
   const leads = await getAllLeads();
 
-  const today      = new Date().toDateString();
+  const today = new Date().toDateString();
   const todayCount = leads.filter(l => new Date(l.timestamp).toDateString() === today).length;
 
-  const qualified  = leads.filter(l => (l.writtenScore || 0) >= 291);
-  const highProb   = leads.filter(l => (l.probability  || 0) >= 80);
+  const qualified = leads.filter(l => (l.writtenScore || 0) >= 291);
+  const highProb = leads.filter(l => (l.probability || 0) >= 80);
 
   const avgWritten = leads.length
     ? Math.round(leads.reduce((s, l) => s + (l.writtenScore || 0), 0) / leads.length)
@@ -193,17 +194,17 @@ async function getAnalyticsSummary() {
     d.setDate(d.getDate() - (6 - i));
     const dayStr = d.toDateString();
     return {
-      date:  d.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric' }),
+      date: d.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric' }),
       count: leads.filter(l => new Date(l.timestamp).toDateString() === dayStr).length,
     };
   });
 
   return {
-    total:       leads.length,
-    today:       todayCount,
-    qualified:   qualified.length,
-    qualPct:     leads.length ? Math.round((qualified.length / leads.length) * 100) : 0,
-    highProb:    highProb.length,
+    total: leads.length,
+    today: todayCount,
+    qualified: qualified.length,
+    qualPct: leads.length ? Math.round((qualified.length / leads.length) * 100) : 0,
+    highProb: highProb.length,
     avgWritten,
     avgTotal,
     dailyCounts,
@@ -238,7 +239,7 @@ function adminLogout() {
 // ============================================================
 if (typeof window !== 'undefined') {
   window.NDAFirebase = {
-    init:               initFirebase,
+    init: initFirebase,
     saveLead,
     getAllLeads,
     deleteLead,

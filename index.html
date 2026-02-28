@@ -5,158 +5,430 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>NDA Rank Predictor — Know Your AIR Before Results</title>
   <meta name="description" content="India's most accurate NDA rank predictor. Enter your marks and get your predicted All India Rank instantly." />
-
-  <!-- Tailwind CSS -->
+  <meta name="keywords" content="NDA rank predictor, NDA AIR predictor, UPSC NDA result, NDA 2025 cutoff" />
+  <meta property="og:title" content="NDA Rank Predictor — Know Your AIR Before Results" />
+  <meta property="og:type" content="website" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#00ff88" />
   <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
 
   <style>
-    /* ── CSS Variables ── */
-    :root {
-      --olive:    #4a5240;
-      --army:     #2d3a1e;
-      --khaki:    #c8b560;
-      --gold:     #f0c040;
-      --danger:   #e63946;
-      --safe:     #52b788;
-      --bg:       #0d0f0a;
-      --surface:  #161a10;
-      --surface2: #1e2416;
-      --text:     #e8e4d0;
-      --muted:    #7a7a65;
+    /* ══════════════════════════════════════════════
+       RESET & FULL SCREEN
+    ══════════════════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      width: 100%; min-height: 100vh;
+      overflow-x: hidden;
+      background: #060a06;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    /* ══════════════════════════════════════════════
+       CSS VARIABLES
+    ══════════════════════════════════════════════ */
+    :root {
+      --green:    #00ff88;
+      --green2:   #00cc66;
+      --green3:   #004422;
+      --gold:     #f0c040;
+      --khaki:    #c8b560;
+      --danger:   #e63946;
+      --safe:     #52b788;
+      --bg:       #060a06;
+      --surface:  #0d130d;
+      --surface2: #111811;
+      --text:     #d4f0d4;
+      --muted:    #4a7a4a;
+      --army:     #1a2e1a;
+    }
 
+    /* ══════════════════════════════════════════════
+       1. HUD GRID BACKGROUND — pulsing green
+    ══════════════════════════════════════════════ */
+    #hud-bg {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      overflow: hidden;
+    }
+
+    /* Grid layer */
+    #hud-bg::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(0,255,136,0.07) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,255,136,0.07) 1px, transparent 1px);
+      background-size: 48px 48px;
+      animation: grid-pulse 4s ease-in-out infinite;
+    }
+
+    @keyframes grid-pulse {
+      0%,100% { opacity: 0.7; }
+      50%      { opacity: 1; }
+    }
+
+    /* Vignette overlay */
+    #hud-bg::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at center, transparent 40%, #060a06 100%);
+    }
+
+    /* ══════════════════════════════════════════════
+       2. RADAR SWEEP
+    ══════════════════════════════════════════════ */
+    #radar-wrap {
+      position: fixed;
+      width: 900px; height: 900px;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none; z-index: 0;
+    }
+
+    #radar-sweep {
+      width: 100%; height: 100%;
+      border-radius: 50%;
+      border: 1px solid rgba(0,255,136,0.08);
+      position: relative;
+      animation: radar-rotate 8s linear infinite;
+      transform-origin: center center;
+    }
+
+    #radar-sweep::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: conic-gradient(
+        from 0deg,
+        transparent 0deg,
+        transparent 320deg,
+        rgba(0,255,136,0.03) 340deg,
+        rgba(0,255,136,0.18) 355deg,
+        rgba(0,255,136,0.25) 360deg
+      );
+      border-radius: 50%;
+    }
+
+    /* Radar rings */
+    #radar-sweep::after {
+      content: '';
+      position: absolute;
+      inset: 15%;
+      border-radius: 50%;
+      border: 1px solid rgba(0,255,136,0.05);
+      box-shadow:
+        0 0 0 80px rgba(0,255,136,0.02),
+        0 0 0 160px rgba(0,255,136,0.015),
+        0 0 0 240px rgba(0,255,136,0.01);
+    }
+
+    /* Center blip */
+    .radar-center {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 6px; height: 6px;
+      background: var(--green);
+      border-radius: 50%;
+      box-shadow: 0 0 12px var(--green), 0 0 24px var(--green);
+      animation: center-blink 2s ease-in-out infinite;
+    }
+
+    @keyframes radar-rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    @keyframes center-blink { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
+5%   { opacity: 1; }
+      95%  { opacity: 1; }
+      100% { top: 100vh; opacity: 0; }
+    }
+
+    /* ══════════════════════════════════════════════
+       4. MOUSE FOLLOWER GLOW
+    ══════════════════════════════════════════════ */
+    #mouse-glow {
+      position: fixed;
+      width: 600px; height: 600px;
+      border-radius: 50%;
+      pointer-events: none; z-index: 1;
+      transform: translate(-50%, -50%);
+      background: radial-gradient(circle,
+        rgba(0,255,136,0.06) 0%,
+        rgba(0,255,136,0.03) 30%,
+        transparent 70%
+      );
+      transition: transform 0.12s ease-out, opacity 0.3s;
+      mix-blend-mode: screen;
+    }
+
+    /* ══════════════════════════════════════════════
+       5. FLOATING PARTICLES
+    ══════════════════════════════════════════════ */
+    .particle {
+      position: fixed;
+      width: 2px; height: 2px;
+      background: var(--green);
+      border-radius: 50%;
+      pointer-events: none; z-index: 0;
+      opacity: 0;
+      animation: particle-float linear infinite;
+    }
+
+    @keyframes particle-float {
+      0%   { transform: translateY(100vh) translateX(0); opacity: 0; }
+      10%  { opacity: 0.6; }
+      90%  { opacity: 0.4; }
+      100% { transform: translateY(-10vh) translateX(var(--drift)); opacity: 0; }
+    }
+
+    /* ══════════════════════════════════════════════
+       TYPOGRAPHY
+    ══════════════════════════════════════════════ */
     body {
-      background-color: var(--bg);
       color: var(--text);
       font-family: 'Rajdhani', sans-serif;
       font-size: 16px;
-      min-height: 100vh;
-      overflow-x: hidden;
+      background: var(--bg);
     }
 
-    /* ── Background Grid ── */
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(192,178,96,0.04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(192,178,96,0.04) 1px, transparent 1px);
-      background-size: 40px 40px;
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    /* ── Glow Orb ── */
-    .glow-orb {
-      position: fixed;
-      width: 600px;
-      height: 600px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(74,82,64,0.25) 0%, transparent 70%);
-      pointer-events: none;
-      z-index: 0;
-      top: -100px;
-      right: -150px;
-      animation: pulse-orb 6s ease-in-out infinite;
-    }
-
-    @keyframes pulse-orb {
-      0%, 100% { transform: scale(1); opacity: 0.6; }
-      50%       { transform: scale(1.15); opacity: 1; }
-    }
-
-    /* ── Typography ── */
     .font-display { font-family: 'Bebas Neue', cursive; letter-spacing: 0.05em; }
     .font-mono    { font-family: 'JetBrains Mono', monospace; }
     .font-ui      { font-family: 'Rajdhani', sans-serif; font-weight: 600; }
 
-    /* ── Hero Badge ── */
+    /* ══════════════════════════════════════════════
+       NAVBAR
+    ══════════════════════════════════════════════ */
+    nav {
+      position: relative; z-index: 10;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 4vw;
+      border-bottom: 1px solid rgba(0,255,136,0.1);
+      background: rgba(6,10,6,0.6);
+      backdrop-filter: blur(12px);
+    }
+
+    .nav-logo-box {
+      width: 30px; height: 30px;
+      border: 1px solid var(--green);
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 0 10px rgba(0,255,136,0.3), inset 0 0 10px rgba(0,255,136,0.05);
+      animation: logo-pulse 3s ease-in-out infinite;
+    }
+
+    @keyframes logo-pulse {
+      0%,100% { box-shadow: 0 0 8px rgba(0,255,136,0.3), inset 0 0 8px rgba(0,255,136,0.05); }
+      50%      { box-shadow: 0 0 20px rgba(0,255,136,0.6), inset 0 0 15px rgba(0,255,136,0.1); }
+    }
+
+    /* ══════════════════════════════════════════════
+       HERO BADGE
+    ══════════════════════════════════════════════ */
     .hero-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: rgba(240,192,64,0.1);
-      border: 1px solid rgba(240,192,64,0.3);
-      color: var(--gold);
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(0,255,136,0.06);
+      border: 1px solid rgba(0,255,136,0.25);
+      color: var(--green);
       font-family: 'JetBrains Mono', monospace;
-      font-size: 11px;
-      letter-spacing: 0.15em;
-      padding: 6px 14px;
-      border-radius: 2px;
-      text-transform: uppercase;
+      font-size: 11px; letter-spacing: 0.15em;
+      padding: 6px 16px; border-radius: 2px;
+      box-shadow: 0 0 12px rgba(0,255,136,0.1);
     }
 
     .hero-badge::before {
       content: '';
       width: 6px; height: 6px;
-      background: var(--gold);
-      border-radius: 50%;
+      background: var(--green); border-radius: 50%;
+      box-shadow: 0 0 6px var(--green);
       animation: blink 1.4s ease-in-out infinite;
     }
 
-    @keyframes blink {
-      0%, 100% { opacity: 1; }
-      50%       { opacity: 0.2; }
-    }
+    @keyframes blink { 0%,100% { opacity:1; } 50% { opacity:0.1; } }
 
-    /* ── Section Card ── */
-    .section-card {
-      background: var(--surface);
-      border: 1px solid rgba(200,181,96,0.15);
-      border-radius: 4px;
+    /* ══════════════════════════════════════════════
+       6. GLITCH EFFECT — Hero title & buttons
+    ══════════════════════════════════════════════ */
+    .glitch-text {
       position: relative;
-      overflow: hidden;
+      display: inline-block;
     }
 
-    .section-card::before {
-      content: '';
+    .glitch-text::before,
+    .glitch-text::after {
+      content: attr(data-text);
       position: absolute;
       top: 0; left: 0; right: 0;
-      height: 2px;
-      background: linear-gradient(90deg, transparent, var(--khaki), transparent);
+      font-family: 'Bebas Neue', cursive;
+      font-size: inherit;
+      line-height: inherit;
+      background: transparent;
+    }
+
+    .glitch-text::before {
+      color: rgba(0,255,136,0.7);
+      clip-path: polygon(0 30%, 100% 30%, 100% 50%, 0 50%);
+      animation: glitch-before 6s infinite;
+    }
+
+    .glitch-text::after {
+      color: rgba(240,192,64,0.7);
+      clip-path: polygon(0 60%, 100% 60%, 100% 80%, 0 80%);
+      animation: glitch-after 6s infinite;
+    }
+
+    .glitch-text:hover::before { animation: glitch-before 0.4s infinite; }
+    .glitch-text:hover::after  { animation: glitch-after  0.4s infinite; }
+
+    @keyframes glitch-before {
+      0%,85%,100% { transform: translate(0); opacity: 0; }
+      87%          { transform: translate(-3px, 1px); opacity: 0.8; }
+      89%          { transform: translate(3px, -1px); opacity: 0.6; }
+      91%          { transform: translate(0); opacity: 0; }
+    }
+
+    @keyframes glitch-after {
+      0%,85%,100% { transform: translate(0); opacity: 0; }
+      88%          { transform: translate(3px, 2px); opacity: 0.8; }
+      90%          { transform: translate(-3px, -2px); opacity: 0.6; }
+      92%          { transform: translate(0); opacity: 0; }
+    }
+
+    /* ══════════════════════════════════════════════
+       STAT BOXES
+    ══════════════════════════════════════════════ */
+    .stat-box {
+      background: rgba(0,255,136,0.04);
+      border: 1px solid rgba(0,255,136,0.15);
+      border-radius: 3px; padding: 14px;
+      text-align: center;
+      transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s;
+      position: relative; overflow: hidden;
+    }
+
+    .stat-box::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--green), transparent);
       opacity: 0.5;
     }
 
-    /* ── Section Label ── */
-    .section-label {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 10px;
-      letter-spacing: 0.2em;
-      color: var(--khaki);
-      text-transform: uppercase;
-      opacity: 0.7;
+    .stat-box:hover {
+      border-color: rgba(0,255,136,0.5);
+      box-shadow: 0 0 20px rgba(0,255,136,0.12), inset 0 0 20px rgba(0,255,136,0.04);
+      transform: translateY(-3px);
     }
 
-    /* ── Input Fields ── */
+    .stat-value {
+      font-family: 'Bebas Neue', cursive;
+      font-size: 30px; color: var(--green); line-height: 1;
+      text-shadow: 0 0 12px rgba(0,255,136,0.5);
+    }
+
+    .stat-label {
+      font-size: 9px; letter-spacing: 0.15em;
+      color: var(--muted); text-transform: uppercase; margin-top: 4px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* ══════════════════════════════════════════════
+       7. SECTION CARDS — with border-beam
+    ══════════════════════════════════════════════ */
+    .section-card {
+      background: var(--surface);
+      border: 1px solid rgba(0,255,136,0.12);
+      border-radius: 5px;
+      position: relative; overflow: hidden;
+      transition: box-shadow 0.4s, border-color 0.4s;
+    }
+
+    /* Top accent line */
+    .section-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--green), transparent);
+      opacity: 0.4;
+    }
+
+    /* Card 3D hover tilt */
+    .section-card:hover {
+      box-shadow:
+        0 0 0 1px rgba(0,255,136,0.2),
+        0 8px 40px rgba(0,255,136,0.08),
+        0 0 60px rgba(0,255,136,0.04);
+      border-color: rgba(0,255,136,0.25);
+    }
+
+    /* Focus glow — added by JS */
+    .section-card.card-focus {
+      box-shadow:
+        0 0 0 1px rgba(0,255,136,0.4),
+        0 0 30px rgba(0,255,136,0.15),
+        0 0 60px rgba(0,255,136,0.06),
+        inset 0 0 30px rgba(0,255,136,0.03);
+      border-color: rgba(0,255,136,0.4);
+    }
+
+    /* ── BORDER BEAM ── */
+    .border-beam::after {
+      content: '';
+      position: absolute;
+      width: 60px; height: 60px;
+      background: conic-gradient(
+        from 0deg,
+        transparent 0deg,
+        var(--green) 60deg,
+        transparent 120deg
+      );
+      border-radius: 50%;
+      animation: beam-orbit 3s linear infinite;
+      /* This is a proxy approach via the pseudo-element shimmer */
+    }
+
+    /* border-beam removed */
+    .border-beam-inner { display: none; }
+
+    /* ── SECTION LABEL ── */
+    .section-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px; letter-spacing: 0.2em;
+      color: var(--green); text-transform: uppercase; opacity: 0.6;
+    }
+
+    /* ══════════════════════════════════════════════
+       INPUT FIELDS
+    ══════════════════════════════════════════════ */
+    .input-label {
+      font-family: 'Rajdhani', sans-serif; font-weight: 600;
+      font-size: 12px; letter-spacing: 0.12em;
+      color: var(--muted); text-transform: uppercase;
+      margin-bottom: 6px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+
+    .input-max {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px; color: rgba(0,255,136,0.3);
+    }
+
     .nda-input {
       width: 100%;
-      background: var(--surface2);
-      border: 1px solid rgba(200,181,96,0.2);
+      background: rgba(0,255,136,0.03);
+      border: 1px solid rgba(0,255,136,0.15);
       color: var(--text);
       font-family: 'JetBrains Mono', monospace;
-      font-size: 20px;
-      font-weight: 700;
+      font-size: 22px; font-weight: 700;
       padding: 14px 16px;
-      border-radius: 3px;
-      outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s;
+      border-radius: 3px; outline: none;
       text-align: center;
       -moz-appearance: textfield;
+      transition: border-color 0.2s, box-shadow 0.3s, background 0.3s;
+      caret-color: var(--green);
     }
 
     .nda-input::-webkit-outer-spin-button,
     .nda-input::-webkit-inner-spin-button { -webkit-appearance: none; }
 
     .nda-input:focus {
-      border-color: var(--gold);
-      box-shadow: 0 0 0 3px rgba(240,192,64,0.12);
+      border-color: var(--green);
+      background: rgba(0,255,136,0.06);
+      box-shadow: 0 0 0 3px rgba(0,255,136,0.1), 0 0 20px rgba(0,255,136,0.08);
+      color: #ffffff;
     }
 
     .nda-input.error {
@@ -164,180 +436,135 @@
       box-shadow: 0 0 0 3px rgba(230,57,70,0.12);
     }
 
-    .nda-input::placeholder { color: var(--muted); font-size: 14px; }
+    .nda-input::placeholder { color: rgba(74,122,74,0.5); font-size: 14px; }
 
-    /* ── Input Label ── */
-    .input-label {
-      font-family: 'Rajdhani', sans-serif;
-      font-weight: 600;
-      font-size: 13px;
-      letter-spacing: 0.1em;
-      color: var(--muted);
-      text-transform: uppercase;
-      margin-bottom: 6px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .input-max {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 10px;
-      color: rgba(200,181,96,0.4);
-    }
-
-    /* ── Score Preview ── */
+    /* ══════════════════════════════════════════════
+       SCORE PREVIEW
+    ══════════════════════════════════════════════ */
     .score-preview {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 11px;
-      color: var(--safe);
-      text-align: center;
-      margin-top: 6px;
-      min-height: 18px;
-      transition: all 0.3s;
+      font-size: 11px; color: var(--green);
+      text-align: center; margin-top: 8px;
+      min-height: 18px; transition: all 0.3s;
+      text-shadow: 0 0 8px rgba(0,255,136,0.4);
     }
 
-    /* ── Divider ── */
-    .tactical-divider {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      color: var(--muted);
-      font-size: 10px;
-      font-family: 'JetBrains Mono', monospace;
-      letter-spacing: 0.15em;
-      opacity: 0.5;
-    }
-
-    .tactical-divider::before,
-    .tactical-divider::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: rgba(200,181,96,0.15);
-    }
-
-    /* ── CTA Button ── */
+    /* ══════════════════════════════════════════════
+       8. PREDICT BUTTON — glitch on hover
+    ══════════════════════════════════════════════ */
     .btn-predict {
-      width: 100%;
-      background: var(--gold);
-      color: var(--army);
+      width: 100%; position: relative; overflow: hidden;
+      background: linear-gradient(135deg, #00cc66 0%, #00ff88 50%, #00cc66 100%);
+      background-size: 200% 100%;
+      color: #060a06;
       font-family: 'Bebas Neue', cursive;
-      font-size: 22px;
-      letter-spacing: 0.12em;
-      padding: 18px;
-      border: none;
-      border-radius: 3px;
+      font-size: 24px; letter-spacing: 0.15em;
+      padding: 20px; border: none; border-radius: 3px;
       cursor: pointer;
-      position: relative;
-      overflow: hidden;
-      transition: transform 0.15s, box-shadow 0.15s;
+      transition: transform 0.15s, box-shadow 0.2s, background-position 0.4s;
+      box-shadow: 0 0 20px rgba(0,255,136,0.3), 0 4px 20px rgba(0,0,0,0.4);
     }
 
+    /* Shimmer sweep */
     .btn-predict::before {
       content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 60%);
+      position: absolute; inset: 0;
+      background: linear-gradient(115deg,
+        transparent 20%, rgba(255,255,255,0.25) 50%, transparent 80%
+      );
+      transform: translateX(-100%);
+      transition: transform 0.5s;
+    }
+
+    /* Glitch flicker */
+    .btn-predict::after {
+      content: attr(data-text);
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Bebas Neue', cursive;
+      font-size: 24px; letter-spacing: 0.15em;
+      color: #060a06;
+      opacity: 0;
     }
 
     .btn-predict:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 32px rgba(240,192,64,0.35);
+      transform: translateY(-3px);
+      box-shadow: 0 0 40px rgba(0,255,136,0.5), 0 8px 40px rgba(0,0,0,0.5);
+      background-position: 100% 0;
+    }
+
+    .btn-predict:hover::before { transform: translateX(100%); }
+
+    .btn-predict:hover::after {
+      animation: btn-glitch 0.4s infinite;
+    }
+
+    @keyframes btn-glitch {
+      0%,100% { opacity: 0; transform: translate(0); }
+      20%      { opacity: 0.4; transform: translate(-2px, 1px); clip-path: polygon(0 30%,100% 30%,100% 50%,0 50%); }
+      40%      { opacity: 0; }
+      60%      { opacity: 0.3; transform: translate(2px, -1px); clip-path: polygon(0 60%,100% 60%,100% 80%,0 80%); }
+      80%      { opacity: 0; }
     }
 
     .btn-predict:active { transform: translateY(0); }
+    .btn-predict:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
 
-    .btn-predict:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-      transform: none;
-      box-shadow: none;
-    }
-
-    /* ── Stats Row ── */
-    .stat-box {
-      background: var(--surface2);
-      border: 1px solid rgba(200,181,96,0.1);
-      border-radius: 3px;
-      padding: 12px;
-      text-align: center;
-    }
-
-    .stat-value {
-      font-family: 'Bebas Neue', cursive;
-      font-size: 26px;
-      color: var(--gold);
-      line-height: 1;
-    }
-
-    .stat-label {
-      font-size: 10px;
-      letter-spacing: 0.12em;
-      color: var(--muted);
-      text-transform: uppercase;
-      margin-top: 4px;
-      font-family: 'JetBrains Mono', monospace;
-    }
-
-    /* ── Cutoff Table ── */
+    /* ══════════════════════════════════════════════
+       CUTOFF TABLE
+    ══════════════════════════════════════════════ */
     .cutoff-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 1px;
-      background: rgba(200,181,96,0.08);
-      border-radius: 2px;
-      overflow: hidden;
+      display: grid; grid-template-columns: 1fr 1fr 1fr;
+      gap: 1px; background: rgba(0,255,136,0.06);
+      border-radius: 2px; overflow: hidden;
+      transition: background 0.2s;
     }
+
+    .cutoff-row:hover { background: rgba(0,255,136,0.1); }
 
     .cutoff-cell {
       background: var(--surface2);
-      padding: 10px 12px;
+      padding: 10px 14px;
       font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
+      font-size: 12px; transition: background 0.2s;
     }
 
     .cutoff-cell.header {
-      color: var(--khaki);
-      font-size: 10px;
-      letter-spacing: 0.1em;
-      opacity: 0.7;
-      background: rgba(200,181,96,0.06);
+      color: var(--green); font-size: 9px;
+      letter-spacing: 0.12em; opacity: 0.7;
+      background: rgba(0,255,136,0.05);
     }
 
-    /* ── Error Message ── */
-    .error-msg {
-      color: var(--danger);
-      font-size: 12px;
-      font-family: 'JetBrains Mono', monospace;
-      margin-top: 6px;
-      display: none;
-    }
+    .cutoff-row:hover .cutoff-cell { background: rgba(0,255,136,0.05); }
 
-    /* ── Lead Modal ── */
+    /* ══════════════════════════════════════════════
+       MODAL
+    ══════════════════════════════════════════════ */
     .modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.85);
-      backdrop-filter: blur(4px);
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.92);
+      backdrop-filter: blur(8px);
       z-index: 100;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
+      display: none; align-items: center;
+      justify-content: center; padding: 20px;
     }
 
     .modal-overlay.active { display: flex; }
 
     .modal-box {
       background: var(--surface);
-      border: 1px solid rgba(200,181,96,0.3);
-      border-radius: 4px;
-      padding: 32px 28px;
-      width: 100%;
-      max-width: 440px;
+      border: 1px solid rgba(0,255,136,0.3);
+      border-radius: 5px;
+      padding: 36px 32px; width: 100%; max-width: 460px;
       position: relative;
-      animation: modal-in 0.3s cubic-bezier(0.34,1.56,0.64,1);
+      animation: modal-in 0.35s cubic-bezier(0.34,1.56,0.64,1);
+      box-shadow: 0 0 60px rgba(0,255,136,0.1), 0 0 120px rgba(0,255,136,0.04);
+    }
+
+    .modal-box::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--green), transparent);
     }
 
     @keyframes modal-in {
@@ -346,28 +573,29 @@
     }
 
     .modal-input {
-      width: 100%;
-      background: var(--surface2);
-      border: 1px solid rgba(200,181,96,0.2);
-      color: var(--text);
-      font-family: 'Rajdhani', sans-serif;
-      font-size: 16px;
-      font-weight: 600;
-      padding: 12px 16px;
-      border-radius: 3px;
-      outline: none;
-      transition: border-color 0.2s;
+      width: 100%; background: rgba(0,255,136,0.04);
+      border: 1px solid rgba(0,255,136,0.2);
+      color: var(--text); font-family: 'Rajdhani', sans-serif;
+      font-size: 16px; font-weight: 600;
+      padding: 13px 16px; border-radius: 3px; outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      caret-color: var(--green);
     }
 
-    .modal-input:focus { border-color: var(--gold); }
+    .modal-input:focus {
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px rgba(0,255,136,0.1);
+    }
+
     .modal-input::placeholder { color: var(--muted); }
 
-    /* ── Loader ── */
+    /* ══════════════════════════════════════════════
+       LOADER
+    ══════════════════════════════════════════════ */
     .loader {
-      display: none;
-      width: 20px; height: 20px;
-      border: 2px solid rgba(13,15,10,0.3);
-      border-top-color: var(--army);
+      display: none; width: 20px; height: 20px;
+      border: 2px solid rgba(6,10,6,0.3);
+      border-top-color: #060a06;
       border-radius: 50%;
       animation: spin 0.7s linear infinite;
       margin: 0 auto;
@@ -375,68 +603,191 @@
 
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ── Animations ── */
+    /* ══════════════════════════════════════════════
+       ANIMATIONS
+    ══════════════════════════════════════════════ */
     @keyframes fade-up {
-      from { opacity: 0; transform: translateY(24px); }
+      from { opacity: 0; transform: translateY(28px); }
       to   { opacity: 1; transform: translateY(0); }
     }
 
-    .fade-up { animation: fade-up 0.6s ease forwards; opacity: 0; }
-    .delay-1 { animation-delay: 0.1s; }
-    .delay-2 { animation-delay: 0.2s; }
-    .delay-3 { animation-delay: 0.3s; }
-    .delay-4 { animation-delay: 0.4s; }
-    .delay-5 { animation-delay: 0.5s; }
+    .fade-up { animation: fade-up 0.7s cubic-bezier(0.22,1,0.36,1) forwards; opacity: 0; }
+    .delay-1 { animation-delay: 0.05s; }
+    .delay-2 { animation-delay: 0.15s; }
+    .delay-3 { animation-delay: 0.25s; }
+    .delay-4 { animation-delay: 0.35s; }
+    .delay-5 { animation-delay: 0.45s; }
 
-    /* ── Scrollbar ── */
+    /* ══════════════════════════════════════════════
+       SCROLLBAR
+    ══════════════════════════════════════════════ */
     ::-webkit-scrollbar { width: 4px; }
     ::-webkit-scrollbar-track { background: var(--bg); }
-    ::-webkit-scrollbar-thumb { background: var(--olive); border-radius: 2px; }
+    ::-webkit-scrollbar-thumb { background: rgba(0,255,136,0.3); border-radius: 2px; }
 
-    /* ── Mobile adjustments ── */
-    @media (max-width: 480px) {
-      .hero-title { font-size: 52px !important; line-height: 0.92 !important; }
+    /* ══════════════════════════════════════════════
+       ERROR
+    ══════════════════════════════════════════════ */
+    .error-msg {
+      color: var(--danger); font-size: 11px;
+      font-family: 'JetBrains Mono', monospace;
+      margin-top: 6px; display: none;
     }
+
+    /* ══════════════════════════════════════════════
+       RESPONSIVE
+    ══════════════════════════════════════════════ */
+    @media (max-width: 768px) {
+      .form-grid { grid-template-columns: 1fr !important; }
+      #radar-wrap { width: 500px; height: 500px; }
+    }
+
+    @media (max-width: 480px) {
+      .hero-title { font-size: 52px !important; }
+      #radar-wrap { display: none; }
+      main { padding: 0 4vw 80px !important; }
+    }
+
+    /* ══════════════════════════════════════════════
+       3D TILT on cards — applied via JS
+    ══════════════════════════════════════════════ */
+    .tilt-card {
+      transform-style: preserve-3d;
+      transition: transform 0.15s ease-out;
+      will-change: transform;
+    }
+
+    /* ══════════════════════════════════════════════
+       CORNER MARKS
+    ══════════════════════════════════════════════ */
+    .corner-mark {
+      position: absolute; width: 16px; height: 16px;
+      pointer-events: none; opacity: 0.5;
+    }
+    .corner-mark.tl { top: 8px; left: 8px;  border-top: 1px solid var(--green); border-left:  1px solid var(--green); }
+    .corner-mark.tr { top: 8px; right: 8px; border-top: 1px solid var(--green); border-right: 1px solid var(--green); }
+    .corner-mark.bl { bottom: 8px; left: 8px;  border-bottom: 1px solid var(--green); border-left:  1px solid var(--green); }
+    .corner-mark.br { bottom: 8px; right: 8px; border-bottom: 1px solid var(--green); border-right: 1px solid var(--green); }
+
+    /* ══════════════════════════════════════════════
+       HUD INFO STRIPS
+    ══════════════════════════════════════════════ */
+    .hud-strip {
+      display: flex; align-items: center; gap: 6px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px; color: rgba(0,255,136,0.35);
+      letter-spacing: 0.1em;
+    }
+
+    /* ══════════════════════════════════════════════
+       TACTICAL DIVIDER
+    ══════════════════════════════════════════════ */
+    .tactical-divider {
+      display: flex; align-items: center; gap: 12px;
+      color: var(--muted); font-size: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: 0.15em; opacity: 0.5;
+    }
+
+    .tactical-divider::before,
+    .tactical-divider::after {
+      content: ''; flex: 1; height: 1px;
+      background: rgba(0,255,136,0.12);
+    }
+
+    /* ══════════════════════════════════════════════
+       RADIO LABELS
+    ══════════════════════════════════════════════ */
+    .rule-label {
+      display: flex; align-items: center; gap: 12px;
+      cursor: pointer; padding: 14px 16px; border-radius: 3px;
+      border: 1px solid rgba(0,255,136,0.15);
+      background: rgba(0,255,136,0.03);
+      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+    }
+
+    .rule-label:hover,
+    .rule-label:has(input:checked) {
+      border-color: rgba(0,255,136,0.4);
+      background: rgba(0,255,136,0.07);
+      box-shadow: 0 0 12px rgba(0,255,136,0.08);
+    }
+
   </style>
 </head>
 
 <body>
-  <div class="glow-orb"></div>
+
+  <!-- ═══════════════════════════════════════════
+       BACKGROUND LAYERS
+  ═══════════════════════════════════════════ -->
+  <div id="hud-bg"></div>
+  <div id="mouse-glow"></div>
+
+  <!-- Radar -->
+  <div id="radar-wrap">
+    <div id="radar-sweep">
+      <div class="radar-center"></div>
+    </div>
+  </div>
+
+  <!-- Floating particles -->
+  <div id="particles-wrap"></div>
 
   <!-- ═══════════════════════════════════════════
        NAVBAR
   ═══════════════════════════════════════════ -->
-  <nav class="relative z-10 flex items-center justify-between px-5 py-4 border-b border-white/5">
-    <div class="flex items-center gap-3">
-      <div class="w-7 h-7 border border-[var(--khaki)] flex items-center justify-center opacity-80">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color:var(--khaki)">
+  <nav>
+    <div style="display:flex; align-items:center; gap:12px;">
+      <div class="nav-logo-box">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00ff88" stroke-width="2.5">
           <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
         </svg>
       </div>
-      <span class="font-display text-lg tracking-widest" style="color:var(--text)">NDA PREDICTOR</span>
+      <div>
+        <div style="font-family:'Bebas Neue',cursive; font-size:18px; letter-spacing:0.08em; color:#d4f0d4;">NDA PREDICTOR</div>
+        <div class="hud-strip">
+          <span style="width:4px;height:4px;background:var(--green);border-radius:50%;box-shadow:0 0 4px var(--green);"></span>
+          SYSTEM ONLINE
+        </div>
+      </div>
     </div>
-    <div class="hero-badge">UPSC DATA 2021–25</div>
+
+    <div style="display:flex; align-items:center; gap:12px;">
+      <div class="hud-strip" id="live-clock">00:00:00</div>
+
+    </div>
   </nav>
 
   <!-- ═══════════════════════════════════════════
        HERO
   ═══════════════════════════════════════════ -->
-  <section class="relative z-10 px-5 pt-12 pb-8 max-w-lg mx-auto text-center">
+  <section class="relative z-10" style="padding: 40px 5vw 24px; text-align:center; width:100%;">
     <div class="fade-up delay-1">
-      <p class="section-label mb-4">India's Most Accurate</p>
-      <h1 class="font-display hero-title" style="font-size:68px; line-height:0.9; color:var(--text)">
+
+      <!-- HUD label -->
+      <div class="hud-strip" style="justify-content:center; margin-bottom:12px;">
+        <span>◆</span> REAL-TIME RANK ANALYSIS SYSTEM <span>◆</span>
+      </div>
+
+      <!-- Main title with glitch -->
+      <h1 class="font-display glitch-text" data-text="KNOW YOUR AIR RANK TODAY"
+          style="font-size: clamp(52px, 8vw, 96px); line-height: 0.92; color: #d4f0d4; letter-spacing:0.04em;">
         KNOW YOUR<br/>
-        <span style="color:var(--gold)">AIR RANK</span><br/>
-        TODAY
+        <span style="color: var(--green); text-shadow: 0 0 30px rgba(0,255,136,0.4);">AIR RANK</span><br/>
+        <span class="glitch-text" data-text="TODAY" style="color:var(--gold); text-shadow:0 0 20px rgba(240,192,64,0.3);">TODAY</span>
       </h1>
-      <p class="font-ui mt-5 text-base leading-relaxed" style="color:var(--muted)">
-        Enter your expected marks — get your <strong style="color:var(--text)">Predicted All India Rank</strong>,
-        selection probability, and sectional analysis. Powered by real UPSC data.
+
+      <p class="font-ui" style="margin-top:16px; font-size:15px; line-height:1.6; color:var(--muted); max-width:800px; margin-left:auto; margin-right:auto;">
+        Enter your expected marks — get your
+        <strong style="color:var(--green);">Predicted All India Rank</strong>,
+        selection probability &amp; sectional analysis.
+        <span style="color:rgba(0,255,136,0.5);">// Powered by real UPSC data</span>
       </p>
     </div>
 
     <!-- Stats Row -->
-    <div class="grid grid-cols-3 gap-2 mt-8 fade-up delay-2">
+    <div class="fade-up delay-2" style="display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:28px; max-width:700px; margin-left:auto; margin-right:auto;">
       <div class="stat-box">
         <div class="stat-value">5</div>
         <div class="stat-label">Years Data</div>
@@ -447,7 +798,7 @@
       </div>
       <div class="stat-box">
         <div class="stat-value">400+</div>
-        <div class="stat-label">Avg Seats/Year</div>
+        <div class="stat-label">Avg Seats / Year</div>
       </div>
     </div>
   </section>
@@ -455,171 +806,227 @@
   <!-- ═══════════════════════════════════════════
        MAIN FORM
   ═══════════════════════════════════════════ -->
-  <main class="relative z-10 px-5 max-w-lg mx-auto pb-16">
+  <main class="relative z-10" style="width:100%; padding:0 4vw 80px;">
 
-    <!-- ── PAPER 1: MATH ── -->
-    <div class="section-card p-5 mb-4 fade-up delay-2">
-      <div class="flex items-center justify-between mb-4">
-        <p class="section-label">Paper I</p>
-        <span class="font-display text-2xl" style="color:var(--gold)">MATHEMATICS</span>
-      </div>
-      <p class="font-mono text-xs mb-4" style="color:var(--muted)">120 Qs | +2.5 correct | −0.83 wrong | Total 300</p>
+    <div class="form-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:24px; width:100%;">
 
-      <div class="grid grid-cols-2 gap-3">
-        <div>
-          <div class="input-label">
-            Correct <span class="input-max">MAX 120</span>
+      <!-- ── LEFT COLUMN ── -->
+      <div style="display:flex; flex-direction:column; gap:20px;">
+
+        <!-- PAPER I — MATH (border-beam) -->
+        <div class="section-card tilt-card p-6 fade-up delay-2" id="card-math">
+          <div class="corner-mark tl"></div><div class="corner-mark tr"></div>
+          <div class="corner-mark bl"></div><div class="corner-mark br"></div>
+          <!-- Border beam -->
+          <div class="border-beam-inner"></div>
+          <div class="border-beam-inner delay-half"></div>
+
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
+            <div>
+              <p class="section-label">Paper I</p>
+              <span style="font-family:'Bebas Neue',cursive; font-size:28px; color:var(--green); text-shadow:0 0 16px rgba(0,255,136,0.4); letter-spacing:0.06em;">MATHEMATICS</span>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-family:'JetBrains Mono',monospace; font-size:11px; color:rgba(0,255,136,0.5);">MAX MARKS</div>
+              <div style="font-family:'Bebas Neue',cursive; font-size:32px; color:var(--gold); line-height:1;">300</div>
+            </div>
           </div>
-          <input type="number" id="math-correct" class="nda-input" placeholder="0" min="0" max="120"
-                 oninput="onInputChange()" />
+
+          <div style="font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--muted); margin-bottom:20px; display:flex; gap:16px;">
+            <span style="color:var(--green);">+2.5</span> correct &nbsp;|&nbsp;
+            <span style="color:var(--danger);">−0.83</span> wrong &nbsp;|&nbsp;
+            120 questions
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+            <div>
+              <div class="input-label">Correct <span class="input-max">MAX 120</span></div>
+              <input type="number" id="math-correct" class="nda-input" placeholder="0" min="0" max="120" oninput="onInputChange()" onfocus="cardFocus('card-math')" onblur="cardBlur('card-math')" />
+            </div>
+            <div>
+              <div class="input-label">Wrong <span class="input-max">MAX 120</span></div>
+              <input type="number" id="math-wrong" class="nda-input" placeholder="0" min="0" max="120" oninput="onInputChange()" onfocus="cardFocus('card-math')" onblur="cardBlur('card-math')" />
+            </div>
+          </div>
+          <div class="score-preview" id="math-preview">Enter attempts to see score</div>
+          <div class="error-msg" id="math-error"></div>
         </div>
-        <div>
-          <div class="input-label">
-            Wrong <span class="input-max">MAX 120</span>
+
+        <!-- PAPER II — GAT (border-beam) -->
+        <div class="section-card tilt-card p-6 fade-up delay-3" id="card-gat">
+          <div class="corner-mark tl"></div><div class="corner-mark tr"></div>
+          <div class="corner-mark bl"></div><div class="corner-mark br"></div>
+          <div class="border-beam-inner"></div>
+          <div class="border-beam-inner delay-half"></div>
+
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
+            <div>
+              <p class="section-label">Paper II</p>
+              <span style="font-family:'Bebas Neue',cursive; font-size:28px; color:var(--green); text-shadow:0 0 16px rgba(0,255,136,0.4); letter-spacing:0.06em;">GAT</span>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-family:'JetBrains Mono',monospace; font-size:11px; color:rgba(0,255,136,0.5);">MAX MARKS</div>
+              <div style="font-family:'Bebas Neue',cursive; font-size:32px; color:var(--gold); line-height:1;">600</div>
+            </div>
           </div>
-          <input type="number" id="math-wrong" class="nda-input" placeholder="0" min="0" max="120"
-                 oninput="onInputChange()" />
+
+          <div style="font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--muted); margin-bottom:20px; display:flex; gap:16px;">
+            <span style="color:var(--green);">+4</span> correct &nbsp;|&nbsp;
+            <span style="color:var(--danger);">−1.33</span> wrong &nbsp;|&nbsp;
+            150 questions
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+            <div>
+              <div class="input-label">Correct <span class="input-max">MAX 150</span></div>
+              <input type="number" id="gat-correct" class="nda-input" placeholder="0" min="0" max="150" oninput="onInputChange()" onfocus="cardFocus('card-gat')" onblur="cardBlur('card-gat')" />
+            </div>
+            <div>
+              <div class="input-label">Wrong <span class="input-max">MAX 150</span></div>
+              <input type="number" id="gat-wrong" class="nda-input" placeholder="0" min="0" max="150" oninput="onInputChange()" onfocus="cardFocus('card-gat')" onblur="cardBlur('card-gat')" />
+            </div>
+          </div>
+          <div class="score-preview" id="gat-preview">Enter attempts to see score</div>
+          <div class="error-msg" id="gat-error"></div>
         </div>
-      </div>
 
-      <div class="score-preview" id="math-preview">Enter attempts to see score</div>
-      <div class="error-msg" id="math-error"></div>
-    </div>
+      </div><!-- /LEFT -->
 
-    <!-- ── PAPER 2: GAT ── -->
-    <div class="section-card p-5 mb-4 fade-up delay-3">
-      <div class="flex items-center justify-between mb-4">
-        <p class="section-label">Paper II</p>
-        <span class="font-display text-2xl" style="color:var(--gold)">GAT</span>
-      </div>
-      <p class="font-mono text-xs mb-4" style="color:var(--muted)">150 Qs | +4 correct | −1.33 wrong | Total 600</p>
+      <!-- ── RIGHT COLUMN ── -->
+      <div style="display:flex; flex-direction:column; gap:20px;">
 
-      <div class="grid grid-cols-2 gap-3">
-        <div>
-          <div class="input-label">
-            Correct <span class="input-max">MAX 150</span>
+        <!-- SSB SCORE -->
+        <div class="section-card tilt-card p-6 fade-up delay-4" id="card-ssb">
+          <div class="corner-mark tl"></div><div class="corner-mark tr"></div>
+          <div class="corner-mark bl"></div><div class="corner-mark br"></div>
+
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
+            <div>
+              <p class="section-label">Optional</p>
+              <span style="font-family:'Bebas Neue',cursive; font-size:28px; color:var(--green); text-shadow:0 0 16px rgba(0,255,136,0.4); letter-spacing:0.06em;">SSB SCORE</span>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-family:'JetBrains Mono',monospace; font-size:11px; color:rgba(0,255,136,0.5);">MAX MARKS</div>
+              <div style="font-family:'Bebas Neue',cursive; font-size:32px; color:var(--gold); line-height:1;">900</div>
+            </div>
           </div>
-          <input type="number" id="gat-correct" class="nda-input" placeholder="0" min="0" max="150"
-                 oninput="onInputChange()" />
+
+          <p style="font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--muted); margin-bottom:16px;">
+            Expected SSB marks. Leave 0 if not appeared yet.
+          </p>
+          <div class="input-label">Expected SSB Marks <span class="input-max">MAX 900</span></div>
+          <input type="number" id="ssb-score" class="nda-input" style="margin-top:8px;" placeholder="0" min="0" max="900" oninput="onInputChange()" onfocus="cardFocus('card-ssb')" onblur="cardBlur('card-ssb')" />
+          <div class="score-preview" id="ssb-preview">Real data: avg selected SSB = ~410 (NDA 1 2024)</div>
+
+          <!-- Mini insight -->
+          <div style="margin-top:16px; padding:12px; background:rgba(0,255,136,0.04); border:1px solid rgba(0,255,136,0.1); border-radius:3px;">
+            <div style="font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--muted); letter-spacing:0.08em; margin-bottom:6px;">// 2024 SSB INSIGHTS</div>
+            <div style="display:flex; justify-content:space-between; font-family:'JetBrains Mono',monospace; font-size:11px;">
+              <span style="color:var(--muted);">Top 10 avg SSB</span>
+              <span style="color:var(--green);">453</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-family:'JetBrains Mono',monospace; font-size:11px; margin-top:4px;">
+              <span style="color:var(--muted);">Max SSB (AIR-2)</span>
+              <span style="color:var(--gold);">524</span>
+            </div>
+          </div>
         </div>
-        <div>
-          <div class="input-label">
-            Wrong <span class="input-max">MAX 150</span>
+
+        <!-- SECTIONAL RULE -->
+        <div class="section-card p-6 fade-up delay-4">
+          <div class="corner-mark tl"></div><div class="corner-mark tr"></div>
+          <p class="section-label" style="margin-bottom:6px;">Sectional Cutoff Rule</p>
+          <p style="font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--muted); margin-bottom:16px;">UPSC applies 20% or 25% minimum per paper.</p>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+            <label class="rule-label">
+              <input type="radio" name="rule" value="25" checked style="accent-color:var(--green);" id="rule-25" />
+              <div>
+                <div style="font-family:'Rajdhani',sans-serif; font-weight:700; color:var(--text); font-size:15px;">25% Rule</div>
+                <div style="font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--muted); margin-top:2px;">Math ≥75 | GAT ≥150</div>
+              </div>
+            </label>
+            <label class="rule-label">
+              <input type="radio" name="rule" value="20" style="accent-color:var(--green);" id="rule-20" />
+              <div>
+                <div style="font-family:'Rajdhani',sans-serif; font-weight:700; color:var(--text); font-size:15px;">20% Rule</div>
+                <div style="font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--muted); margin-top:2px;">Math ≥60 | GAT ≥120</div>
+              </div>
+            </label>
           </div>
-          <input type="number" id="gat-wrong" class="nda-input" placeholder="0" min="0" max="150"
-                 oninput="onInputChange()" />
         </div>
-      </div>
 
-      <div class="score-preview" id="gat-preview">Enter attempts to see score</div>
-      <div class="error-msg" id="gat-error"></div>
-    </div>
-
-    <!-- ── SSB SCORE ── -->
-    <div class="section-card p-5 mb-4 fade-up delay-4">
-      <div class="flex items-center justify-between mb-4">
-        <p class="section-label">Optional</p>
-        <span class="font-display text-2xl" style="color:var(--gold)">SSB SCORE</span>
-      </div>
-      <p class="font-mono text-xs mb-4" style="color:var(--muted)">Expected SSB marks out of 900. Leave 0 if not appeared yet.</p>
-
-      <div>
-        <div class="input-label">
-          Expected SSB Marks <span class="input-max">MAX 900</span>
+        <!-- PREDICT BUTTON -->
+        <div class="fade-up delay-5">
+          <button class="btn-predict" id="predict-btn" data-text="⚡ PREDICT MY AIR RANK" onclick="openLeadModal()">
+            <span id="btn-text">⚡ PREDICT MY AIR RANK</span>
+            <div class="loader" id="btn-loader"></div>
+          </button>
+          <p style="text-align:center; font-family:'JetBrains Mono',monospace; font-size:10px; color:rgba(0,255,136,0.25); margin-top:10px; letter-spacing:0.05em;">
+            UPSC NDA VERIFIED DATA 2020–2024 · ESTIMATED PREDICTION ONLY
+          </p>
         </div>
-        <input type="number" id="ssb-score" class="nda-input" placeholder="0" min="0" max="900"
-               oninput="onInputChange()" />
+
+      </div><!-- /RIGHT -->
+
+    </div><!-- /form-grid -->
+
+    <!-- CUTOFF TABLE -->
+    <div class="section-card p-6 fade-up delay-5" style="width:100%; margin:20px 0 0;">
+      <div class="corner-mark tl"></div><div class="corner-mark tr"></div>
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
+        <p class="section-label">Historical Cutoff Reference — Verified UPSC Data</p>
+        <div class="hud-strip">AIR 1-641 ANALYZED</div>
       </div>
-
-      <div class="score-preview" id="ssb-preview">Average selected candidates score ~366 in SSB</div>
-    </div>
-
-    <!-- ── SECTIONAL RULE ── -->
-    <div class="section-card p-5 mb-6 fade-up delay-4">
-      <p class="section-label mb-3">Sectional Cutoff Rule</p>
-      <p class="font-mono text-xs mb-4" style="color:var(--muted)">UPSC applies 20% or 25% rule. Check your notification.</p>
-
-      <div class="grid grid-cols-2 gap-3">
-        <label class="flex items-center gap-3 cursor-pointer p-3 rounded" style="border:1px solid rgba(200,181,96,0.2); background:var(--surface2)">
-          <input type="radio" name="rule" value="25" checked class="accent-yellow-400" id="rule-25" />
-          <div>
-            <div class="font-ui text-sm" style="color:var(--text)">25% Rule</div>
-            <div class="font-mono text-xs" style="color:var(--muted)">Math 75 | GAT 150</div>
-          </div>
-        </label>
-        <label class="flex items-center gap-3 cursor-pointer p-3 rounded" style="border:1px solid rgba(200,181,96,0.2); background:var(--surface2)">
-          <input type="radio" name="rule" value="20" class="accent-yellow-400" id="rule-20" />
-          <div>
-            <div class="font-ui text-sm" style="color:var(--text)">20% Rule</div>
-            <div class="font-mono text-xs" style="color:var(--muted)">Math 60 | GAT 120</div>
-          </div>
-        </label>
-      </div>
-    </div>
-
-    <!-- ── PREDICT BUTTON ── -->
-    <div class="fade-up delay-5">
-      <button class="btn-predict" id="predict-btn" onclick="openLeadModal()">
-        <span id="btn-text">⚡ PREDICT MY AIR RANK</span>
-        <div class="loader" id="btn-loader"></div>
-      </button>
-      <p class="text-center font-mono text-xs mt-3" style="color:var(--muted)">
-        Based on UPSC NDA data 2021–2025 · Not an official UPSC tool
-      </p>
-    </div>
-
-    <!-- ── CUTOFF REFERENCE ── -->
-    <div class="section-card p-5 mt-8 fade-up delay-5">
-      <p class="section-label mb-4">Historical Cutoff Reference</p>
-
-      <div class="cutoff-row mb-1">
+      <div class="cutoff-row" style="margin-bottom:4px;">
         <div class="cutoff-cell header">EXAM</div>
         <div class="cutoff-cell header">WRITTEN /900</div>
         <div class="cutoff-cell header">FINAL /1800</div>
       </div>
-
-      <div id="cutoff-table">
-        <!-- Filled by JS -->
-      </div>
+      <div id="cutoff-table"></div>
     </div>
 
   </main>
 
   <!-- ═══════════════════════════════════════════
-       LEAD CAPTURE MODAL
+       LEAD MODAL
   ═══════════════════════════════════════════ -->
   <div class="modal-overlay" id="lead-modal">
     <div class="modal-box">
-      <p class="section-label mb-2">Almost There!</p>
-      <h2 class="font-display text-3xl mb-1" style="color:var(--gold)">GET YOUR RESULT</h2>
-      <p class="font-ui text-sm mb-6" style="color:var(--muted)">Enter your details to see your predicted AIR rank and full analysis.</p>
+      <div class="corner-mark tl"></div><div class="corner-mark tr"></div>
+      <div class="corner-mark bl"></div><div class="corner-mark br"></div>
+      <p class="section-label" style="margin-bottom:6px;">Almost There!</p>
+      <h2 style="font-family:'Bebas Neue',cursive; font-size:36px; color:var(--green); margin-bottom:4px; text-shadow:0 0 20px rgba(0,255,136,0.3);">GET YOUR RESULT</h2>
+      <p style="font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--muted); margin-bottom:24px;">Enter details to unlock your predicted AIR rank &amp; analysis.</p>
 
-      <div class="space-y-3">
+      <div style="display:flex; flex-direction:column; gap:12px;">
         <div>
-          <div class="input-label mb-1">Full Name</div>
-          <input type="text" id="lead-name" class="modal-input" placeholder="Your name" />
+          <div class="input-label" style="margin-bottom:6px;">Full Name</div>
+          <input type="text" id="lead-name" class="modal-input" placeholder="Your full name" />
         </div>
         <div>
-          <div class="input-label mb-1">Phone Number</div>
+          <div class="input-label" style="margin-bottom:6px;">Phone Number</div>
           <input type="tel" id="lead-phone" class="modal-input" placeholder="10-digit mobile number" maxlength="10" />
         </div>
         <div>
-          <div class="input-label mb-1">Your Age</div>
+          <div class="input-label" style="margin-bottom:6px;">Your Age</div>
           <input type="number" id="lead-age" class="modal-input" placeholder="e.g. 17" min="16" max="19" />
         </div>
       </div>
 
-      <div class="error-msg mt-2" id="modal-error" style="display:block; min-height:18px;"></div>
+      <div class="error-msg" id="modal-error" style="display:block; min-height:18px; margin-top:8px;"></div>
 
-      <button class="btn-predict mt-5" id="modal-submit-btn" onclick="submitLead()">
+      <button class="btn-predict" id="modal-submit-btn" data-text="🎯 SHOW MY RANK" onclick="submitLead()" style="margin-top:16px;">
         <span id="modal-btn-text">🎯 SHOW MY RANK</span>
         <div class="loader" id="modal-loader"></div>
       </button>
 
-      <button onclick="closeLeadModal()" class="w-full mt-3 text-center font-mono text-xs py-2 cursor-pointer"
-              style="color:var(--muted); background:none; border:none;">
-        Cancel
+      <button onclick="closeLeadModal()" style="width:100%; margin-top:10px; background:none; border:none; color:var(--muted); font-family:'JetBrains Mono',monospace; font-size:11px; padding:8px; cursor:pointer; letter-spacing:0.1em;">
+        [ CANCEL ]
       </button>
+
+      <p style="font-family:'JetBrains Mono',monospace; font-size:9px; color:rgba(0,255,136,0.2); text-align:center; margin-top:8px; letter-spacing:0.05em;">
+        🔒 DATA SECURED · NOT SHARED WITH THIRD PARTIES
+      </p>
     </div>
   </div>
 
@@ -628,152 +1035,230 @@
   ═══════════════════════════════════════════ -->
   <script>
 
-    // ─── Cutoff Table Data ────────────────────
+    // ══════════════════════════════════════
+    // MOUSE FOLLOWER GLOW
+    // ══════════════════════════════════════
+    const mouseGlow = document.getElementById('mouse-glow');
+    let mx = window.innerWidth / 2, my = window.innerHeight / 2;
+    let gx = mx, gy = my;
+
+    document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+
+    function animateGlow() {
+      gx += (mx - gx) * 0.08;
+      gy += (my - gy) * 0.08;
+      mouseGlow.style.left = gx + 'px';
+      mouseGlow.style.top  = gy + 'px';
+      requestAnimationFrame(animateGlow);
+    }
+    animateGlow();
+
+    // ══════════════════════════════════════
+    // 3D TILT ON CARDS
+    // ══════════════════════════════════════
+    document.querySelectorAll('.tilt-card').forEach(card => {
+      card.addEventListener('mousemove', e => {
+        const r  = card.getBoundingClientRect();
+        const cx = r.left + r.width  / 2;
+        const cy = r.top  + r.height / 2;
+        const dx = (e.clientX - cx) / (r.width  / 2);
+        const dy = (e.clientY - cy) / (r.height / 2);
+        const rotX = -dy * 6;
+        const rotY =  dx * 6;
+        card.style.transform = `perspective(800px) rotateX(${rotX}deg) rotateY(${rotY}deg) scale3d(1.02,1.02,1.02)`;
+      });
+
+      card.addEventListener('mouseleave', () => {
+        card.style.transform = 'perspective(800px) rotateX(0) rotateY(0) scale3d(1,1,1)';
+      });
+    });
+
+    // ══════════════════════════════════════
+    // CARD FOCUS / BLUR GLOW
+    // ══════════════════════════════════════
+    function cardFocus(id) {
+      document.getElementById(id)?.classList.add('card-focus');
+    }
+    function cardBlur(id) {
+      document.getElementById(id)?.classList.remove('card-focus');
+    }
+
+    // ══════════════════════════════════════
+    // FLOATING PARTICLES
+    // ══════════════════════════════════════
+    const pwrap = document.getElementById('particles-wrap');
+    for (let i = 0; i < 25; i++) {
+      const p = document.createElement('div');
+      p.className = 'particle';
+      const left  = Math.random() * 100;
+      const delay = Math.random() * 15;
+      const dur   = 12 + Math.random() * 18;
+      const drift = (Math.random() - 0.5) * 120;
+      p.style.cssText = `left:${left}vw; animation-duration:${dur}s; animation-delay:${delay}s; --drift:${drift}px; width:${Math.random() > 0.7 ? 3 : 2}px; height:${Math.random() > 0.7 ? 3 : 2}px; opacity:0.5;`;
+      pwrap.appendChild(p);
+    }
+
+    // ══════════════════════════════════════
+    // LIVE CLOCK
+    // ══════════════════════════════════════
+    function updateClock() {
+      const now = new Date();
+      const h = String(now.getHours()).padStart(2,'0');
+      const m = String(now.getMinutes()).padStart(2,'0');
+      const s = String(now.getSeconds()).padStart(2,'0');
+      const el = document.getElementById('live-clock');
+      if (el) el.textContent = `${h}:${m}:${s}`;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // ══════════════════════════════════════
+    // SCORE CALCULATION
+    // ══════════════════════════════════════
     const CUTOFF_DATA = [
-      { exam: "NDA 1 2025", written: 305, final: 673 },
+      { exam: "NDA 1 2025", written: 336, final: 699 },
       { exam: "NDA 2 2024", written: 305, final: 673 },
       { exam: "NDA 1 2024", written: 291, final: 654 },
-      { exam: "NDA 2 2023", written: 292, final: 656 },
-      { exam: "NDA 1 2023", written: 301, final: 664 },
+      { exam: "NDA 2 2023", written: 293, final: 656 },
+      { exam: "NDA 1 2023", written: 302, final: 664 },
       { exam: "NDA 2 2022", written: 316, final: 678 },
       { exam: "NDA 1 2022", written: 360, final: 720 },
       { exam: "NDA 2 2021", written: 355, final: 726 },
       { exam: "NDA 1 2021", written: 343, final: 709 },
+      { exam: "NDA 2 2020", written: 355, final: 719 },
     ];
 
-    // ─── NDA Config ──────────────────────────
     const CFG = {
-      math: { q: 120, correct: 2.5, wrong: 0.83, min25: 75, min20: 60 },
-      gat:  { q: 150, correct: 4,   wrong: 1.33, min25: 150, min20: 120 },
+      math: { q:120, correct:2.5,  wrong:0.83, min25:75,  min20:60  },
+      gat:  { q:150, correct:4,    wrong:1.33, min25:150, min20:120 },
     };
 
+    // Real data anchor points from UPSC official PDF
+    // Rank matrix calibrated from NDA 1 2023, NDA 2 2023, NDA 1 2025 official UPSC data (1900+ data points)
     const RANK_MATRIX = [
-      { min: 1100, max: 1800, airMin: 1,    airMax: 25,   prob: 99, tag: "TOPPER 🏆",      color: "#FFD700" },
-      { min: 1000, max: 1099, airMin: 26,   airMax: 100,  prob: 98, tag: "EXCELLENT 🌟",   color: "#00C853" },
-      { min: 900,  max: 999,  airMin: 101,  airMax: 250,  prob: 95, tag: "VERY STRONG 💪", color: "#00BCD4" },
-      { min: 820,  max: 899,  airMin: 251,  airMax: 450,  prob: 88, tag: "STRONG ✅",       color: "#4CAF50" },
-      { min: 750,  max: 819,  airMin: 451,  airMax: 650,  prob: 75, tag: "DECENT 👍",       color: "#8BC34A" },
-      { min: 700,  max: 749,  airMin: 651,  airMax: 800,  prob: 55, tag: "BORDERLINE ⚠️",  color: "#FFC107" },
-      { min: 654,  max: 699,  airMin: 801,  airMax: 1000, prob: 25, tag: "RISKY 🔴",        color: "#FF9800" },
-      { min: 0,    max: 653,  airMin: 1001, airMax: 9999, prob: 5,  tag: "NOT SELECTED ❌", color: "#F44336" },
+      { min:980, max:1800, airMin:1,   airMax:14,   prob:99, tag:"TOPPER ZONE 🏆",  color:"#FFD700" },
+      { min:930, max:979,  airMin:3,   airMax:62,   prob:98, tag:"OUTSTANDING 🌟",  color:"#00E676" },
+      { min:880, max:929,  airMin:6,   airMax:140,  prob:96, tag:"EXCELLENT 💪",    color:"#00C853" },
+      { min:840, max:879,  airMin:21,  airMax:280,  prob:92, tag:"VERY STRONG ✅",  color:"#00BCD4" },
+      { min:800, max:839,  airMin:59,  airMax:450,  prob:80, tag:"STRONG 💡",       color:"#4CAF50" },
+      { min:760, max:799,  airMin:150, airMax:620,  prob:62, tag:"GOOD 👍",         color:"#8BC34A" },
+      { min:720, max:759,  airMin:300, airMax:710,  prob:40, tag:"MODERATE ⚡",      color:"#FFC107" },
+      { min:680, max:719,  airMin:470, airMax:735,  prob:18, tag:"BORDERLINE ⚠️",  color:"#FF9800" },
+      { min:650, max:679,  airMin:620, airMax:900,  prob:6,  tag:"RISKY 🔴",        color:"#FF5722" },
+      { min:0,   max:649,  airMin:901, airMax:9999, prob:1,  tag:"NOT SELECTED ❌", color:"#F44336" },
     ];
 
-    // ─── Stored Scores ────────────────────────
     let cachedResult = null;
 
-    // ─── Render Cutoff Table ──────────────────
+    // Render cutoff table
     function renderCutoffTable() {
       const el = document.getElementById('cutoff-table');
-      el.innerHTML = CUTOFF_DATA.map(d => `
-        <div class="cutoff-row mb-px">
-          <div class="cutoff-cell font-ui" style="color:var(--text); font-size:11px">${d.exam}</div>
-          <div class="cutoff-cell" style="color:var(--khaki)">${d.written}</div>
-          <div class="cutoff-cell" style="color:var(--safe)">${d.final}</div>
+      el.innerHTML = CUTOFF_DATA.map((d, i) => `
+        <div class="cutoff-row" style="margin-bottom:4px; animation:fade-up 0.5s ease ${0.05*i}s forwards; opacity:0;">
+          <div class="cutoff-cell font-ui" style="color:var(--text); font-size:11px;">${d.exam}</div>
+          <div class="cutoff-cell" style="color:var(--green);">${d.written}</div>
+          <div class="cutoff-cell" style="color:var(--gold);">${d.final}</div>
         </div>
       `).join('');
     }
 
-    // ─── Live Score Preview ───────────────────
     function calcMath() {
       const c = parseInt(document.getElementById('math-correct').value) || 0;
       const w = parseInt(document.getElementById('math-wrong').value)   || 0;
-      return parseFloat(((c * CFG.math.correct) - (w * CFG.math.wrong)).toFixed(2));
+      return Math.round(((c * CFG.math.correct) - (w * CFG.math.wrong)) * 100) / 100;
     }
 
     function calcGAT() {
       const c = parseInt(document.getElementById('gat-correct').value) || 0;
       const w = parseInt(document.getElementById('gat-wrong').value)   || 0;
-      return parseFloat(((c * CFG.gat.correct) - (w * CFG.gat.wrong)).toFixed(2));
+      return Math.round(((c * CFG.gat.correct)  - (w * CFG.gat.wrong)) * 100) / 100;
     }
 
     function onInputChange() {
-      const mathScore = calcMath();
-      const gatScore  = calcGAT();
-      const ssb       = parseInt(document.getElementById('ssb-score').value) || 0;
-      const rule      = document.querySelector('input[name="rule"]:checked').value;
+      const math = calcMath();
+      const gat  = calcGAT();
+      const ssb  = parseInt(document.getElementById('ssb-score').value) || 0;
+      const rule = document.querySelector('input[name="rule"]:checked').value;
 
-      // Math preview
-      const mathMin = rule === "20" ? CFG.math.min20 : CFG.math.min25;
-      const mathOk  = mathScore >= mathMin;
-      const mathEl  = document.getElementById('math-preview');
-      mathEl.style.color = mathScore > 0 ? (mathOk ? 'var(--safe)' : 'var(--danger)') : 'var(--muted)';
-      mathEl.textContent = mathScore !== 0
-        ? `Score: ${mathScore} / 300 ${mathOk ? '✓ Sectional Clear' : `✗ Need ${(mathMin - mathScore).toFixed(1)} more`}`
-        : 'Enter attempts to see score';
+      const mathMin = rule === '20' ? CFG.math.min20 : CFG.math.min25;
+      const gatMin  = rule === '20' ? CFG.gat.min20  : CFG.gat.min25;
 
-      // GAT preview
-      const gatMin = rule === "20" ? CFG.gat.min20 : CFG.gat.min25;
-      const gatOk  = gatScore >= gatMin;
-      const gatEl  = document.getElementById('gat-preview');
-      gatEl.style.color = gatScore > 0 ? (gatOk ? 'var(--safe)' : 'var(--danger)') : 'var(--muted)';
-      gatEl.textContent = gatScore !== 0
-        ? `Score: ${gatScore} / 600 ${gatOk ? '✓ Sectional Clear' : `✗ Need ${(gatMin - gatScore).toFixed(1)} more`}`
-        : 'Enter attempts to see score';
+      const mEl = document.getElementById('math-preview');
+      const gEl = document.getElementById('gat-preview');
+      const sEl = document.getElementById('ssb-preview');
 
-      // SSB preview
-      const ssbEl = document.getElementById('ssb-preview');
-      ssbEl.textContent = ssb > 0
-        ? `Total Score: ${mathScore + gatScore + ssb} / 1800`
-        : 'Average selected candidates score ~366 in SSB';
+      if (math !== 0) {
+        const ok = math >= mathMin;
+        mEl.style.color = ok ? 'var(--green)' : 'var(--danger)';
+        mEl.textContent = `Score: ${math}/300 ${ok ? '✓ SECTIONAL CLEAR' : `✗ NEED ${(mathMin-math).toFixed(1)} MORE`}`;
+      } else {
+        mEl.style.color = 'var(--muted)';
+        mEl.textContent = 'Enter attempts to see score';
+      }
+
+      if (gat !== 0) {
+        const ok = gat >= gatMin;
+        gEl.style.color = ok ? 'var(--green)' : 'var(--danger)';
+        gEl.textContent = `Score: ${gat}/600 ${ok ? '✓ SECTIONAL CLEAR' : `✗ NEED ${(gatMin-gat).toFixed(1)} MORE`}`;
+      } else {
+        gEl.style.color = 'var(--muted)';
+        gEl.textContent = 'Enter attempts to see score';
+      }
+
+      if (ssb > 0) {
+        const total = math + gat + ssb;
+        sEl.style.color = 'var(--gold)';
+        sEl.textContent = `Total Score: ${total}/1800`;
+      } else {
+        sEl.style.color = 'var(--muted)';
+        sEl.textContent = 'Real data: avg selected SSB = ~410 (NDA 1 2024)';
+      }
     }
 
-    // ─── Validate Inputs ──────────────────────
     function validateInputs() {
       const mc = parseInt(document.getElementById('math-correct').value) || 0;
       const mw = parseInt(document.getElementById('math-wrong').value)   || 0;
       const gc = parseInt(document.getElementById('gat-correct').value)  || 0;
       const gw = parseInt(document.getElementById('gat-wrong').value)    || 0;
       const ssb = parseInt(document.getElementById('ssb-score').value)   || 0;
-
-      if (mc + mw > CFG.math.q) return `Math: Correct + Wrong cannot exceed ${CFG.math.q}`;
-      if (gc + gw > CFG.gat.q)  return `GAT: Correct + Wrong cannot exceed ${CFG.gat.q}`;
-      if (ssb > 900)             return 'SSB marks cannot exceed 900';
-      if (mc === 0 && gc === 0)  return 'Please enter at least Math or GAT attempts';
+      if (mc + mw > 120) return 'Math: Correct + Wrong cannot exceed 120';
+      if (gc + gw > 150) return 'GAT: Correct + Wrong cannot exceed 150';
+      if (ssb > 900)     return 'SSB marks cannot exceed 900';
+      if (mc === 0 && gc === 0) return 'Please enter at least Math or GAT attempts';
       return null;
     }
 
-    // ─── Build Result Object ──────────────────
     function buildResult(age = 17) {
-      const mc  = parseInt(document.getElementById('math-correct').value) || 0;
-      const mw  = parseInt(document.getElementById('math-wrong').value)   || 0;
-      const gc  = parseInt(document.getElementById('gat-correct').value)  || 0;
-      const gw  = parseInt(document.getElementById('gat-wrong').value)    || 0;
-      const ssb = parseInt(document.getElementById('ssb-score').value)    || 0;
+      const mc   = parseInt(document.getElementById('math-correct').value) || 0;
+      const mw   = parseInt(document.getElementById('math-wrong').value)   || 0;
+      const gc   = parseInt(document.getElementById('gat-correct').value)  || 0;
+      const gw   = parseInt(document.getElementById('gat-wrong').value)    || 0;
+      const ssb  = parseInt(document.getElementById('ssb-score').value)    || 0;
       const rule = document.querySelector('input[name="rule"]:checked').value;
 
-      const mathScore    = parseFloat(((mc * CFG.math.correct) - (mw * CFG.math.wrong)).toFixed(2));
-      const gatScore     = parseFloat(((gc * CFG.gat.correct)  - (gw * CFG.gat.wrong)).toFixed(2));
-      const writtenScore = parseFloat((mathScore + gatScore).toFixed(2));
+      const mathScore    = Math.round(((mc * CFG.math.correct) - (mw * CFG.math.wrong)) * 100) / 100;
+      const gatScore     = Math.round(((gc * CFG.gat.correct)  - (gw * CFG.gat.wrong))  * 100) / 100;
+      const writtenScore = mathScore + gatScore;
       const totalScore   = writtenScore + ssb;
 
-      const mathMin = rule === "20" ? CFG.math.min20 : CFG.math.min25;
-      const gatMin  = rule === "20" ? CFG.gat.min20  : CFG.gat.min25;
-
+      const mathMin = rule === '20' ? CFG.math.min20 : CFG.math.min25;
+      const gatMin  = rule === '20' ? CFG.gat.min20  : CFG.gat.min25;
       const mathPassed = mathScore >= mathMin;
       const gatPassed  = gatScore  >= gatMin;
-      const sectionalPassed = mathPassed && gatPassed;
-
-      const band = RANK_MATRIX.find(b => totalScore >= b.min && totalScore <= b.max)
-                   || RANK_MATRIX[RANK_MATRIX.length - 1];
+      const band = RANK_MATRIX.find(b => totalScore >= b.min && totalScore <= b.max) || RANK_MATRIX[RANK_MATRIX.length - 1];
 
       return {
         mathScore, gatScore, writtenScore, ssb, totalScore,
-        mathPassed, gatPassed, sectionalPassed,
+        mathPassed, gatPassed, sectionalPassed: mathPassed && gatPassed,
         mathMin, gatMin, rule,
         airMin: band.airMin, airMax: band.airMax,
-        probability: band.prob,
-        tag: band.tag, color: band.color,
-        age,
+        probability: band.prob, tag: band.tag, color: band.color, age,
       };
     }
 
-    // ─── Modal Controls ───────────────────────
     function openLeadModal() {
       const err = validateInputs();
-      if (err) {
-        alert(err);
-        return;
-      }
+      if (err) { alert(err); return; }
       document.getElementById('lead-modal').classList.add('active');
     }
 
@@ -781,76 +1266,71 @@
       document.getElementById('lead-modal').classList.remove('active');
     }
 
-    // ─── Submit Lead ──────────────────────────
     function submitLead() {
       const name  = document.getElementById('lead-name').value.trim();
       const phone = document.getElementById('lead-phone').value.trim();
       const age   = parseInt(document.getElementById('lead-age').value) || 17;
       const errEl = document.getElementById('modal-error');
-
       errEl.textContent = '';
 
-      if (!name)                          { errEl.textContent = '⚠ Name required'; return; }
-      if (!/^\d{10}$/.test(phone))        { errEl.textContent = '⚠ Valid 10-digit phone required'; return; }
-      if (age < 16 || age > 19)           { errEl.textContent = '⚠ Age must be between 16-19'; return; }
+      if (!name)                   { errEl.textContent = '⚠ Name required'; return; }
+      if (!/^\d{10}$/.test(phone)) { errEl.textContent = '⚠ Valid 10-digit phone required'; return; }
+      if (age < 16 || age > 19)    { errEl.textContent = '⚠ Age must be 16–19'; return; }
 
-      // Show loader
       document.getElementById('modal-btn-text').style.display = 'none';
-      document.getElementById('modal-loader').style.display = 'block';
-      document.getElementById('modal-submit-btn').disabled = true;
+      document.getElementById('modal-loader').style.display   = 'block';
+      document.getElementById('modal-submit-btn').disabled    = true;
 
-      // Build result
       cachedResult = buildResult(age);
       cachedResult.name  = name;
       cachedResult.phone = phone;
 
-      // Save to localStorage (Firebase replace karein baad mein)
       const leads = JSON.parse(localStorage.getItem('nda_leads') || '[]');
       leads.push({
         name, phone, age,
-        mathScore:    cachedResult.mathScore,
-        gatScore:     cachedResult.gatScore,
-        writtenScore: cachedResult.writtenScore,
-        ssb:          cachedResult.ssb,
-        totalScore:   cachedResult.totalScore,
-        airMin:       cachedResult.airMin,
-        airMax:       cachedResult.airMax,
-        probability:  cachedResult.probability,
-        timestamp:    new Date().toISOString(),
+        mathScore: cachedResult.mathScore, gatScore: cachedResult.gatScore,
+        writtenScore: cachedResult.writtenScore, ssb: cachedResult.ssb,
+        totalScore: cachedResult.totalScore, airMin: cachedResult.airMin,
+        airMax: cachedResult.airMax, probability: cachedResult.probability,
+        sectionalPassed: cachedResult.sectionalPassed,
+        timestamp: new Date().toISOString(),
       });
       localStorage.setItem('nda_leads', JSON.stringify(leads));
 
-      // Simulate slight delay then redirect
       setTimeout(() => {
-        const params = new URLSearchParams({
-          name,
-          math:    cachedResult.mathScore,
-          gat:     cachedResult.gatScore,
-          written: cachedResult.writtenScore,
-          ssb:     cachedResult.ssb,
-          total:   cachedResult.totalScore,
-          airMin:  cachedResult.airMin,
-          airMax:  cachedResult.airMax,
-          prob:    cachedResult.probability,
-          tag:     cachedResult.tag,
-          color:   cachedResult.color,
+        const p = new URLSearchParams({
+          name, math: cachedResult.mathScore, gat: cachedResult.gatScore,
+          written: cachedResult.writtenScore, ssb: cachedResult.ssb,
+          total: cachedResult.totalScore, airMin: cachedResult.airMin,
+          airMax: cachedResult.airMax, prob: cachedResult.probability,
+          tag: cachedResult.tag, color: cachedResult.color,
           sectional: cachedResult.sectionalPassed ? '1' : '0',
-          mathPass:  cachedResult.mathPassed ? '1' : '0',
-          gatPass:   cachedResult.gatPassed  ? '1' : '0',
+          mathPass: cachedResult.mathPassed ? '1' : '0',
+          gatPass:  cachedResult.gatPassed  ? '1' : '0',
           age,
         });
-        window.location.href = `result.html?${params.toString()}`;
+        window.location.href = `result.html?${p.toString()}`;
       }, 1200);
     }
 
-    // ─── Init ─────────────────────────────────
+    // Init
     renderCutoffTable();
 
-    // Close modal on overlay click
     document.getElementById('lead-modal').addEventListener('click', function(e) {
       if (e.target === this) closeLeadModal();
     });
 
+    // PWA
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+    }
+
   </script>
+
+  <!-- Firebase + NDA Scripts -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="assets/js/firebase-config.js"></script>
+
 </body>
 </html>

@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NDA Rank Predictor — Know Your AIR Before Results</title>
+  <meta name="description" content="India's most accurate NDA rank predictor. Enter your marks and get your predicted All India Rank instantly." />
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ── CSS Variables ── */
+    :root {
+      --olive:    #4a5240;
+      --army:     #2d3a1e;
+      --khaki:    #c8b560;
+      --gold:     #f0c040;
+      --danger:   #e63946;
+      --safe:     #52b788;
+      --bg:       #0d0f0a;
+      --surface:  #161a10;
+      --surface2: #1e2416;
+      --text:     #e8e4d0;
+      --muted:    #7a7a65;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 16px;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Background Grid ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(192,178,96,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(192,178,96,0.04) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Glow Orb ── */
+    .glow-orb {
+      position: fixed;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(74,82,64,0.25) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+      top: -100px;
+      right: -150px;
+      animation: pulse-orb 6s ease-in-out infinite;
+    }
+
+    @keyframes pulse-orb {
+      0%, 100% { transform: scale(1); opacity: 0.6; }
+      50%       { transform: scale(1.15); opacity: 1; }
+    }
+
+    /* ── Typography ── */
+    .font-display { font-family: 'Bebas Neue', cursive; letter-spacing: 0.05em; }
+    .font-mono    { font-family: 'JetBrains Mono', monospace; }
+    .font-ui      { font-family: 'Rajdhani', sans-serif; font-weight: 600; }
+
+    /* ── Hero Badge ── */
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(240,192,64,0.1);
+      border: 1px solid rgba(240,192,64,0.3);
+      color: var(--gold);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      padding: 6px 14px;
+      border-radius: 2px;
+      text-transform: uppercase;
+    }
+
+    .hero-badge::before {
+      content: '';
+      width: 6px; height: 6px;
+      background: var(--gold);
+      border-radius: 50%;
+      animation: blink 1.4s ease-in-out infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.2; }
+    }
+
+    /* ── Section Card ── */
+    .section-card {
+      background: var(--surface);
+      border: 1px solid rgba(200,181,96,0.15);
+      border-radius: 4px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .section-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--khaki), transparent);
+      opacity: 0.5;
+    }
+
+    /* ── Section Label ── */
+    .section-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      color: var(--khaki);
+      text-transform: uppercase;
+      opacity: 0.7;
+    }
+
+    /* ── Input Fields ── */
+    .nda-input {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid rgba(200,181,96,0.2);
+      color: var(--text);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 20px;
+      font-weight: 700;
+      padding: 14px 16px;
+      border-radius: 3px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      text-align: center;
+      -moz-appearance: textfield;
+    }
+
+    .nda-input::-webkit-outer-spin-button,
+    .nda-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+    .nda-input:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(240,192,64,0.12);
+    }
+
+    .nda-input.error {
+      border-color: var(--danger);
+      box-shadow: 0 0 0 3px rgba(230,57,70,0.12);
+    }
+
+    .nda-input::placeholder { color: var(--muted); font-size: 14px; }
+
+    /* ── Input Label ── */
+    .input-label {
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 600;
+      font-size: 13px;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .input-max {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: rgba(200,181,96,0.4);
+    }
+
+    /* ── Score Preview ── */
+    .score-preview {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--safe);
+      text-align: center;
+      margin-top: 6px;
+      min-height: 18px;
+      transition: all 0.3s;
+    }
+
+    /* ── Divider ── */
+    .tactical-divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: 0.15em;
+      opacity: 0.5;
+    }
+
+    .tactical-divider::before,
+    .tactical-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(200,181,96,0.15);
+    }
+
+    /* ── CTA Button ── */
+    .btn-predict {
+      width: 100%;
+      background: var(--gold);
+      color: var(--army);
+      font-family: 'Bebas Neue', cursive;
+      font-size: 22px;
+      letter-spacing: 0.12em;
+      padding: 18px;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+
+    .btn-predict::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 60%);
+    }
+
+    .btn-predict:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(240,192,64,0.35);
+    }
+
+    .btn-predict:active { transform: translateY(0); }
+
+    .btn-predict:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    /* ── Stats Row ── */
+    .stat-box {
+      background: var(--surface2);
+      border: 1px solid rgba(200,181,96,0.1);
+      border-radius: 3px;
+      padding: 12px;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-family: 'Bebas Neue', cursive;
+      font-size: 26px;
+      color: var(--gold);
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-top: 4px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* ── Cutoff Table ── */
+    .cutoff-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1px;
+      background: rgba(200,181,96,0.08);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .cutoff-cell {
+      background: var(--surface2);
+      padding: 10px 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+    }
+
+    .cutoff-cell.header {
+      color: var(--khaki);
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      opacity: 0.7;
+      background: rgba(200,181,96,0.06);
+    }
+
+    /* ── Error Message ── */
+    .error-msg {
+      color: var(--danger);
+      font-size: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      margin-top: 6px;
+      display: none;
+    }
+
+    /* ── Lead Modal ── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(4px);
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-overlay.active { display: flex; }
+
+    .modal-box {
+      background: var(--surface);
+      border: 1px solid rgba(200,181,96,0.3);
+      border-radius: 4px;
+      padding: 32px 28px;
+      width: 100%;
+      max-width: 440px;
+      position: relative;
+      animation: modal-in 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    }
+
+    @keyframes modal-in {
+      from { opacity: 0; transform: scale(0.88) translateY(20px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .modal-input {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid rgba(200,181,96,0.2);
+      color: var(--text);
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 16px;
+      font-weight: 600;
+      padding: 12px 16px;
+      border-radius: 3px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .modal-input:focus { border-color: var(--gold); }
+    .modal-input::placeholder { color: var(--muted); }
+
+    /* ── Loader ── */
+    .loader {
+      display: none;
+      width: 20px; height: 20px;
+      border: 2px solid rgba(13,15,10,0.3);
+      border-top-color: var(--army);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin: 0 auto;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Animations ── */
+    @keyframes fade-up {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .fade-up { animation: fade-up 0.6s ease forwards; opacity: 0; }
+    .delay-1 { animation-delay: 0.1s; }
+    .delay-2 { animation-delay: 0.2s; }
+    .delay-3 { animation-delay: 0.3s; }
+    .delay-4 { animation-delay: 0.4s; }
+    .delay-5 { animation-delay: 0.5s; }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--olive); border-radius: 2px; }
+
+    /* ── Mobile adjustments ── */
+    @media (max-width: 480px) {
+      .hero-title { font-size: 52px !important; line-height: 0.92 !important; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="glow-orb"></div>
+
+  <!-- ═══════════════════════════════════════════
+       NAVBAR
+  ═══════════════════════════════════════════ -->
+  <nav class="relative z-10 flex items-center justify-between px-5 py-4 border-b border-white/5">
+    <div class="flex items-center gap-3">
+      <div class="w-7 h-7 border border-[var(--khaki)] flex items-center justify-center opacity-80">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color:var(--khaki)">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+        </svg>
+      </div>
+      <span class="font-display text-lg tracking-widest" style="color:var(--text)">NDA PREDICTOR</span>
+    </div>
+    <div class="hero-badge">UPSC DATA 2021–25</div>
+  </nav>
+
+  <!-- ═══════════════════════════════════════════
+       HERO
+  ═══════════════════════════════════════════ -->
+  <section class="relative z-10 px-5 pt-12 pb-8 max-w-lg mx-auto text-center">
+    <div class="fade-up delay-1">
+      <p class="section-label mb-4">India's Most Accurate</p>
+      <h1 class="font-display hero-title" style="font-size:68px; line-height:0.9; color:var(--text)">
+        KNOW YOUR<br/>
+        <span style="color:var(--gold)">AIR RANK</span><br/>
+        TODAY
+      </h1>
+      <p class="font-ui mt-5 text-base leading-relaxed" style="color:var(--muted)">
+        Enter your expected marks — get your <strong style="color:var(--text)">Predicted All India Rank</strong>,
+        selection probability, and sectional analysis. Powered by real UPSC data.
+      </p>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="grid grid-cols-3 gap-2 mt-8 fade-up delay-2">
+      <div class="stat-box">
+        <div class="stat-value">5</div>
+        <div class="stat-label">Years Data</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-value">10</div>
+        <div class="stat-label">Exams Analyzed</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-value">400+</div>
+        <div class="stat-label">Avg Seats/Year</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       MAIN FORM
+  ═══════════════════════════════════════════ -->
+  <main class="relative z-10 px-5 max-w-lg mx-auto pb-16">
+
+    <!-- ── PAPER 1: MATH ── -->
+    <div class="section-card p-5 mb-4 fade-up delay-2">
+      <div class="flex items-center justify-between mb-4">
+        <p class="section-label">Paper I</p>
+        <span class="font-display text-2xl" style="color:var(--gold)">MATHEMATICS</span>
+      </div>
+      <p class="font-mono text-xs mb-4" style="color:var(--muted)">120 Qs | +2.5 correct | −0.83 wrong | Total 300</p>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <div class="input-label">
+            Correct <span class="input-max">MAX 120</span>
+          </div>
+          <input type="number" id="math-correct" class="nda-input" placeholder="0" min="0" max="120"
+                 oninput="onInputChange()" />
+        </div>
+        <div>
+          <div class="input-label">
+            Wrong <span class="input-max">MAX 120</span>
+          </div>
+          <input type="number" id="math-wrong" class="nda-input" placeholder="0" min="0" max="120"
+                 oninput="onInputChange()" />
+        </div>
+      </div>
+
+      <div class="score-preview" id="math-preview">Enter attempts to see score</div>
+      <div class="error-msg" id="math-error"></div>
+    </div>
+
+    <!-- ── PAPER 2: GAT ── -->
+    <div class="section-card p-5 mb-4 fade-up delay-3">
+      <div class="flex items-center justify-between mb-4">
+        <p class="section-label">Paper II</p>
+        <span class="font-display text-2xl" style="color:var(--gold)">GAT</span>
+      </div>
+      <p class="font-mono text-xs mb-4" style="color:var(--muted)">150 Qs | +4 correct | −1.33 wrong | Total 600</p>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <div class="input-label">
+            Correct <span class="input-max">MAX 150</span>
+          </div>
+          <input type="number" id="gat-correct" class="nda-input" placeholder="0" min="0" max="150"
+                 oninput="onInputChange()" />
+        </div>
+        <div>
+          <div class="input-label">
+            Wrong <span class="input-max">MAX 150</span>
+          </div>
+          <input type="number" id="gat-wrong" class="nda-input" placeholder="0" min="0" max="150"
+                 oninput="onInputChange()" />
+        </div>
+      </div>
+
+      <div class="score-preview" id="gat-preview">Enter attempts to see score</div>
+      <div class="error-msg" id="gat-error"></div>
+    </div>
+
+    <!-- ── SSB SCORE ── -->
+    <div class="section-card p-5 mb-4 fade-up delay-4">
+      <div class="flex items-center justify-between mb-4">
+        <p class="section-label">Optional</p>
+        <span class="font-display text-2xl" style="color:var(--gold)">SSB SCORE</span>
+      </div>
+      <p class="font-mono text-xs mb-4" style="color:var(--muted)">Expected SSB marks out of 900. Leave 0 if not appeared yet.</p>
+
+      <div>
+        <div class="input-label">
+          Expected SSB Marks <span class="input-max">MAX 900</span>
+        </div>
+        <input type="number" id="ssb-score" class="nda-input" placeholder="0" min="0" max="900"
+               oninput="onInputChange()" />
+      </div>
+
+      <div class="score-preview" id="ssb-preview">Average selected candidates score ~366 in SSB</div>
+    </div>
+
+    <!-- ── SECTIONAL RULE ── -->
+    <div class="section-card p-5 mb-6 fade-up delay-4">
+      <p class="section-label mb-3">Sectional Cutoff Rule</p>
+      <p class="font-mono text-xs mb-4" style="color:var(--muted)">UPSC applies 20% or 25% rule. Check your notification.</p>
+
+      <div class="grid grid-cols-2 gap-3">
+        <label class="flex items-center gap-3 cursor-pointer p-3 rounded" style="border:1px solid rgba(200,181,96,0.2); background:var(--surface2)">
+          <input type="radio" name="rule" value="25" checked class="accent-yellow-400" id="rule-25" />
+          <div>
+            <div class="font-ui text-sm" style="color:var(--text)">25% Rule</div>
+            <div class="font-mono text-xs" style="color:var(--muted)">Math 75 | GAT 150</div>
+          </div>
+        </label>
+        <label class="flex items-center gap-3 cursor-pointer p-3 rounded" style="border:1px solid rgba(200,181,96,0.2); background:var(--surface2)">
+          <input type="radio" name="rule" value="20" class="accent-yellow-400" id="rule-20" />
+          <div>
+            <div class="font-ui text-sm" style="color:var(--text)">20% Rule</div>
+            <div class="font-mono text-xs" style="color:var(--muted)">Math 60 | GAT 120</div>
+          </div>
+        </label>
+      </div>
+    </div>
+
+    <!-- ── PREDICT BUTTON ── -->
+    <div class="fade-up delay-5">
+      <button class="btn-predict" id="predict-btn" onclick="openLeadModal()">
+        <span id="btn-text">⚡ PREDICT MY AIR RANK</span>
+        <div class="loader" id="btn-loader"></div>
+      </button>
+      <p class="text-center font-mono text-xs mt-3" style="color:var(--muted)">
+        Based on UPSC NDA data 2021–2025 · Not an official UPSC tool
+      </p>
+    </div>
+
+    <!-- ── CUTOFF REFERENCE ── -->
+    <div class="section-card p-5 mt-8 fade-up delay-5">
+      <p class="section-label mb-4">Historical Cutoff Reference</p>
+
+      <div class="cutoff-row mb-1">
+        <div class="cutoff-cell header">EXAM</div>
+        <div class="cutoff-cell header">WRITTEN /900</div>
+        <div class="cutoff-cell header">FINAL /1800</div>
+      </div>
+
+      <div id="cutoff-table">
+        <!-- Filled by JS -->
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ═══════════════════════════════════════════
+       LEAD CAPTURE MODAL
+  ═══════════════════════════════════════════ -->
+  <div class="modal-overlay" id="lead-modal">
+    <div class="modal-box">
+      <p class="section-label mb-2">Almost There!</p>
+      <h2 class="font-display text-3xl mb-1" style="color:var(--gold)">GET YOUR RESULT</h2>
+      <p class="font-ui text-sm mb-6" style="color:var(--muted)">Enter your details to see your predicted AIR rank and full analysis.</p>
+
+      <div class="space-y-3">
+        <div>
+          <div class="input-label mb-1">Full Name</div>
+          <input type="text" id="lead-name" class="modal-input" placeholder="Your name" />
+        </div>
+        <div>
+          <div class="input-label mb-1">Phone Number</div>
+          <input type="tel" id="lead-phone" class="modal-input" placeholder="10-digit mobile number" maxlength="10" />
+        </div>
+        <div>
+          <div class="input-label mb-1">Your Age</div>
+          <input type="number" id="lead-age" class="modal-input" placeholder="e.g. 17" min="16" max="19" />
+        </div>
+      </div>
+
+      <div class="error-msg mt-2" id="modal-error" style="display:block; min-height:18px;"></div>
+
+      <button class="btn-predict mt-5" id="modal-submit-btn" onclick="submitLead()">
+        <span id="modal-btn-text">🎯 SHOW MY RANK</span>
+        <div class="loader" id="modal-loader"></div>
+      </button>
+
+      <button onclick="closeLeadModal()" class="w-full mt-3 text-center font-mono text-xs py-2 cursor-pointer"
+              style="color:var(--muted); background:none; border:none;">
+        Cancel
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       SCRIPTS
+  ═══════════════════════════════════════════ -->
+  <script>
+
+    // ─── Cutoff Table Data ────────────────────
+    const CUTOFF_DATA = [
+      { exam: "NDA 1 2025", written: 305, final: 673 },
+      { exam: "NDA 2 2024", written: 305, final: 673 },
+      { exam: "NDA 1 2024", written: 291, final: 654 },
+      { exam: "NDA 2 2023", written: 292, final: 656 },
+      { exam: "NDA 1 2023", written: 301, final: 664 },
+      { exam: "NDA 2 2022", written: 316, final: 678 },
+      { exam: "NDA 1 2022", written: 360, final: 720 },
+      { exam: "NDA 2 2021", written: 355, final: 726 },
+      { exam: "NDA 1 2021", written: 343, final: 709 },
+    ];
+
+    // ─── NDA Config ──────────────────────────
+    const CFG = {
+      math: { q: 120, correct: 2.5, wrong: 0.83, min25: 75, min20: 60 },
+      gat:  { q: 150, correct: 4,   wrong: 1.33, min25: 150, min20: 120 },
+    };
+
+    const RANK_MATRIX = [
+      { min: 1100, max: 1800, airMin: 1,    airMax: 25,   prob: 99, tag: "TOPPER 🏆",      color: "#FFD700" },
+      { min: 1000, max: 1099, airMin: 26,   airMax: 100,  prob: 98, tag: "EXCELLENT 🌟",   color: "#00C853" },
+      { min: 900,  max: 999,  airMin: 101,  airMax: 250,  prob: 95, tag: "VERY STRONG 💪", color: "#00BCD4" },
+      { min: 820,  max: 899,  airMin: 251,  airMax: 450,  prob: 88, tag: "STRONG ✅",       color: "#4CAF50" },
+      { min: 750,  max: 819,  airMin: 451,  airMax: 650,  prob: 75, tag: "DECENT 👍",       color: "#8BC34A" },
+      { min: 700,  max: 749,  airMin: 651,  airMax: 800,  prob: 55, tag: "BORDERLINE ⚠️",  color: "#FFC107" },
+      { min: 654,  max: 699,  airMin: 801,  airMax: 1000, prob: 25, tag: "RISKY 🔴",        color: "#FF9800" },
+      { min: 0,    max: 653,  airMin: 1001, airMax: 9999, prob: 5,  tag: "NOT SELECTED ❌", color: "#F44336" },
+    ];
+
+    // ─── Stored Scores ────────────────────────
+    let cachedResult = null;
+
+    // ─── Render Cutoff Table ──────────────────
+    function renderCutoffTable() {
+      const el = document.getElementById('cutoff-table');
+      el.innerHTML = CUTOFF_DATA.map(d => `
+        <div class="cutoff-row mb-px">
+          <div class="cutoff-cell font-ui" style="color:var(--text); font-size:11px">${d.exam}</div>
+          <div class="cutoff-cell" style="color:var(--khaki)">${d.written}</div>
+          <div class="cutoff-cell" style="color:var(--safe)">${d.final}</div>
+        </div>
+      `).join('');
+    }
+
+    // ─── Live Score Preview ───────────────────
+    function calcMath() {
+      const c = parseInt(document.getElementById('math-correct').value) || 0;
+      const w = parseInt(document.getElementById('math-wrong').value)   || 0;
+      return parseFloat(((c * CFG.math.correct) - (w * CFG.math.wrong)).toFixed(2));
+    }
+
+    function calcGAT() {
+      const c = parseInt(document.getElementById('gat-correct').value) || 0;
+      const w = parseInt(document.getElementById('gat-wrong').value)   || 0;
+      return parseFloat(((c * CFG.gat.correct) - (w * CFG.gat.wrong)).toFixed(2));
+    }
+
+    function onInputChange() {
+      const mathScore = calcMath();
+      const gatScore  = calcGAT();
+      const ssb       = parseInt(document.getElementById('ssb-score').value) || 0;
+      const rule      = document.querySelector('input[name="rule"]:checked').value;
+
+      // Math preview
+      const mathMin = rule === "20" ? CFG.math.min20 : CFG.math.min25;
+      const mathOk  = mathScore >= mathMin;
+      const mathEl  = document.getElementById('math-preview');
+      mathEl.style.color = mathScore > 0 ? (mathOk ? 'var(--safe)' : 'var(--danger)') : 'var(--muted)';
+      mathEl.textContent = mathScore !== 0
+        ? `Score: ${mathScore} / 300 ${mathOk ? '✓ Sectional Clear' : `✗ Need ${(mathMin - mathScore).toFixed(1)} more`}`
+        : 'Enter attempts to see score';
+
+      // GAT preview
+      const gatMin = rule === "20" ? CFG.gat.min20 : CFG.gat.min25;
+      const gatOk  = gatScore >= gatMin;
+      const gatEl  = document.getElementById('gat-preview');
+      gatEl.style.color = gatScore > 0 ? (gatOk ? 'var(--safe)' : 'var(--danger)') : 'var(--muted)';
+      gatEl.textContent = gatScore !== 0
+        ? `Score: ${gatScore} / 600 ${gatOk ? '✓ Sectional Clear' : `✗ Need ${(gatMin - gatScore).toFixed(1)} more`}`
+        : 'Enter attempts to see score';
+
+      // SSB preview
+      const ssbEl = document.getElementById('ssb-preview');
+      ssbEl.textContent = ssb > 0
+        ? `Total Score: ${mathScore + gatScore + ssb} / 1800`
+        : 'Average selected candidates score ~366 in SSB';
+    }
+
+    // ─── Validate Inputs ──────────────────────
+    function validateInputs() {
+      const mc = parseInt(document.getElementById('math-correct').value) || 0;
+      const mw = parseInt(document.getElementById('math-wrong').value)   || 0;
+      const gc = parseInt(document.getElementById('gat-correct').value)  || 0;
+      const gw = parseInt(document.getElementById('gat-wrong').value)    || 0;
+      const ssb = parseInt(document.getElementById('ssb-score').value)   || 0;
+
+      if (mc + mw > CFG.math.q) return `Math: Correct + Wrong cannot exceed ${CFG.math.q}`;
+      if (gc + gw > CFG.gat.q)  return `GAT: Correct + Wrong cannot exceed ${CFG.gat.q}`;
+      if (ssb > 900)             return 'SSB marks cannot exceed 900';
+      if (mc === 0 && gc === 0)  return 'Please enter at least Math or GAT attempts';
+      return null;
+    }
+
+    // ─── Build Result Object ──────────────────
+    function buildResult(age = 17) {
+      const mc  = parseInt(document.getElementById('math-correct').value) || 0;
+      const mw  = parseInt(document.getElementById('math-wrong').value)   || 0;
+      const gc  = parseInt(document.getElementById('gat-correct').value)  || 0;
+      const gw  = parseInt(document.getElementById('gat-wrong').value)    || 0;
+      const ssb = parseInt(document.getElementById('ssb-score').value)    || 0;
+      const rule = document.querySelector('input[name="rule"]:checked').value;
+
+      const mathScore    = parseFloat(((mc * CFG.math.correct) - (mw * CFG.math.wrong)).toFixed(2));
+      const gatScore     = parseFloat(((gc * CFG.gat.correct)  - (gw * CFG.gat.wrong)).toFixed(2));
+      const writtenScore = parseFloat((mathScore + gatScore).toFixed(2));
+      const totalScore   = writtenScore + ssb;
+
+      const mathMin = rule === "20" ? CFG.math.min20 : CFG.math.min25;
+      const gatMin  = rule === "20" ? CFG.gat.min20  : CFG.gat.min25;
+
+      const mathPassed = mathScore >= mathMin;
+      const gatPassed  = gatScore  >= gatMin;
+      const sectionalPassed = mathPassed && gatPassed;
+
+      const band = RANK_MATRIX.find(b => totalScore >= b.min && totalScore <= b.max)
+                   || RANK_MATRIX[RANK_MATRIX.length - 1];
+
+      return {
+        mathScore, gatScore, writtenScore, ssb, totalScore,
+        mathPassed, gatPassed, sectionalPassed,
+        mathMin, gatMin, rule,
+        airMin: band.airMin, airMax: band.airMax,
+        probability: band.prob,
+        tag: band.tag, color: band.color,
+        age,
+      };
+    }
+
+    // ─── Modal Controls ───────────────────────
+    function openLeadModal() {
+      const err = validateInputs();
+      if (err) {
+        alert(err);
+        return;
+      }
+      document.getElementById('lead-modal').classList.add('active');
+    }
+
+    function closeLeadModal() {
+      document.getElementById('lead-modal').classList.remove('active');
+    }
+
+    // ─── Submit Lead ──────────────────────────
+    function submitLead() {
+      const name  = document.getElementById('lead-name').value.trim();
+      const phone = document.getElementById('lead-phone').value.trim();
+      const age   = parseInt(document.getElementById('lead-age').value) || 17;
+      const errEl = document.getElementById('modal-error');
+
+      errEl.textContent = '';
+
+      if (!name)                          { errEl.textContent = '⚠ Name required'; return; }
+      if (!/^\d{10}$/.test(phone))        { errEl.textContent = '⚠ Valid 10-digit phone required'; return; }
+      if (age < 16 || age > 19)           { errEl.textContent = '⚠ Age must be between 16-19'; return; }
+
+      // Show loader
+      document.getElementById('modal-btn-text').style.display = 'none';
+      document.getElementById('modal-loader').style.display = 'block';
+      document.getElementById('modal-submit-btn').disabled = true;
+
+      // Build result
+      cachedResult = buildResult(age);
+      cachedResult.name  = name;
+      cachedResult.phone = phone;
+
+      // Save to localStorage (Firebase replace karein baad mein)
+      const leads = JSON.parse(localStorage.getItem('nda_leads') || '[]');
+      leads.push({
+        name, phone, age,
+        mathScore:    cachedResult.mathScore,
+        gatScore:     cachedResult.gatScore,
+        writtenScore: cachedResult.writtenScore,
+        ssb:          cachedResult.ssb,
+        totalScore:   cachedResult.totalScore,
+        airMin:       cachedResult.airMin,
+        airMax:       cachedResult.airMax,
+        probability:  cachedResult.probability,
+        timestamp:    new Date().toISOString(),
+      });
+      localStorage.setItem('nda_leads', JSON.stringify(leads));
+
+      // Simulate slight delay then redirect
+      setTimeout(() => {
+        const params = new URLSearchParams({
+          name,
+          math:    cachedResult.mathScore,
+          gat:     cachedResult.gatScore,
+          written: cachedResult.writtenScore,
+          ssb:     cachedResult.ssb,
+          total:   cachedResult.totalScore,
+          airMin:  cachedResult.airMin,
+          airMax:  cachedResult.airMax,
+          prob:    cachedResult.probability,
+          tag:     cachedResult.tag,
+          color:   cachedResult.color,
+          sectional: cachedResult.sectionalPassed ? '1' : '0',
+          mathPass:  cachedResult.mathPassed ? '1' : '0',
+          gatPass:   cachedResult.gatPassed  ? '1' : '0',
+          age,
+        });
+        window.location.href = `result.html?${params.toString()}`;
+      }, 1200);
+    }
+
+    // ─── Init ─────────────────────────────────
+    renderCutoffTable();
+
+    // Close modal on overlay click
+    document.getElementById('lead-modal').addEventListener('click', function(e) {
+      if (e.target === this) closeLeadModal();
+    });
+
+  </script>
+</body>
+</html>
