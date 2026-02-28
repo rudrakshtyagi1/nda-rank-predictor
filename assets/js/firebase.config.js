@@ -88,7 +88,7 @@ async function saveLead(leadData) {
   // ── 2. Also save to Firebase if connected ──────────────────
   if (firebaseOk && db) {
     try {
-      await db.collection('leads').add(lead);
+      await db.collection('user').add(lead);
       console.log('✅ Lead saved to Firebase:', lead.name);
 
       // Log analytics event
@@ -128,7 +128,7 @@ async function getAllLeads() {
   // ── From Firebase ──────────────────────────────────────────
   if (firebaseOk && db) {
     try {
-      const snap = await db.collection('leads')
+      const snap = await db.collection('user')
         .orderBy('timestamp', 'desc')
         .limit(500)
         .get();
@@ -155,7 +155,7 @@ async function getAllLeads() {
 async function deleteLead(leadId) {
   if (firebaseOk && db && leadId) {
     try {
-      await db.collection('leads').doc(leadId).delete();
+      await db.collection('user').doc(leadId).delete();
       console.log('Lead deleted from Firebase:', leadId);
     } catch (err) {
       console.error('Firebase delete failed:', err);

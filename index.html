@@ -1,27 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta name="google-site-verification" content="T0061T1IWVUPP65xsPB1Ah2o4IJZmycTxvQDVA1ArE8" />
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>NDA Rank Predictor — Know Your AIR Before Results</title>
-  <meta name="description" content="India's most accurate NDA rank predictor. Enter your marks and get your predicted All India Rank instantly." />
+  <meta name="description"
+    content="India's most accurate NDA rank predictor. Enter your marks and get your predicted All India Rank instantly." />
   <meta name="keywords" content="NDA rank predictor, NDA AIR predictor, UPSC NDA result, NDA 2025 cutoff" />
   <meta property="og:title" content="NDA Rank Predictor — Know Your AIR Before Results" />
   <meta property="og:type" content="website" />
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#00ff88" />
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap"
+    rel="stylesheet" />
 
   <style>
     /* ══════════════════════════════════════════════
        RESET & FULL SCREEN
     ══════════════════════════════════════════════ */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-    html, body {
-      width: 100%; min-height: 100vh;
+    html,
+    body {
+      width: 100%;
+      min-height: 100vh;
       overflow-x: hidden;
       background: #060a06;
     }
@@ -30,49 +42,61 @@
        CSS VARIABLES
     ══════════════════════════════════════════════ */
     :root {
-      --green:    #00ff88;
-      --green2:   #00cc66;
-      --green3:   #004422;
-      --gold:     #f0c040;
-      --khaki:    #c8b560;
-      --danger:   #e63946;
-      --safe:     #52b788;
-      --bg:       #060a06;
-      --surface:  #0d130d;
+      --green: #00ff88;
+      --green2: #00cc66;
+      --green3: #004422;
+      --gold: #f0c040;
+      --khaki: #c8b560;
+      --danger: #e63946;
+      --safe: #52b788;
+      --bg: #060a06;
+      --surface: #0d130d;
       --surface2: #111811;
-      --text:     #d4f0d4;
-      --muted:    #4a7a4a;
-      --army:     #1a2e1a;
+      --text: #d4f0d4;
+      --muted: #4a7a4a;
+      --army: #1a2e1a;
     }
 
     /* ══════════════════════════════════════════════
        1. HUD GRID BACKGROUND — pulsing green
     ══════════════════════════════════════════════ */
     #hud-bg {
-      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
       overflow: hidden;
     }
 
     /* Grid layer */
     #hud-bg::before {
       content: '';
-      position: absolute; inset: 0;
+      position: absolute;
+      inset: 0;
       background-image:
-        linear-gradient(rgba(0,255,136,0.07) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0,255,136,0.07) 1px, transparent 1px);
+        linear-gradient(rgba(0, 255, 136, 0.07) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 255, 136, 0.07) 1px, transparent 1px);
       background-size: 48px 48px;
       animation: grid-pulse 4s ease-in-out infinite;
     }
 
     @keyframes grid-pulse {
-      0%,100% { opacity: 0.7; }
-      50%      { opacity: 1; }
+
+      0%,
+      100% {
+        opacity: 0.7;
+      }
+
+      50% {
+        opacity: 1;
+      }
     }
 
     /* Vignette overlay */
     #hud-bg::after {
       content: '';
-      position: absolute; inset: 0;
+      position: absolute;
+      inset: 0;
       background: radial-gradient(ellipse at center, transparent 40%, #060a06 100%);
     }
 
@@ -81,16 +105,20 @@
     ══════════════════════════════════════════════ */
     #radar-wrap {
       position: fixed;
-      width: 900px; height: 900px;
-      top: 50%; left: 50%;
+      width: 900px;
+      height: 900px;
+      top: 50%;
+      left: 50%;
       transform: translate(-50%, -50%);
-      pointer-events: none; z-index: 0;
+      pointer-events: none;
+      z-index: 0;
     }
 
     #radar-sweep {
-      width: 100%; height: 100%;
+      width: 100%;
+      height: 100%;
       border-radius: 50%;
-      border: 1px solid rgba(0,255,136,0.08);
+      border: 1px solid rgba(0, 255, 136, 0.08);
       position: relative;
       animation: radar-rotate 8s linear infinite;
       transform-origin: center center;
@@ -98,15 +126,14 @@
 
     #radar-sweep::before {
       content: '';
-      position: absolute; inset: 0;
-      background: conic-gradient(
-        from 0deg,
-        transparent 0deg,
-        transparent 320deg,
-        rgba(0,255,136,0.03) 340deg,
-        rgba(0,255,136,0.18) 355deg,
-        rgba(0,255,136,0.25) 360deg
-      );
+      position: absolute;
+      inset: 0;
+      background: conic-gradient(from 0deg,
+          transparent 0deg,
+          transparent 320deg,
+          rgba(0, 255, 136, 0.03) 340deg,
+          rgba(0, 255, 136, 0.18) 355deg,
+          rgba(0, 255, 136, 0.25) 360deg);
       border-radius: 50%;
     }
 
@@ -116,29 +143,49 @@
       position: absolute;
       inset: 15%;
       border-radius: 50%;
-      border: 1px solid rgba(0,255,136,0.05);
+      border: 1px solid rgba(0, 255, 136, 0.05);
       box-shadow:
-        0 0 0 80px rgba(0,255,136,0.02),
-        0 0 0 160px rgba(0,255,136,0.015),
-        0 0 0 240px rgba(0,255,136,0.01);
+        0 0 0 80px rgba(0, 255, 136, 0.02),
+        0 0 0 160px rgba(0, 255, 136, 0.015),
+        0 0 0 240px rgba(0, 255, 136, 0.01);
     }
 
     /* Center blip */
     .radar-center {
-      position: absolute; top: 50%; left: 50%;
+      position: absolute;
+      top: 50%;
+      left: 50%;
       transform: translate(-50%, -50%);
-      width: 6px; height: 6px;
+      width: 6px;
+      height: 6px;
       background: var(--green);
       border-radius: 50%;
       box-shadow: 0 0 12px var(--green), 0 0 24px var(--green);
       animation: center-blink 2s ease-in-out infinite;
     }
 
-    @keyframes radar-rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-    @keyframes center-blink { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
-5%   { opacity: 1; }
-      95%  { opacity: 1; }
-      100% { top: 100vh; opacity: 0; }
+    @keyframes radar-rotate {
+      from {
+        transform: rotate(0deg);
+      }
+
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    @keyframes center-blink {
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.3;
+      }
+    }
+
     }
 
     /* ══════════════════════════════════════════════
@@ -146,15 +193,16 @@
     ══════════════════════════════════════════════ */
     #mouse-glow {
       position: fixed;
-      width: 600px; height: 600px;
+      width: 600px;
+      height: 600px;
       border-radius: 50%;
-      pointer-events: none; z-index: 1;
+      pointer-events: none;
+      z-index: 1;
       transform: translate(-50%, -50%);
       background: radial-gradient(circle,
-        rgba(0,255,136,0.06) 0%,
-        rgba(0,255,136,0.03) 30%,
-        transparent 70%
-      );
+          rgba(0, 255, 136, 0.06) 0%,
+          rgba(0, 255, 136, 0.03) 30%,
+          transparent 70%);
       transition: transform 0.12s ease-out, opacity 0.3s;
       mix-blend-mode: screen;
     }
@@ -164,19 +212,34 @@
     ══════════════════════════════════════════════ */
     .particle {
       position: fixed;
-      width: 2px; height: 2px;
+      width: 2px;
+      height: 2px;
       background: var(--green);
       border-radius: 50%;
-      pointer-events: none; z-index: 0;
+      pointer-events: none;
+      z-index: 0;
       opacity: 0;
       animation: particle-float linear infinite;
     }
 
     @keyframes particle-float {
-      0%   { transform: translateY(100vh) translateX(0); opacity: 0; }
-      10%  { opacity: 0.6; }
-      90%  { opacity: 0.4; }
-      100% { transform: translateY(-10vh) translateX(var(--drift)); opacity: 0; }
+      0% {
+        transform: translateY(100vh) translateX(0);
+        opacity: 0;
+      }
+
+      10% {
+        opacity: 0.6;
+      }
+
+      90% {
+        opacity: 0.4;
+      }
+
+      100% {
+        transform: translateY(-10vh) translateX(var(--drift));
+        opacity: 0;
+      }
     }
 
     /* ══════════════════════════════════════════════
@@ -189,58 +252,97 @@
       background: var(--bg);
     }
 
-    .font-display { font-family: 'Bebas Neue', cursive; letter-spacing: 0.05em; }
-    .font-mono    { font-family: 'JetBrains Mono', monospace; }
-    .font-ui      { font-family: 'Rajdhani', sans-serif; font-weight: 600; }
+    .font-display {
+      font-family: 'Bebas Neue', cursive;
+      letter-spacing: 0.05em;
+    }
+
+    .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .font-ui {
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 600;
+    }
 
     /* ══════════════════════════════════════════════
        NAVBAR
     ══════════════════════════════════════════════ */
     nav {
-      position: relative; z-index: 10;
-      display: flex; align-items: center; justify-content: space-between;
+      position: relative;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       padding: 16px 4vw;
-      border-bottom: 1px solid rgba(0,255,136,0.1);
-      background: rgba(6,10,6,0.6);
+      border-bottom: 1px solid rgba(0, 255, 136, 0.1);
+      background: rgba(6, 10, 6, 0.6);
       backdrop-filter: blur(12px);
     }
 
     .nav-logo-box {
-      width: 30px; height: 30px;
+      width: 30px;
+      height: 30px;
       border: 1px solid var(--green);
-      display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 0 10px rgba(0,255,136,0.3), inset 0 0 10px rgba(0,255,136,0.05);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 10px rgba(0, 255, 136, 0.3), inset 0 0 10px rgba(0, 255, 136, 0.05);
       animation: logo-pulse 3s ease-in-out infinite;
     }
 
     @keyframes logo-pulse {
-      0%,100% { box-shadow: 0 0 8px rgba(0,255,136,0.3), inset 0 0 8px rgba(0,255,136,0.05); }
-      50%      { box-shadow: 0 0 20px rgba(0,255,136,0.6), inset 0 0 15px rgba(0,255,136,0.1); }
+
+      0%,
+      100% {
+        box-shadow: 0 0 8px rgba(0, 255, 136, 0.3), inset 0 0 8px rgba(0, 255, 136, 0.05);
+      }
+
+      50% {
+        box-shadow: 0 0 20px rgba(0, 255, 136, 0.6), inset 0 0 15px rgba(0, 255, 136, 0.1);
+      }
     }
 
     /* ══════════════════════════════════════════════
        HERO BADGE
     ══════════════════════════════════════════════ */
     .hero-badge {
-      display: inline-flex; align-items: center; gap: 8px;
-      background: rgba(0,255,136,0.06);
-      border: 1px solid rgba(0,255,136,0.25);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(0, 255, 136, 0.06);
+      border: 1px solid rgba(0, 255, 136, 0.25);
       color: var(--green);
       font-family: 'JetBrains Mono', monospace;
-      font-size: 11px; letter-spacing: 0.15em;
-      padding: 6px 16px; border-radius: 2px;
-      box-shadow: 0 0 12px rgba(0,255,136,0.1);
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      padding: 6px 16px;
+      border-radius: 2px;
+      box-shadow: 0 0 12px rgba(0, 255, 136, 0.1);
     }
 
     .hero-badge::before {
       content: '';
-      width: 6px; height: 6px;
-      background: var(--green); border-radius: 50%;
+      width: 6px;
+      height: 6px;
+      background: var(--green);
+      border-radius: 50%;
       box-shadow: 0 0 6px var(--green);
       animation: blink 1.4s ease-in-out infinite;
     }
 
-    @keyframes blink { 0%,100% { opacity:1; } 50% { opacity:0.1; } }
+    @keyframes blink {
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.1;
+      }
+    }
 
     /* ══════════════════════════════════════════════
        6. GLITCH EFFECT — Hero title & buttons
@@ -254,7 +356,9 @@
     .glitch-text::after {
       content: attr(data-text);
       position: absolute;
-      top: 0; left: 0; right: 0;
+      top: 0;
+      left: 0;
+      right: 0;
       font-family: 'Bebas Neue', cursive;
       font-size: inherit;
       line-height: inherit;
@@ -262,68 +366,120 @@
     }
 
     .glitch-text::before {
-      color: rgba(0,255,136,0.7);
+      color: rgba(0, 255, 136, 0.7);
       clip-path: polygon(0 30%, 100% 30%, 100% 50%, 0 50%);
       animation: glitch-before 6s infinite;
     }
 
     .glitch-text::after {
-      color: rgba(240,192,64,0.7);
+      color: rgba(240, 192, 64, 0.7);
       clip-path: polygon(0 60%, 100% 60%, 100% 80%, 0 80%);
       animation: glitch-after 6s infinite;
     }
 
-    .glitch-text:hover::before { animation: glitch-before 0.4s infinite; }
-    .glitch-text:hover::after  { animation: glitch-after  0.4s infinite; }
+    .glitch-text:hover::before {
+      animation: glitch-before 0.4s infinite;
+    }
+
+    .glitch-text:hover::after {
+      animation: glitch-after 0.4s infinite;
+    }
 
     @keyframes glitch-before {
-      0%,85%,100% { transform: translate(0); opacity: 0; }
-      87%          { transform: translate(-3px, 1px); opacity: 0.8; }
-      89%          { transform: translate(3px, -1px); opacity: 0.6; }
-      91%          { transform: translate(0); opacity: 0; }
+
+      0%,
+      85%,
+      100% {
+        transform: translate(0);
+        opacity: 0;
+      }
+
+      87% {
+        transform: translate(-3px, 1px);
+        opacity: 0.8;
+      }
+
+      89% {
+        transform: translate(3px, -1px);
+        opacity: 0.6;
+      }
+
+      91% {
+        transform: translate(0);
+        opacity: 0;
+      }
     }
 
     @keyframes glitch-after {
-      0%,85%,100% { transform: translate(0); opacity: 0; }
-      88%          { transform: translate(3px, 2px); opacity: 0.8; }
-      90%          { transform: translate(-3px, -2px); opacity: 0.6; }
-      92%          { transform: translate(0); opacity: 0; }
+
+      0%,
+      85%,
+      100% {
+        transform: translate(0);
+        opacity: 0;
+      }
+
+      88% {
+        transform: translate(3px, 2px);
+        opacity: 0.8;
+      }
+
+      90% {
+        transform: translate(-3px, -2px);
+        opacity: 0.6;
+      }
+
+      92% {
+        transform: translate(0);
+        opacity: 0;
+      }
     }
 
     /* ══════════════════════════════════════════════
        STAT BOXES
     ══════════════════════════════════════════════ */
     .stat-box {
-      background: rgba(0,255,136,0.04);
-      border: 1px solid rgba(0,255,136,0.15);
-      border-radius: 3px; padding: 14px;
+      background: rgba(0, 255, 136, 0.04);
+      border: 1px solid rgba(0, 255, 136, 0.15);
+      border-radius: 3px;
+      padding: 14px;
       text-align: center;
       transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s;
-      position: relative; overflow: hidden;
+      position: relative;
+      overflow: hidden;
     }
 
     .stat-box::before {
       content: '';
-      position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
       background: linear-gradient(90deg, transparent, var(--green), transparent);
       opacity: 0.5;
     }
 
     .stat-box:hover {
-      border-color: rgba(0,255,136,0.5);
-      box-shadow: 0 0 20px rgba(0,255,136,0.12), inset 0 0 20px rgba(0,255,136,0.04);
+      border-color: rgba(0, 255, 136, 0.5);
+      box-shadow: 0 0 20px rgba(0, 255, 136, 0.12), inset 0 0 20px rgba(0, 255, 136, 0.04);
       transform: translateY(-3px);
     }
 
     .stat-value {
       font-family: 'Bebas Neue', cursive;
-      font-size: 30px; color: var(--green); line-height: 1;
-      text-shadow: 0 0 12px rgba(0,255,136,0.5);
+      font-size: 30px;
+      color: var(--green);
+      line-height: 1;
+      text-shadow: 0 0 12px rgba(0, 255, 136, 0.5);
     }
 
     .stat-label {
-      font-size: 9px; letter-spacing: 0.15em;
-      color: var(--muted); text-transform: uppercase; margin-top: 4px;
+      font-size: 9px;
+      letter-spacing: 0.15em;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-top: 4px;
       font-family: 'JetBrains Mono', monospace;
     }
 
@@ -332,16 +488,21 @@
     ══════════════════════════════════════════════ */
     .section-card {
       background: var(--surface);
-      border: 1px solid rgba(0,255,136,0.12);
+      border: 1px solid rgba(0, 255, 136, 0.12);
       border-radius: 5px;
-      position: relative; overflow: hidden;
+      position: relative;
+      overflow: hidden;
       transition: box-shadow 0.4s, border-color 0.4s;
     }
 
     /* Top accent line */
     .section-card::before {
       content: '';
-      position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
       background: linear-gradient(90deg, transparent, var(--green), transparent);
       opacity: 0.4;
     }
@@ -349,73 +510,85 @@
     /* Card 3D hover tilt */
     .section-card:hover {
       box-shadow:
-        0 0 0 1px rgba(0,255,136,0.2),
-        0 8px 40px rgba(0,255,136,0.08),
-        0 0 60px rgba(0,255,136,0.04);
-      border-color: rgba(0,255,136,0.25);
+        0 0 0 1px rgba(0, 255, 136, 0.2),
+        0 8px 40px rgba(0, 255, 136, 0.08),
+        0 0 60px rgba(0, 255, 136, 0.04);
+      border-color: rgba(0, 255, 136, 0.25);
     }
 
     /* Focus glow — added by JS */
     .section-card.card-focus {
       box-shadow:
-        0 0 0 1px rgba(0,255,136,0.4),
-        0 0 30px rgba(0,255,136,0.15),
-        0 0 60px rgba(0,255,136,0.06),
-        inset 0 0 30px rgba(0,255,136,0.03);
-      border-color: rgba(0,255,136,0.4);
+        0 0 0 1px rgba(0, 255, 136, 0.4),
+        0 0 30px rgba(0, 255, 136, 0.15),
+        0 0 60px rgba(0, 255, 136, 0.06),
+        inset 0 0 30px rgba(0, 255, 136, 0.03);
+      border-color: rgba(0, 255, 136, 0.4);
     }
 
     /* ── BORDER BEAM ── */
     .border-beam::after {
       content: '';
       position: absolute;
-      width: 60px; height: 60px;
-      background: conic-gradient(
-        from 0deg,
-        transparent 0deg,
-        var(--green) 60deg,
-        transparent 120deg
-      );
+      width: 60px;
+      height: 60px;
+      background: conic-gradient(from 0deg,
+          transparent 0deg,
+          var(--green) 60deg,
+          transparent 120deg);
       border-radius: 50%;
       animation: beam-orbit 3s linear infinite;
       /* This is a proxy approach via the pseudo-element shimmer */
     }
 
     /* border-beam removed */
-    .border-beam-inner { display: none; }
+    .border-beam-inner {
+      display: none;
+    }
 
     /* ── SECTION LABEL ── */
     .section-label {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 10px; letter-spacing: 0.2em;
-      color: var(--green); text-transform: uppercase; opacity: 0.6;
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      color: var(--green);
+      text-transform: uppercase;
+      opacity: 0.6;
     }
 
     /* ══════════════════════════════════════════════
        INPUT FIELDS
     ══════════════════════════════════════════════ */
     .input-label {
-      font-family: 'Rajdhani', sans-serif; font-weight: 600;
-      font-size: 12px; letter-spacing: 0.12em;
-      color: var(--muted); text-transform: uppercase;
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 600;
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      text-transform: uppercase;
       margin-bottom: 6px;
-      display: flex; align-items: center; justify-content: space-between;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
 
     .input-max {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 10px; color: rgba(0,255,136,0.3);
+      font-size: 10px;
+      color: rgba(0, 255, 136, 0.3);
     }
 
     .nda-input {
       width: 100%;
-      background: rgba(0,255,136,0.03);
-      border: 1px solid rgba(0,255,136,0.15);
+      background: rgba(0, 255, 136, 0.03);
+      border: 1px solid rgba(0, 255, 136, 0.15);
       color: var(--text);
       font-family: 'JetBrains Mono', monospace;
-      font-size: 22px; font-weight: 700;
+      font-size: 22px;
+      font-weight: 700;
       padding: 14px 16px;
-      border-radius: 3px; outline: none;
+      border-radius: 3px;
+      outline: none;
       text-align: center;
       -moz-appearance: textfield;
       transition: border-color 0.2s, box-shadow 0.3s, background 0.3s;
@@ -423,56 +596,69 @@
     }
 
     .nda-input::-webkit-outer-spin-button,
-    .nda-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+    .nda-input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+    }
 
     .nda-input:focus {
       border-color: var(--green);
-      background: rgba(0,255,136,0.06);
-      box-shadow: 0 0 0 3px rgba(0,255,136,0.1), 0 0 20px rgba(0,255,136,0.08);
+      background: rgba(0, 255, 136, 0.06);
+      box-shadow: 0 0 0 3px rgba(0, 255, 136, 0.1), 0 0 20px rgba(0, 255, 136, 0.08);
       color: #ffffff;
     }
 
     .nda-input.error {
       border-color: var(--danger);
-      box-shadow: 0 0 0 3px rgba(230,57,70,0.12);
+      box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.12);
     }
 
-    .nda-input::placeholder { color: rgba(74,122,74,0.5); font-size: 14px; }
+    .nda-input::placeholder {
+      color: rgba(74, 122, 74, 0.5);
+      font-size: 14px;
+    }
 
     /* ══════════════════════════════════════════════
        SCORE PREVIEW
     ══════════════════════════════════════════════ */
     .score-preview {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 11px; color: var(--green);
-      text-align: center; margin-top: 8px;
-      min-height: 18px; transition: all 0.3s;
-      text-shadow: 0 0 8px rgba(0,255,136,0.4);
+      font-size: 11px;
+      color: var(--green);
+      text-align: center;
+      margin-top: 8px;
+      min-height: 18px;
+      transition: all 0.3s;
+      text-shadow: 0 0 8px rgba(0, 255, 136, 0.4);
     }
 
     /* ══════════════════════════════════════════════
        8. PREDICT BUTTON — glitch on hover
     ══════════════════════════════════════════════ */
     .btn-predict {
-      width: 100%; position: relative; overflow: hidden;
+      width: 100%;
+      position: relative;
+      overflow: hidden;
       background: linear-gradient(135deg, #00cc66 0%, #00ff88 50%, #00cc66 100%);
       background-size: 200% 100%;
       color: #060a06;
       font-family: 'Bebas Neue', cursive;
-      font-size: 24px; letter-spacing: 0.15em;
-      padding: 20px; border: none; border-radius: 3px;
+      font-size: 24px;
+      letter-spacing: 0.15em;
+      padding: 20px;
+      border: none;
+      border-radius: 3px;
       cursor: pointer;
       transition: transform 0.15s, box-shadow 0.2s, background-position 0.4s;
-      box-shadow: 0 0 20px rgba(0,255,136,0.3), 0 4px 20px rgba(0,0,0,0.4);
+      box-shadow: 0 0 20px rgba(0, 255, 136, 0.3), 0 4px 20px rgba(0, 0, 0, 0.4);
     }
 
     /* Shimmer sweep */
     .btn-predict::before {
       content: '';
-      position: absolute; inset: 0;
+      position: absolute;
+      inset: 0;
       background: linear-gradient(115deg,
-        transparent 20%, rgba(255,255,255,0.25) 50%, transparent 80%
-      );
+          transparent 20%, rgba(255, 255, 255, 0.25) 50%, transparent 80%);
       transform: translateX(-100%);
       transition: transform 0.5s;
     }
@@ -480,173 +666,298 @@
     /* Glitch flicker */
     .btn-predict::after {
       content: attr(data-text);
-      position: absolute; inset: 0;
-      display: flex; align-items: center; justify-content: center;
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       font-family: 'Bebas Neue', cursive;
-      font-size: 24px; letter-spacing: 0.15em;
+      font-size: 24px;
+      letter-spacing: 0.15em;
       color: #060a06;
       opacity: 0;
     }
 
     .btn-predict:hover {
       transform: translateY(-3px);
-      box-shadow: 0 0 40px rgba(0,255,136,0.5), 0 8px 40px rgba(0,0,0,0.5);
+      box-shadow: 0 0 40px rgba(0, 255, 136, 0.5), 0 8px 40px rgba(0, 0, 0, 0.5);
       background-position: 100% 0;
     }
 
-    .btn-predict:hover::before { transform: translateX(100%); }
+    .btn-predict:hover::before {
+      transform: translateX(100%);
+    }
 
     .btn-predict:hover::after {
       animation: btn-glitch 0.4s infinite;
     }
 
     @keyframes btn-glitch {
-      0%,100% { opacity: 0; transform: translate(0); }
-      20%      { opacity: 0.4; transform: translate(-2px, 1px); clip-path: polygon(0 30%,100% 30%,100% 50%,0 50%); }
-      40%      { opacity: 0; }
-      60%      { opacity: 0.3; transform: translate(2px, -1px); clip-path: polygon(0 60%,100% 60%,100% 80%,0 80%); }
-      80%      { opacity: 0; }
+
+      0%,
+      100% {
+        opacity: 0;
+        transform: translate(0);
+      }
+
+      20% {
+        opacity: 0.4;
+        transform: translate(-2px, 1px);
+        clip-path: polygon(0 30%, 100% 30%, 100% 50%, 0 50%);
+      }
+
+      40% {
+        opacity: 0;
+      }
+
+      60% {
+        opacity: 0.3;
+        transform: translate(2px, -1px);
+        clip-path: polygon(0 60%, 100% 60%, 100% 80%, 0 80%);
+      }
+
+      80% {
+        opacity: 0;
+      }
     }
 
-    .btn-predict:active { transform: translateY(0); }
-    .btn-predict:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+    .btn-predict:active {
+      transform: translateY(0);
+    }
+
+    .btn-predict:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none;
+    }
 
     /* ══════════════════════════════════════════════
        CUTOFF TABLE
     ══════════════════════════════════════════════ */
     .cutoff-row {
-      display: grid; grid-template-columns: 1fr 1fr 1fr;
-      gap: 1px; background: rgba(0,255,136,0.06);
-      border-radius: 2px; overflow: hidden;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1px;
+      background: rgba(0, 255, 136, 0.06);
+      border-radius: 2px;
+      overflow: hidden;
       transition: background 0.2s;
     }
 
-    .cutoff-row:hover { background: rgba(0,255,136,0.1); }
+    .cutoff-row:hover {
+      background: rgba(0, 255, 136, 0.1);
+    }
 
     .cutoff-cell {
       background: var(--surface2);
       padding: 10px 14px;
       font-family: 'JetBrains Mono', monospace;
-      font-size: 12px; transition: background 0.2s;
+      font-size: 12px;
+      transition: background 0.2s;
     }
 
     .cutoff-cell.header {
-      color: var(--green); font-size: 9px;
-      letter-spacing: 0.12em; opacity: 0.7;
-      background: rgba(0,255,136,0.05);
+      color: var(--green);
+      font-size: 9px;
+      letter-spacing: 0.12em;
+      opacity: 0.7;
+      background: rgba(0, 255, 136, 0.05);
     }
 
-    .cutoff-row:hover .cutoff-cell { background: rgba(0,255,136,0.05); }
+    .cutoff-row:hover .cutoff-cell {
+      background: rgba(0, 255, 136, 0.05);
+    }
 
     /* ══════════════════════════════════════════════
        MODAL
     ══════════════════════════════════════════════ */
     .modal-overlay {
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,0.92);
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.92);
       backdrop-filter: blur(8px);
       z-index: 100;
-      display: none; align-items: center;
-      justify-content: center; padding: 20px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
     }
 
-    .modal-overlay.active { display: flex; }
+    .modal-overlay.active {
+      display: flex;
+    }
 
     .modal-box {
       background: var(--surface);
-      border: 1px solid rgba(0,255,136,0.3);
+      border: 1px solid rgba(0, 255, 136, 0.3);
       border-radius: 5px;
-      padding: 36px 32px; width: 100%; max-width: 460px;
+      padding: 36px 32px;
+      width: 100%;
+      max-width: 460px;
       position: relative;
-      animation: modal-in 0.35s cubic-bezier(0.34,1.56,0.64,1);
-      box-shadow: 0 0 60px rgba(0,255,136,0.1), 0 0 120px rgba(0,255,136,0.04);
+      animation: modal-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 0 60px rgba(0, 255, 136, 0.1), 0 0 120px rgba(0, 255, 136, 0.04);
     }
 
     .modal-box::before {
       content: '';
-      position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
       background: linear-gradient(90deg, transparent, var(--green), transparent);
     }
 
     @keyframes modal-in {
-      from { opacity: 0; transform: scale(0.88) translateY(20px); }
-      to   { opacity: 1; transform: scale(1) translateY(0); }
+      from {
+        opacity: 0;
+        transform: scale(0.88) translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
     }
 
     .modal-input {
-      width: 100%; background: rgba(0,255,136,0.04);
-      border: 1px solid rgba(0,255,136,0.2);
-      color: var(--text); font-family: 'Rajdhani', sans-serif;
-      font-size: 16px; font-weight: 600;
-      padding: 13px 16px; border-radius: 3px; outline: none;
+      width: 100%;
+      background: rgba(0, 255, 136, 0.04);
+      border: 1px solid rgba(0, 255, 136, 0.2);
+      color: var(--text);
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 16px;
+      font-weight: 600;
+      padding: 13px 16px;
+      border-radius: 3px;
+      outline: none;
       transition: border-color 0.2s, box-shadow 0.2s;
       caret-color: var(--green);
     }
 
     .modal-input:focus {
       border-color: var(--green);
-      box-shadow: 0 0 0 3px rgba(0,255,136,0.1);
+      box-shadow: 0 0 0 3px rgba(0, 255, 136, 0.1);
     }
 
-    .modal-input::placeholder { color: var(--muted); }
+    .modal-input::placeholder {
+      color: var(--muted);
+    }
 
     /* ══════════════════════════════════════════════
        LOADER
     ══════════════════════════════════════════════ */
     .loader {
-      display: none; width: 20px; height: 20px;
-      border: 2px solid rgba(6,10,6,0.3);
+      display: none;
+      width: 20px;
+      height: 20px;
+      border: 2px solid rgba(6, 10, 6, 0.3);
       border-top-color: #060a06;
       border-radius: 50%;
       animation: spin 0.7s linear infinite;
       margin: 0 auto;
     }
 
-    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
 
     /* ══════════════════════════════════════════════
        ANIMATIONS
     ══════════════════════════════════════════════ */
     @keyframes fade-up {
-      from { opacity: 0; transform: translateY(28px); }
-      to   { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(28px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
-    .fade-up { animation: fade-up 0.7s cubic-bezier(0.22,1,0.36,1) forwards; opacity: 0; }
-    .delay-1 { animation-delay: 0.05s; }
-    .delay-2 { animation-delay: 0.15s; }
-    .delay-3 { animation-delay: 0.25s; }
-    .delay-4 { animation-delay: 0.35s; }
-    .delay-5 { animation-delay: 0.45s; }
+    .fade-up {
+      animation: fade-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      opacity: 0;
+    }
+
+    .delay-1 {
+      animation-delay: 0.05s;
+    }
+
+    .delay-2 {
+      animation-delay: 0.15s;
+    }
+
+    .delay-3 {
+      animation-delay: 0.25s;
+    }
+
+    .delay-4 {
+      animation-delay: 0.35s;
+    }
+
+    .delay-5 {
+      animation-delay: 0.45s;
+    }
 
     /* ══════════════════════════════════════════════
        SCROLLBAR
     ══════════════════════════════════════════════ */
-    ::-webkit-scrollbar { width: 4px; }
-    ::-webkit-scrollbar-track { background: var(--bg); }
-    ::-webkit-scrollbar-thumb { background: rgba(0,255,136,0.3); border-radius: 2px; }
+    ::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(0, 255, 136, 0.3);
+      border-radius: 2px;
+    }
 
     /* ══════════════════════════════════════════════
        ERROR
     ══════════════════════════════════════════════ */
     .error-msg {
-      color: var(--danger); font-size: 11px;
+      color: var(--danger);
+      font-size: 11px;
       font-family: 'JetBrains Mono', monospace;
-      margin-top: 6px; display: none;
+      margin-top: 6px;
+      display: none;
     }
 
     /* ══════════════════════════════════════════════
        RESPONSIVE
     ══════════════════════════════════════════════ */
     @media (max-width: 768px) {
-      .form-grid { grid-template-columns: 1fr !important; }
-      #radar-wrap { width: 500px; height: 500px; }
+      .form-grid {
+        grid-template-columns: 1fr !important;
+      }
+
+      #radar-wrap {
+        width: 500px;
+        height: 500px;
+      }
     }
 
     @media (max-width: 480px) {
-      .hero-title { font-size: 52px !important; }
-      #radar-wrap { display: none; }
-      main { padding: 0 4vw 80px !important; }
+      .hero-title {
+        font-size: 52px !important;
+      }
+
+      #radar-wrap {
+        display: none;
+      }
+
+      main {
+        padding: 0 4vw 80px !important;
+      }
     }
 
     /* ══════════════════════════════════════════════
@@ -662,21 +973,51 @@
        CORNER MARKS
     ══════════════════════════════════════════════ */
     .corner-mark {
-      position: absolute; width: 16px; height: 16px;
-      pointer-events: none; opacity: 0.5;
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      pointer-events: none;
+      opacity: 0.5;
     }
-    .corner-mark.tl { top: 8px; left: 8px;  border-top: 1px solid var(--green); border-left:  1px solid var(--green); }
-    .corner-mark.tr { top: 8px; right: 8px; border-top: 1px solid var(--green); border-right: 1px solid var(--green); }
-    .corner-mark.bl { bottom: 8px; left: 8px;  border-bottom: 1px solid var(--green); border-left:  1px solid var(--green); }
-    .corner-mark.br { bottom: 8px; right: 8px; border-bottom: 1px solid var(--green); border-right: 1px solid var(--green); }
+
+    .corner-mark.tl {
+      top: 8px;
+      left: 8px;
+      border-top: 1px solid var(--green);
+      border-left: 1px solid var(--green);
+    }
+
+    .corner-mark.tr {
+      top: 8px;
+      right: 8px;
+      border-top: 1px solid var(--green);
+      border-right: 1px solid var(--green);
+    }
+
+    .corner-mark.bl {
+      bottom: 8px;
+      left: 8px;
+      border-bottom: 1px solid var(--green);
+      border-left: 1px solid var(--green);
+    }
+
+    .corner-mark.br {
+      bottom: 8px;
+      right: 8px;
+      border-bottom: 1px solid var(--green);
+      border-right: 1px solid var(--green);
+    }
 
     /* ══════════════════════════════════════════════
        HUD INFO STRIPS
     ══════════════════════════════════════════════ */
     .hud-strip {
-      display: flex; align-items: center; gap: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
       font-family: 'JetBrains Mono', monospace;
-      font-size: 9px; color: rgba(0,255,136,0.35);
+      font-size: 9px;
+      color: rgba(0, 255, 136, 0.35);
       letter-spacing: 0.1em;
     }
 
@@ -684,36 +1025,45 @@
        TACTICAL DIVIDER
     ══════════════════════════════════════════════ */
     .tactical-divider {
-      display: flex; align-items: center; gap: 12px;
-      color: var(--muted); font-size: 10px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 10px;
       font-family: 'JetBrains Mono', monospace;
-      letter-spacing: 0.15em; opacity: 0.5;
+      letter-spacing: 0.15em;
+      opacity: 0.5;
     }
 
     .tactical-divider::before,
     .tactical-divider::after {
-      content: ''; flex: 1; height: 1px;
-      background: rgba(0,255,136,0.12);
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(0, 255, 136, 0.12);
     }
 
     /* ══════════════════════════════════════════════
        RADIO LABELS
     ══════════════════════════════════════════════ */
     .rule-label {
-      display: flex; align-items: center; gap: 12px;
-      cursor: pointer; padding: 14px 16px; border-radius: 3px;
-      border: 1px solid rgba(0,255,136,0.15);
-      background: rgba(0,255,136,0.03);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      padding: 14px 16px;
+      border-radius: 3px;
+      border: 1px solid rgba(0, 255, 136, 0.15);
+      background: rgba(0, 255, 136, 0.03);
       transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
     }
 
     .rule-label:hover,
     .rule-label:has(input:checked) {
-      border-color: rgba(0,255,136,0.4);
-      background: rgba(0,255,136,0.07);
-      box-shadow: 0 0 12px rgba(0,255,136,0.08);
+      border-color: rgba(0, 255, 136, 0.4);
+      background: rgba(0, 255, 136, 0.07);
+      box-shadow: 0 0 12px rgba(0, 255, 136, 0.08);
     }
-
   </style>
 </head>
 
@@ -742,13 +1092,16 @@
     <div style="display:flex; align-items:center; gap:12px;">
       <div class="nav-logo-box">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00ff88" stroke-width="2.5">
-          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+          <polygon
+            points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
         </svg>
       </div>
       <div>
-        <div style="font-family:'Bebas Neue',cursive; font-size:18px; letter-spacing:0.08em; color:#d4f0d4;">NDA PREDICTOR</div>
+        <div style="font-family:'Bebas Neue',cursive; font-size:18px; letter-spacing:0.08em; color:#d4f0d4;">NDA
+          PREDICTOR</div>
         <div class="hud-strip">
-          <span style="width:4px;height:4px;background:var(--green);border-radius:50%;box-shadow:0 0 4px var(--green);"></span>
+          <span
+            style="width:4px;height:4px;background:var(--green);border-radius:50%;box-shadow:0 0 4px var(--green);"></span>
           SYSTEM ONLINE
         </div>
       </div>
@@ -773,13 +1126,15 @@
 
       <!-- Main title with glitch -->
       <h1 class="font-display glitch-text" data-text="KNOW YOUR AIR RANK TODAY"
-          style="font-size: clamp(52px, 8vw, 96px); line-height: 0.92; color: #d4f0d4; letter-spacing:0.04em;">
-        KNOW YOUR<br/>
-        <span style="color: var(--green); text-shadow: 0 0 30px rgba(0,255,136,0.4);">AIR RANK</span><br/>
-        <span class="glitch-text" data-text="TODAY" style="color:var(--gold); text-shadow:0 0 20px rgba(240,192,64,0.3);">TODAY</span>
+        style="font-size: clamp(52px, 8vw, 96px); line-height: 0.92; color: #d4f0d4; letter-spacing:0.04em;">
+        KNOW YOUR<br />
+        <span style="color: var(--green); text-shadow: 0 0 30px rgba(0,255,136,0.4);">AIR RANK</span><br />
+        <span class="glitch-text" data-text="TODAY"
+          style="color:var(--gold); text-shadow:0 0 20px rgba(240,192,64,0.3);">TODAY</span>
       </h1>
 
-      <p class="font-ui" style="margin-top:16px; font-size:15px; line-height:1.6; color:var(--muted); max-width:800px; margin-left:auto; margin-right:auto;">
+      <p class="font-ui"
+        style="margin-top:16px; font-size:15px; line-height:1.6; color:var(--muted); max-width:800px; margin-left:auto; margin-right:auto;">
         Enter your expected marks — get your
         <strong style="color:var(--green);">Predicted All India Rank</strong>,
         selection probability &amp; sectional analysis.
@@ -788,7 +1143,8 @@
     </div>
 
     <!-- Stats Row -->
-    <div class="fade-up delay-2" style="display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:28px; max-width:700px; margin-left:auto; margin-right:auto;">
+    <div class="fade-up delay-2"
+      style="display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:28px; max-width:700px; margin-left:auto; margin-right:auto;">
       <div class="stat-box">
         <div class="stat-value">5</div>
         <div class="stat-label">Years Data</div>
@@ -816,8 +1172,10 @@
 
         <!-- PAPER I — MATH (border-beam) -->
         <div class="section-card tilt-card p-6 fade-up delay-2" id="card-math">
-          <div class="corner-mark tl"></div><div class="corner-mark tr"></div>
-          <div class="corner-mark bl"></div><div class="corner-mark br"></div>
+          <div class="corner-mark tl"></div>
+          <div class="corner-mark tr"></div>
+          <div class="corner-mark bl"></div>
+          <div class="corner-mark br"></div>
           <!-- Border beam -->
           <div class="border-beam-inner"></div>
           <div class="border-beam-inner delay-half"></div>
@@ -825,15 +1183,18 @@
           <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
             <div>
               <p class="section-label">Paper I</p>
-              <span style="font-family:'Bebas Neue',cursive; font-size:28px; color:var(--green); text-shadow:0 0 16px rgba(0,255,136,0.4); letter-spacing:0.06em;">MATHEMATICS</span>
+              <span
+                style="font-family:'Bebas Neue',cursive; font-size:28px; color:var(--green); text-shadow:0 0 16px rgba(0,255,136,0.4); letter-spacing:0.06em;">MATHEMATICS</span>
             </div>
             <div style="text-align:right;">
-              <div style="font-family:'JetBrains Mono',monospace; font-size:11px; color:rgba(0,255,136,0.5);">MAX MARKS</div>
+              <div style="font-family:'JetBrains Mono',monospace; font-size:11px; color:rgba(0,255,136,0.5);">MAX MARKS
+              </div>
               <div style="font-family:'Bebas Neue',cursive; font-size:32px; color:var(--gold); line-height:1;">300</div>
             </div>
           </div>
 
-          <div style="font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--muted); margin-bottom:20px; display:flex; gap:16px;">
+          <div
+            style="font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--muted); margin-bottom:20px; display:flex; gap:16px;">
             <span style="color:var(--green);">+2.5</span> correct &nbsp;|&nbsp;
             <span style="color:var(--danger);">−0.83</span> wrong &nbsp;|&nbsp;
             120 questions
@@ -842,11 +1203,13 @@
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
             <div>
               <div class="input-label">Correct <span class="input-max">MAX 120</span></div>
-              <input type="number" id="math-correct" class="nda-input" placeholder="0" min="0" max="120" oninput="onInputChange()" onfocus="cardFocus('card-math')" onblur="cardBlur('card-math')" />
+              <input type="number" id="math-correct" class="nda-input" placeholder="0" min="0" max="120"
+                oninput="onInputChange()" onfocus="cardFocus('card-math')" onblur="cardBlur('card-math')" />
             </div>
             <div>
               <div class="input-label">Wrong <span class="input-max">MAX 120</span></div>
-              <input type="number" id="math-wrong" class="nda-input" placeholder="0" min="0" max="120" oninput="onInputChange()" onfocus="cardFocus('card-math')" onblur="cardBlur('card-math')" />
+              <input type="number" id="math-wrong" class="nda-input" placeholder="0" min="0" max="120"
+                oninput="onInputChange()" onfocus="cardFocus('card-math')" onblur="cardBlur('card-math')" />
             </div>
           </div>
           <div class="score-preview" id="math-preview">Enter attempts to see score</div>
@@ -855,23 +1218,28 @@
 
         <!-- PAPER II — GAT (border-beam) -->
         <div class="section-card tilt-card p-6 fade-up delay-3" id="card-gat">
-          <div class="corner-mark tl"></div><div class="corner-mark tr"></div>
-          <div class="corner-mark bl"></div><div class="corner-mark br"></div>
+          <div class="corner-mark tl"></div>
+          <div class="corner-mark tr"></div>
+          <div class="corner-mark bl"></div>
+          <div class="corner-mark br"></div>
           <div class="border-beam-inner"></div>
           <div class="border-beam-inner delay-half"></div>
 
           <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
             <div>
               <p class="section-label">Paper II</p>
-              <span style="font-family:'Bebas Neue',cursive; font-size:28px; color:var(--green); text-shadow:0 0 16px rgba(0,255,136,0.4); letter-spacing:0.06em;">GAT</span>
+              <span
+                style="font-family:'Bebas Neue',cursive; font-size:28px; color:var(--green); text-shadow:0 0 16px rgba(0,255,136,0.4); letter-spacing:0.06em;">GAT</span>
             </div>
             <div style="text-align:right;">
-              <div style="font-family:'JetBrains Mono',monospace; font-size:11px; color:rgba(0,255,136,0.5);">MAX MARKS</div>
+              <div style="font-family:'JetBrains Mono',monospace; font-size:11px; color:rgba(0,255,136,0.5);">MAX MARKS
+              </div>
               <div style="font-family:'Bebas Neue',cursive; font-size:32px; color:var(--gold); line-height:1;">600</div>
             </div>
           </div>
 
-          <div style="font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--muted); margin-bottom:20px; display:flex; gap:16px;">
+          <div
+            style="font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--muted); margin-bottom:20px; display:flex; gap:16px;">
             <span style="color:var(--green);">+4</span> correct &nbsp;|&nbsp;
             <span style="color:var(--danger);">−1.33</span> wrong &nbsp;|&nbsp;
             150 questions
@@ -880,11 +1248,13 @@
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
             <div>
               <div class="input-label">Correct <span class="input-max">MAX 150</span></div>
-              <input type="number" id="gat-correct" class="nda-input" placeholder="0" min="0" max="150" oninput="onInputChange()" onfocus="cardFocus('card-gat')" onblur="cardBlur('card-gat')" />
+              <input type="number" id="gat-correct" class="nda-input" placeholder="0" min="0" max="150"
+                oninput="onInputChange()" onfocus="cardFocus('card-gat')" onblur="cardBlur('card-gat')" />
             </div>
             <div>
               <div class="input-label">Wrong <span class="input-max">MAX 150</span></div>
-              <input type="number" id="gat-wrong" class="nda-input" placeholder="0" min="0" max="150" oninput="onInputChange()" onfocus="cardFocus('card-gat')" onblur="cardBlur('card-gat')" />
+              <input type="number" id="gat-wrong" class="nda-input" placeholder="0" min="0" max="150"
+                oninput="onInputChange()" onfocus="cardFocus('card-gat')" onblur="cardBlur('card-gat')" />
             </div>
           </div>
           <div class="score-preview" id="gat-preview">Enter attempts to see score</div>
@@ -898,16 +1268,21 @@
 
         <!-- SSB SCORE -->
         <div class="section-card tilt-card p-6 fade-up delay-4" id="card-ssb">
-          <div class="corner-mark tl"></div><div class="corner-mark tr"></div>
-          <div class="corner-mark bl"></div><div class="corner-mark br"></div>
+          <div class="corner-mark tl"></div>
+          <div class="corner-mark tr"></div>
+          <div class="corner-mark bl"></div>
+          <div class="corner-mark br"></div>
 
           <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
             <div>
               <p class="section-label">Optional</p>
-              <span style="font-family:'Bebas Neue',cursive; font-size:28px; color:var(--green); text-shadow:0 0 16px rgba(0,255,136,0.4); letter-spacing:0.06em;">SSB SCORE</span>
+              <span
+                style="font-family:'Bebas Neue',cursive; font-size:28px; color:var(--green); text-shadow:0 0 16px rgba(0,255,136,0.4); letter-spacing:0.06em;">SSB
+                SCORE</span>
             </div>
             <div style="text-align:right;">
-              <div style="font-family:'JetBrains Mono',monospace; font-size:11px; color:rgba(0,255,136,0.5);">MAX MARKS</div>
+              <div style="font-family:'JetBrains Mono',monospace; font-size:11px; color:rgba(0,255,136,0.5);">MAX MARKS
+              </div>
               <div style="font-family:'Bebas Neue',cursive; font-size:32px; color:var(--gold); line-height:1;">900</div>
             </div>
           </div>
@@ -916,17 +1291,23 @@
             Expected SSB marks. Leave 0 if not appeared yet.
           </p>
           <div class="input-label">Expected SSB Marks <span class="input-max">MAX 900</span></div>
-          <input type="number" id="ssb-score" class="nda-input" style="margin-top:8px;" placeholder="0" min="0" max="900" oninput="onInputChange()" onfocus="cardFocus('card-ssb')" onblur="cardBlur('card-ssb')" />
+          <input type="number" id="ssb-score" class="nda-input" style="margin-top:8px;" placeholder="0" min="0"
+            max="900" oninput="onInputChange()" onfocus="cardFocus('card-ssb')" onblur="cardBlur('card-ssb')" />
           <div class="score-preview" id="ssb-preview">Real data: avg selected SSB = ~410 (NDA 1 2024)</div>
 
           <!-- Mini insight -->
-          <div style="margin-top:16px; padding:12px; background:rgba(0,255,136,0.04); border:1px solid rgba(0,255,136,0.1); border-radius:3px;">
-            <div style="font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--muted); letter-spacing:0.08em; margin-bottom:6px;">// 2024 SSB INSIGHTS</div>
-            <div style="display:flex; justify-content:space-between; font-family:'JetBrains Mono',monospace; font-size:11px;">
+          <div
+            style="margin-top:16px; padding:12px; background:rgba(0,255,136,0.04); border:1px solid rgba(0,255,136,0.1); border-radius:3px;">
+            <div
+              style="font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--muted); letter-spacing:0.08em; margin-bottom:6px;">
+              // 2024 SSB INSIGHTS</div>
+            <div
+              style="display:flex; justify-content:space-between; font-family:'JetBrains Mono',monospace; font-size:11px;">
               <span style="color:var(--muted);">Top 10 avg SSB</span>
               <span style="color:var(--green);">453</span>
             </div>
-            <div style="display:flex; justify-content:space-between; font-family:'JetBrains Mono',monospace; font-size:11px; margin-top:4px;">
+            <div
+              style="display:flex; justify-content:space-between; font-family:'JetBrains Mono',monospace; font-size:11px; margin-top:4px;">
               <span style="color:var(--muted);">Max SSB (AIR-2)</span>
               <span style="color:var(--gold);">524</span>
             </div>
@@ -935,22 +1316,30 @@
 
         <!-- SECTIONAL RULE -->
         <div class="section-card p-6 fade-up delay-4">
-          <div class="corner-mark tl"></div><div class="corner-mark tr"></div>
+          <div class="corner-mark tl"></div>
+          <div class="corner-mark tr"></div>
           <p class="section-label" style="margin-bottom:6px;">Sectional Cutoff Rule</p>
-          <p style="font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--muted); margin-bottom:16px;">UPSC applies 20% or 25% minimum per paper.</p>
+          <p style="font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--muted); margin-bottom:16px;">
+            UPSC applies 20% or 25% minimum per paper.</p>
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
             <label class="rule-label">
               <input type="radio" name="rule" value="25" checked style="accent-color:var(--green);" id="rule-25" />
               <div>
-                <div style="font-family:'Rajdhani',sans-serif; font-weight:700; color:var(--text); font-size:15px;">25% Rule</div>
-                <div style="font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--muted); margin-top:2px;">Math ≥75 | GAT ≥150</div>
+                <div style="font-family:'Rajdhani',sans-serif; font-weight:700; color:var(--text); font-size:15px;">25%
+                  Rule</div>
+                <div
+                  style="font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--muted); margin-top:2px;">
+                  Math ≥75 | GAT ≥150</div>
               </div>
             </label>
             <label class="rule-label">
               <input type="radio" name="rule" value="20" style="accent-color:var(--green);" id="rule-20" />
               <div>
-                <div style="font-family:'Rajdhani',sans-serif; font-weight:700; color:var(--text); font-size:15px;">20% Rule</div>
-                <div style="font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--muted); margin-top:2px;">Math ≥60 | GAT ≥120</div>
+                <div style="font-family:'Rajdhani',sans-serif; font-weight:700; color:var(--text); font-size:15px;">20%
+                  Rule</div>
+                <div
+                  style="font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--muted); margin-top:2px;">
+                  Math ≥60 | GAT ≥120</div>
               </div>
             </label>
           </div>
@@ -962,7 +1351,8 @@
             <span id="btn-text">⚡ PREDICT MY AIR RANK</span>
             <div class="loader" id="btn-loader"></div>
           </button>
-          <p style="text-align:center; font-family:'JetBrains Mono',monospace; font-size:10px; color:rgba(0,255,136,0.25); margin-top:10px; letter-spacing:0.05em;">
+          <p
+            style="text-align:center; font-family:'JetBrains Mono',monospace; font-size:10px; color:rgba(0,255,136,0.25); margin-top:10px; letter-spacing:0.05em;">
             UPSC NDA VERIFIED DATA 2020–2024 · ESTIMATED PREDICTION ONLY
           </p>
         </div>
@@ -973,7 +1363,8 @@
 
     <!-- CUTOFF TABLE -->
     <div class="section-card p-6 fade-up delay-5" style="width:100%; margin:20px 0 0;">
-      <div class="corner-mark tl"></div><div class="corner-mark tr"></div>
+      <div class="corner-mark tl"></div>
+      <div class="corner-mark tr"></div>
       <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
         <p class="section-label">Historical Cutoff Reference — Verified UPSC Data</p>
         <div class="hud-strip">AIR 1-641 ANALYZED</div>
@@ -993,11 +1384,16 @@
   ═══════════════════════════════════════════ -->
   <div class="modal-overlay" id="lead-modal">
     <div class="modal-box">
-      <div class="corner-mark tl"></div><div class="corner-mark tr"></div>
-      <div class="corner-mark bl"></div><div class="corner-mark br"></div>
+      <div class="corner-mark tl"></div>
+      <div class="corner-mark tr"></div>
+      <div class="corner-mark bl"></div>
+      <div class="corner-mark br"></div>
       <p class="section-label" style="margin-bottom:6px;">Almost There!</p>
-      <h2 style="font-family:'Bebas Neue',cursive; font-size:36px; color:var(--green); margin-bottom:4px; text-shadow:0 0 20px rgba(0,255,136,0.3);">GET YOUR RESULT</h2>
-      <p style="font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--muted); margin-bottom:24px;">Enter details to unlock your predicted AIR rank &amp; analysis.</p>
+      <h2
+        style="font-family:'Bebas Neue',cursive; font-size:36px; color:var(--green); margin-bottom:4px; text-shadow:0 0 20px rgba(0,255,136,0.3);">
+        GET YOUR RESULT</h2>
+      <p style="font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--muted); margin-bottom:24px;">Enter
+        details to unlock your predicted AIR rank &amp; analysis.</p>
 
       <div style="display:flex; flex-direction:column; gap:12px;">
         <div>
@@ -1016,16 +1412,19 @@
 
       <div class="error-msg" id="modal-error" style="display:block; min-height:18px; margin-top:8px;"></div>
 
-      <button class="btn-predict" id="modal-submit-btn" data-text="🎯 SHOW MY RANK" onclick="submitLead()" style="margin-top:16px;">
+      <button class="btn-predict" id="modal-submit-btn" data-text="🎯 SHOW MY RANK" onclick="submitLead()"
+        style="margin-top:16px;">
         <span id="modal-btn-text">🎯 SHOW MY RANK</span>
         <div class="loader" id="modal-loader"></div>
       </button>
 
-      <button onclick="closeLeadModal()" style="width:100%; margin-top:10px; background:none; border:none; color:var(--muted); font-family:'JetBrains Mono',monospace; font-size:11px; padding:8px; cursor:pointer; letter-spacing:0.1em;">
+      <button onclick="closeLeadModal()"
+        style="width:100%; margin-top:10px; background:none; border:none; color:var(--muted); font-family:'JetBrains Mono',monospace; font-size:11px; padding:8px; cursor:pointer; letter-spacing:0.1em;">
         [ CANCEL ]
       </button>
 
-      <p style="font-family:'JetBrains Mono',monospace; font-size:9px; color:rgba(0,255,136,0.2); text-align:center; margin-top:8px; letter-spacing:0.05em;">
+      <p
+        style="font-family:'JetBrains Mono',monospace; font-size:9px; color:rgba(0,255,136,0.2); text-align:center; margin-top:8px; letter-spacing:0.05em;">
         🔒 DATA SECURED · NOT SHARED WITH THIRD PARTIES
       </p>
     </div>
@@ -1049,7 +1448,7 @@
       gx += (mx - gx) * 0.08;
       gy += (my - gy) * 0.08;
       mouseGlow.style.left = gx + 'px';
-      mouseGlow.style.top  = gy + 'px';
+      mouseGlow.style.top = gy + 'px';
       requestAnimationFrame(animateGlow);
     }
     animateGlow();
@@ -1059,13 +1458,13 @@
     // ══════════════════════════════════════
     document.querySelectorAll('.tilt-card').forEach(card => {
       card.addEventListener('mousemove', e => {
-        const r  = card.getBoundingClientRect();
-        const cx = r.left + r.width  / 2;
-        const cy = r.top  + r.height / 2;
-        const dx = (e.clientX - cx) / (r.width  / 2);
+        const r = card.getBoundingClientRect();
+        const cx = r.left + r.width / 2;
+        const cy = r.top + r.height / 2;
+        const dx = (e.clientX - cx) / (r.width / 2);
         const dy = (e.clientY - cy) / (r.height / 2);
         const rotX = -dy * 6;
-        const rotY =  dx * 6;
+        const rotY = dx * 6;
         card.style.transform = `perspective(800px) rotateX(${rotX}deg) rotateY(${rotY}deg) scale3d(1.02,1.02,1.02)`;
       });
 
@@ -1091,9 +1490,9 @@
     for (let i = 0; i < 25; i++) {
       const p = document.createElement('div');
       p.className = 'particle';
-      const left  = Math.random() * 100;
+      const left = Math.random() * 100;
       const delay = Math.random() * 15;
-      const dur   = 12 + Math.random() * 18;
+      const dur = 12 + Math.random() * 18;
       const drift = (Math.random() - 0.5) * 120;
       p.style.cssText = `left:${left}vw; animation-duration:${dur}s; animation-delay:${delay}s; --drift:${drift}px; width:${Math.random() > 0.7 ? 3 : 2}px; height:${Math.random() > 0.7 ? 3 : 2}px; opacity:0.5;`;
       pwrap.appendChild(p);
@@ -1104,9 +1503,9 @@
     // ══════════════════════════════════════
     function updateClock() {
       const now = new Date();
-      const h = String(now.getHours()).padStart(2,'0');
-      const m = String(now.getMinutes()).padStart(2,'0');
-      const s = String(now.getSeconds()).padStart(2,'0');
+      const h = String(now.getHours()).padStart(2, '0');
+      const m = String(now.getMinutes()).padStart(2, '0');
+      const s = String(now.getSeconds()).padStart(2, '0');
       const el = document.getElementById('live-clock');
       if (el) el.textContent = `${h}:${m}:${s}`;
     }
@@ -1130,23 +1529,23 @@
     ];
 
     const CFG = {
-      math: { q:120, correct:2.5,  wrong:0.83, min25:75,  min20:60  },
-      gat:  { q:150, correct:4,    wrong:1.33, min25:150, min20:120 },
+      math: { q: 120, correct: 2.5, wrong: 0.83, min25: 75, min20: 60 },
+      gat: { q: 150, correct: 4, wrong: 1.33, min25: 150, min20: 120 },
     };
 
     // Real data anchor points from UPSC official PDF
     // Rank matrix calibrated from NDA 1 2023, NDA 2 2023, NDA 1 2025 official UPSC data (1900+ data points)
     const RANK_MATRIX = [
-      { min:980, max:1800, airMin:1,   airMax:14,   prob:99, tag:"TOPPER ZONE 🏆",  color:"#FFD700" },
-      { min:930, max:979,  airMin:3,   airMax:62,   prob:98, tag:"OUTSTANDING 🌟",  color:"#00E676" },
-      { min:880, max:929,  airMin:6,   airMax:140,  prob:96, tag:"EXCELLENT 💪",    color:"#00C853" },
-      { min:840, max:879,  airMin:21,  airMax:280,  prob:92, tag:"VERY STRONG ✅",  color:"#00BCD4" },
-      { min:800, max:839,  airMin:59,  airMax:450,  prob:80, tag:"STRONG 💡",       color:"#4CAF50" },
-      { min:760, max:799,  airMin:150, airMax:620,  prob:62, tag:"GOOD 👍",         color:"#8BC34A" },
-      { min:720, max:759,  airMin:300, airMax:710,  prob:40, tag:"MODERATE ⚡",      color:"#FFC107" },
-      { min:680, max:719,  airMin:470, airMax:735,  prob:18, tag:"BORDERLINE ⚠️",  color:"#FF9800" },
-      { min:650, max:679,  airMin:620, airMax:900,  prob:6,  tag:"RISKY 🔴",        color:"#FF5722" },
-      { min:0,   max:649,  airMin:901, airMax:9999, prob:1,  tag:"NOT SELECTED ❌", color:"#F44336" },
+      { min: 980, max: 1800, airMin: 1, airMax: 14, prob: 99, tag: "TOPPER ZONE 🏆", color: "#FFD700" },
+      { min: 930, max: 979, airMin: 3, airMax: 62, prob: 98, tag: "OUTSTANDING 🌟", color: "#00E676" },
+      { min: 880, max: 929, airMin: 6, airMax: 140, prob: 96, tag: "EXCELLENT 💪", color: "#00C853" },
+      { min: 840, max: 879, airMin: 21, airMax: 280, prob: 92, tag: "VERY STRONG ✅", color: "#00BCD4" },
+      { min: 800, max: 839, airMin: 59, airMax: 450, prob: 80, tag: "STRONG 💡", color: "#4CAF50" },
+      { min: 760, max: 799, airMin: 150, airMax: 620, prob: 62, tag: "GOOD 👍", color: "#8BC34A" },
+      { min: 720, max: 759, airMin: 300, airMax: 710, prob: 40, tag: "MODERATE ⚡", color: "#FFC107" },
+      { min: 680, max: 719, airMin: 470, airMax: 735, prob: 18, tag: "BORDERLINE ⚠️", color: "#FF9800" },
+      { min: 650, max: 679, airMin: 620, airMax: 900, prob: 6, tag: "RISKY 🔴", color: "#FF5722" },
+      { min: 0, max: 649, airMin: 901, airMax: 9999, prob: 1, tag: "NOT SELECTED ❌", color: "#F44336" },
     ];
 
     let cachedResult = null;
@@ -1155,7 +1554,7 @@
     function renderCutoffTable() {
       const el = document.getElementById('cutoff-table');
       el.innerHTML = CUTOFF_DATA.map((d, i) => `
-        <div class="cutoff-row" style="margin-bottom:4px; animation:fade-up 0.5s ease ${0.05*i}s forwards; opacity:0;">
+        <div class="cutoff-row" style="margin-bottom:4px; animation:fade-up 0.5s ease ${0.05 * i}s forwards; opacity:0;">
           <div class="cutoff-cell font-ui" style="color:var(--text); font-size:11px;">${d.exam}</div>
           <div class="cutoff-cell" style="color:var(--green);">${d.written}</div>
           <div class="cutoff-cell" style="color:var(--gold);">${d.final}</div>
@@ -1165,24 +1564,24 @@
 
     function calcMath() {
       const c = parseInt(document.getElementById('math-correct').value) || 0;
-      const w = parseInt(document.getElementById('math-wrong').value)   || 0;
+      const w = parseInt(document.getElementById('math-wrong').value) || 0;
       return Math.round(((c * CFG.math.correct) - (w * CFG.math.wrong)) * 100) / 100;
     }
 
     function calcGAT() {
       const c = parseInt(document.getElementById('gat-correct').value) || 0;
-      const w = parseInt(document.getElementById('gat-wrong').value)   || 0;
-      return Math.round(((c * CFG.gat.correct)  - (w * CFG.gat.wrong)) * 100) / 100;
+      const w = parseInt(document.getElementById('gat-wrong').value) || 0;
+      return Math.round(((c * CFG.gat.correct) - (w * CFG.gat.wrong)) * 100) / 100;
     }
 
     function onInputChange() {
       const math = calcMath();
-      const gat  = calcGAT();
-      const ssb  = parseInt(document.getElementById('ssb-score').value) || 0;
+      const gat = calcGAT();
+      const ssb = parseInt(document.getElementById('ssb-score').value) || 0;
       const rule = document.querySelector('input[name="rule"]:checked').value;
 
       const mathMin = rule === '20' ? CFG.math.min20 : CFG.math.min25;
-      const gatMin  = rule === '20' ? CFG.gat.min20  : CFG.gat.min25;
+      const gatMin = rule === '20' ? CFG.gat.min20 : CFG.gat.min25;
 
       const mEl = document.getElementById('math-preview');
       const gEl = document.getElementById('gat-preview');
@@ -1191,7 +1590,7 @@
       if (math !== 0) {
         const ok = math >= mathMin;
         mEl.style.color = ok ? 'var(--green)' : 'var(--danger)';
-        mEl.textContent = `Score: ${math}/300 ${ok ? '✓ SECTIONAL CLEAR' : `✗ NEED ${(mathMin-math).toFixed(1)} MORE`}`;
+        mEl.textContent = `Score: ${math}/300 ${ok ? '✓ SECTIONAL CLEAR' : `✗ NEED ${(mathMin - math).toFixed(1)} MORE`}`;
       } else {
         mEl.style.color = 'var(--muted)';
         mEl.textContent = 'Enter attempts to see score';
@@ -1200,7 +1599,7 @@
       if (gat !== 0) {
         const ok = gat >= gatMin;
         gEl.style.color = ok ? 'var(--green)' : 'var(--danger)';
-        gEl.textContent = `Score: ${gat}/600 ${ok ? '✓ SECTIONAL CLEAR' : `✗ NEED ${(gatMin-gat).toFixed(1)} MORE`}`;
+        gEl.textContent = `Score: ${gat}/600 ${ok ? '✓ SECTIONAL CLEAR' : `✗ NEED ${(gatMin - gat).toFixed(1)} MORE`}`;
       } else {
         gEl.style.color = 'var(--muted)';
         gEl.textContent = 'Enter attempts to see score';
@@ -1218,34 +1617,34 @@
 
     function validateInputs() {
       const mc = parseInt(document.getElementById('math-correct').value) || 0;
-      const mw = parseInt(document.getElementById('math-wrong').value)   || 0;
-      const gc = parseInt(document.getElementById('gat-correct').value)  || 0;
-      const gw = parseInt(document.getElementById('gat-wrong').value)    || 0;
-      const ssb = parseInt(document.getElementById('ssb-score').value)   || 0;
+      const mw = parseInt(document.getElementById('math-wrong').value) || 0;
+      const gc = parseInt(document.getElementById('gat-correct').value) || 0;
+      const gw = parseInt(document.getElementById('gat-wrong').value) || 0;
+      const ssb = parseInt(document.getElementById('ssb-score').value) || 0;
       if (mc + mw > 120) return 'Math: Correct + Wrong cannot exceed 120';
       if (gc + gw > 150) return 'GAT: Correct + Wrong cannot exceed 150';
-      if (ssb > 900)     return 'SSB marks cannot exceed 900';
+      if (ssb > 900) return 'SSB marks cannot exceed 900';
       if (mc === 0 && gc === 0) return 'Please enter at least Math or GAT attempts';
       return null;
     }
 
     function buildResult(age = 17) {
-      const mc   = parseInt(document.getElementById('math-correct').value) || 0;
-      const mw   = parseInt(document.getElementById('math-wrong').value)   || 0;
-      const gc   = parseInt(document.getElementById('gat-correct').value)  || 0;
-      const gw   = parseInt(document.getElementById('gat-wrong').value)    || 0;
-      const ssb  = parseInt(document.getElementById('ssb-score').value)    || 0;
+      const mc = parseInt(document.getElementById('math-correct').value) || 0;
+      const mw = parseInt(document.getElementById('math-wrong').value) || 0;
+      const gc = parseInt(document.getElementById('gat-correct').value) || 0;
+      const gw = parseInt(document.getElementById('gat-wrong').value) || 0;
+      const ssb = parseInt(document.getElementById('ssb-score').value) || 0;
       const rule = document.querySelector('input[name="rule"]:checked').value;
 
-      const mathScore    = Math.round(((mc * CFG.math.correct) - (mw * CFG.math.wrong)) * 100) / 100;
-      const gatScore     = Math.round(((gc * CFG.gat.correct)  - (gw * CFG.gat.wrong))  * 100) / 100;
+      const mathScore = Math.round(((mc * CFG.math.correct) - (mw * CFG.math.wrong)) * 100) / 100;
+      const gatScore = Math.round(((gc * CFG.gat.correct) - (gw * CFG.gat.wrong)) * 100) / 100;
       const writtenScore = mathScore + gatScore;
-      const totalScore   = writtenScore + ssb;
+      const totalScore = writtenScore + ssb;
 
       const mathMin = rule === '20' ? CFG.math.min20 : CFG.math.min25;
-      const gatMin  = rule === '20' ? CFG.gat.min20  : CFG.gat.min25;
+      const gatMin = rule === '20' ? CFG.gat.min20 : CFG.gat.min25;
       const mathPassed = mathScore >= mathMin;
-      const gatPassed  = gatScore  >= gatMin;
+      const gatPassed = gatScore >= gatMin;
       const band = RANK_MATRIX.find(b => totalScore >= b.min && totalScore <= b.max) || RANK_MATRIX[RANK_MATRIX.length - 1];
 
       return {
@@ -1267,23 +1666,23 @@
       document.getElementById('lead-modal').classList.remove('active');
     }
 
-    function submitLead() {
-      const name  = document.getElementById('lead-name').value.trim();
+    async function submitLead() {
+      const name = document.getElementById('lead-name').value.trim();
       const phone = document.getElementById('lead-phone').value.trim();
-      const age   = parseInt(document.getElementById('lead-age').value) || 17;
+      const age = parseInt(document.getElementById('lead-age').value) || 17;
       const errEl = document.getElementById('modal-error');
       errEl.textContent = '';
 
-      if (!name)                   { errEl.textContent = '⚠ Name required'; return; }
+      if (!name) { errEl.textContent = '⚠ Name required'; return; }
       if (!/^\d{10}$/.test(phone)) { errEl.textContent = '⚠ Valid 10-digit phone required'; return; }
-      if (age < 16 || age > 19)    { errEl.textContent = '⚠ Age must be 16–19'; return; }
+      if (age < 16 || age > 19) { errEl.textContent = '⚠ Age must be 16–19'; return; }
 
       document.getElementById('modal-btn-text').style.display = 'none';
-      document.getElementById('modal-loader').style.display   = 'block';
-      document.getElementById('modal-submit-btn').disabled    = true;
+      document.getElementById('modal-loader').style.display = 'block';
+      document.getElementById('modal-submit-btn').disabled = true;
 
       cachedResult = buildResult(age);
-      cachedResult.name  = name;
+      cachedResult.name = name;
       cachedResult.phone = phone;
 
       const leads = JSON.parse(localStorage.getItem('nda_leads') || '[]');
@@ -1298,6 +1697,25 @@
       });
       localStorage.setItem('nda_leads', JSON.stringify(leads));
 
+      // ✅ Firebase mein save
+      if (window.NDAFirebase) {
+        await NDAFirebase.saveLead({
+          name, phone, age,
+          mathScore: cachedResult.mathScore,
+          gatScore: cachedResult.gatScore,
+          writtenScore: cachedResult.writtenScore,
+          ssb: cachedResult.ssb,
+          totalScore: cachedResult.totalScore,
+          airMin: cachedResult.airMin,
+          airMax: cachedResult.airMax,
+          probability: cachedResult.probability,
+          tag: cachedResult.tag,
+          sectionalPassed: cachedResult.sectionalPassed,
+          mathPassed: cachedResult.mathPassed,
+          gatPassed: cachedResult.gatPassed,
+        });
+      }
+
       setTimeout(() => {
         const p = new URLSearchParams({
           name, math: cachedResult.mathScore, gat: cachedResult.gatScore,
@@ -1307,7 +1725,7 @@
           tag: cachedResult.tag, color: cachedResult.color,
           sectional: cachedResult.sectionalPassed ? '1' : '0',
           mathPass: cachedResult.mathPassed ? '1' : '0',
-          gatPass:  cachedResult.gatPassed  ? '1' : '0',
+          gatPass: cachedResult.gatPassed ? '1' : '0',
           age,
         });
         window.location.href = `result.html?${p.toString()}`;
@@ -1317,21 +1735,23 @@
     // Init
     renderCutoffTable();
 
-    document.getElementById('lead-modal').addEventListener('click', function(e) {
+    document.getElementById('lead-modal').addEventListener('click', function (e) {
       if (e.target === this) closeLeadModal();
     });
 
     // PWA
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+      window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => { }));
     }
 
   </script>
 
   <!-- Firebase + NDA Scripts -->
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
   <script src="assets/js/firebase-config.js"></script>
 
 </body>
+
 </html>
